@@ -21,8 +21,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const registerSchema = z.object({
   username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
@@ -38,6 +39,8 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 const RegisterForm = () => {
   const { register } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -52,11 +55,15 @@ const RegisterForm = () => {
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
+    setError(null);
+    setSuccess(null);
     try {
       setIsSubmitting(true);
       await register(data);
+      setSuccess('Account created successfully! You will be redirected to your portal.');
     } catch (error) {
       console.error('Registration submission error:', error);
+      setError('Registration failed. This email or username might already be in use. Please try with different credentials.');
     } finally {
       setIsSubmitting(false);
     }
@@ -71,6 +78,22 @@ const RegisterForm = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        {success && (
+          <Alert className="mb-4 bg-green-50 border-green-200">
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <AlertTitle className="text-green-800">Success</AlertTitle>
+            <AlertDescription className="text-green-700">{success}</AlertDescription>
+          </Alert>
+        )}
+        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
