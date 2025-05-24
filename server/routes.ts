@@ -27,6 +27,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register a new user
   app.post("/api/v1/auth/register", async (req: Request, res: Response) => {
     try {
+      console.log("Registration request received:", req.body);
+      
       const userData = insertUserSchema.parse(req.body);
       
       // Check if user with that email already exists
@@ -44,13 +46,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword
       });
       
-      // If it's a patient, create a patient profile
-      if (userData.role === UserRole.PATIENT) {
-        await storage.createPatientProfile({
-          userId: newUser.id,
-          medicalAidVerified: false
-        });
-      }
+      console.log("User created successfully:", newUser.id);
       
       // Generate JWT token
       const token = generateToken(newUser);
@@ -64,13 +60,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Registration error:", error);
-      return res.status(400).json({ message: "Invalid registration data" });
+      return res.status(400).json({ message: "Invalid registration data", error: error instanceof Error ? error.message : String(error) });
     }
   });
   
   // Login
   app.post("/api/v1/auth/login", async (req: Request, res: Response) => {
     try {
+      console.log("Login request received:", req.body);
       const { email, password } = req.body;
       
       if (!email || !password) {
@@ -84,6 +81,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid email or password" });
       }
       
+      console.log("User authenticated successfully:", user.id);
+      
       // Generate JWT token
       const token = generateToken(user);
       
@@ -96,18 +95,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Login error:", error);
-      return res.status(500).json({ message: "An error occurred during login" });
+      return res.status(500).json({ message: "An error occurred during login", error: error instanceof Error ? error.message : String(error) });
     }
   });
   
   // Get current user
   app.get("/api/v1/auth/me", authenticateJWT, async (req: Request, res: Response) => {
     try {
+      console.log("Getting current user, user ID from token:", req.user?.id);
+      
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      
       const user = await storage.getUser(req.user.id);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
+      
+      console.log("User found:", user.id);
       
       // Return user info without password
       const { password, ...userWithoutPassword } = user;
@@ -115,7 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(200).json(userWithoutPassword);
     } catch (error) {
       console.error("Get current user error:", error);
-      return res.status(500).json({ message: "An error occurred" });
+      return res.status(500).json({ message: "An error occurred", error: error instanceof Error ? error.message : String(error) });
     }
   });
   
