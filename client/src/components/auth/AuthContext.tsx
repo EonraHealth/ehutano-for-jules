@@ -48,14 +48,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // Effect to handle redirection when user state changes
+  useEffect(() => {
+    if (user) {
+      redirectBasedOnRole(user.role);
+    }
+  }, [user]);
+
   const fetchCurrentUser = async () => {
     try {
       setIsLoading(true);
       const response = await fetch('/api/v1/auth/me', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        credentials: 'include'
+        }
       });
 
       if (response.ok) {
@@ -78,11 +84,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      const response = await apiRequest('POST', '/api/v1/auth/login', { email, password });
+      const response = await fetch('/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to login');
+        throw new Error(errorData.message || 'Invalid email or password');
       }
       
       const data = await response.json();
@@ -95,8 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         variant: 'default',
       });
       
-      // Redirect based on user role
-      redirectBasedOnRole(data.user.role);
+      // Redirect handled by the useEffect
     } catch (error) {
       console.error('Login error:', error);
       toast({
@@ -104,6 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: error instanceof Error ? error.message : 'An error occurred during login',
         variant: 'destructive',
       });
+      throw error; // Re-throw to allow form handling
     } finally {
       setIsLoading(false);
     }
@@ -112,11 +124,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (userData: any) => {
     try {
       setIsLoading(true);
-      const response = await apiRequest('POST', '/api/v1/auth/register', userData);
+      const response = await fetch('/api/v1/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to register');
+        throw new Error(errorData.message || 'Registration failed');
       }
       
       const data = await response.json();
@@ -129,8 +147,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         variant: 'default',
       });
       
-      // Redirect based on user role
-      redirectBasedOnRole(data.user.role);
+      // Redirect handled by the useEffect
     } catch (error) {
       console.error('Registration error:', error);
       toast({
@@ -138,6 +155,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: error instanceof Error ? error.message : 'An error occurred during registration',
         variant: 'destructive',
       });
+      throw error; // Re-throw to allow form handling
     } finally {
       setIsLoading(false);
     }
@@ -156,6 +174,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const redirectBasedOnRole = (role: string) => {
+    console.log(`Redirecting user with role: ${role}`);
     switch (role) {
       case 'PATIENT':
         setLocation('/patient-portal');

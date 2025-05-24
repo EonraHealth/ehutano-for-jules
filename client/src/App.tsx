@@ -8,6 +8,7 @@ import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import MobileNavbar from "./components/layout/MobileNavbar";
 import { useAuth } from "./hooks/useAuth";
+import { AuthProvider } from "./components/auth/AuthContext";
 
 // Pages
 import HomePage from "./pages/HomePage";
@@ -21,6 +22,17 @@ import WellnessHubPage from "./pages/WellnessHubPage";
 
 function Router() {
   const { user, isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -63,10 +75,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
