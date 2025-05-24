@@ -29,21 +29,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Registration request received:", req.body);
       
-      const userData = insertUserSchema.parse(req.body);
+      // For now, just accept these fields to simplify registration
+      const { username, email, password, fullName, role, phoneNumber } = req.body;
+      
+      if (!username || !email || !password || !fullName || !role) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
       
       // Check if user with that email already exists
-      const existingUser = await storage.getUserByEmail(userData.email);
+      const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ message: "User with that email already exists" });
       }
       
-      // Hash the password
-      const hashedPassword = await hashPassword(userData.password);
+      // Check if username is taken
+      const existingUsername = await storage.getUserByUsername(username);
+      if (existingUsername) {
+        return res.status(400).json({ message: "Username is already taken" });
+      }
       
-      // Create the user
+      // Hash the password
+      const hashedPassword = await hashPassword(password);
+      
+      // Create the user with minimal fields
       const newUser = await storage.createUser({
-        ...userData,
-        password: hashedPassword
+        username,
+        email,
+        password: hashedPassword,
+        fullName,
+        role,
+        phoneNumber: phoneNumber || null,
+        profilePictureUrl: null,
+        isActive: true
       });
       
       console.log("User created successfully:", newUser.id);
@@ -52,7 +69,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const token = generateToken(newUser);
       
       // Return user info (without password) and token
-      const { password, ...userWithoutPassword } = newUser;
+      const { password: pwd, ...userWithoutPassword } = newUser;
       
       return res.status(201).json({
         user: userWithoutPassword,

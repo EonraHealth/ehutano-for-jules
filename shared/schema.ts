@@ -352,13 +352,7 @@ export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
-// Type relations
-export const userRelations = {
-  patientProfile: one(patientProfiles, {
-    fields: [users.id],
-    references: [patientProfiles.userId],
-  }),
-};
+// No relations needed for now
 
 export type PatientProfile = typeof patientProfiles.$inferSelect;
 export type InsertPatientProfile = z.infer<typeof insertPatientProfileSchema>;
