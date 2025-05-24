@@ -1,0 +1,66 @@
+import { Link, useLocation } from 'wouter';
+import { Home, ShoppingBag, Shield, Activity, User } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+
+const MobileNavbar = () => {
+  const [location] = useLocation();
+  const { isAuthenticated, user } = useAuth();
+
+  // Define base navigation items
+  const baseNavItems = [
+    {
+      label: 'Home',
+      href: '/',
+      icon: <Home className="h-6 w-6" />
+    },
+    {
+      label: 'Orders',
+      href: '/patient-portal/orders',
+      icon: <ShoppingBag className="h-6 w-6" />,
+      roles: ['PATIENT']
+    },
+    {
+      label: 'Verify',
+      href: '/medicine-verification',
+      icon: <Shield className="h-6 w-6" />
+    },
+    {
+      label: 'Health',
+      href: '/wellness-hub',
+      icon: <Activity className="h-6 w-6" />
+    },
+    {
+      label: 'Profile',
+      href: '/profile',
+      icon: <User className="h-6 w-6" />
+    }
+  ];
+
+  // Filter navigation items based on user role
+  const navItems = baseNavItems.filter(item => {
+    if (!item.roles) return true;
+    if (!isAuthenticated) return false;
+    return item.roles.includes(user?.role || '');
+  });
+
+  return (
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+      <div className="grid grid-cols-5 h-16">
+        {navItems.map((item, index) => (
+          <Link
+            key={index}
+            href={item.href}
+            className={`flex flex-col items-center justify-center ${
+              location === item.href ? 'text-primary-600' : 'text-gray-500'
+            }`}
+          >
+            {item.icon}
+            <span className="text-xs mt-1">{item.label}</span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default MobileNavbar;
