@@ -14,15 +14,28 @@ const MobileNavbar = () => {
       icon: <Home className="h-6 w-6" />
     },
     {
-      label: 'Orders',
-      href: '/patient-portal/orders',
+      label: 'Patient',
+      href: '/patient-portal',
       icon: <ShoppingBag className="h-6 w-6" />,
       roles: ['PATIENT']
     },
     {
-      label: 'Verify',
-      href: '/medicine-verification',
-      icon: <Shield className="h-6 w-6" />
+      label: 'Pharmacy',
+      href: '/pharmacy-portal',
+      icon: <ShoppingBag className="h-6 w-6" />,
+      roles: ['PHARMACY_STAFF']
+    },
+    {
+      label: 'Doctor',
+      href: '/doctor-portal',
+      icon: <Shield className="h-6 w-6" />,
+      roles: ['DOCTOR']
+    },
+    {
+      label: 'Wholesaler',
+      href: '/wholesaler-portal',
+      icon: <ShoppingBag className="h-6 w-6" />,
+      roles: ['WHOLESALER_STAFF']
     },
     {
       label: 'Health',

@@ -25,7 +25,7 @@ const Header = () => {
   ];
 
   const filteredNavItems = navItems.filter(item => 
-    item.role === null || !isAuthenticated || item.role === user?.role
+    item.role === null || (isAuthenticated && item.role === user?.role) || (!isAuthenticated && item.role === null)
   );
 
   return (
