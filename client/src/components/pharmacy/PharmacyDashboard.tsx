@@ -50,6 +50,27 @@ const PharmacyDashboard = () => {
   const { data: salesData, isLoading: salesLoading } = useQuery<any[]>({
     queryKey: ['/api/v1/pharmacy/analytics/sales'],
   });
+  
+  // Fetch medicine category data for charts
+  const { data: categoryData, isLoading: categoryLoading } = useQuery<any[]>({
+    queryKey: ['/api/v1/pharmacy/analytics/categories'],
+  });
+  
+  // Fetch trends data
+  const { data: trendsData, isLoading: trendsLoading } = useQuery<any[]>({
+    queryKey: ['/api/v1/pharmacy/analytics/trends'],
+  });
+  
+  // Fetch medical aid claims analytics
+  const { data: medicalAidAnalytics, isLoading: medicalAidLoading } = useQuery<{
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+    totalValue: number;
+  }>({
+    queryKey: ['/api/v1/pharmacy/analytics/medical-aid'],
+  });
 
   // Mock data for market watch (will be replaced with real API)
   const marketWatchData = {
@@ -335,36 +356,422 @@ const PharmacyDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Analytics Charts */}
-      <Card>
+      {/* Advanced Analytics Dashboard */}
+      <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Sales Analytics</CardTitle>
+          <CardTitle>Advanced Business Analytics</CardTitle>
         </CardHeader>
         <CardContent>
-          {salesLoading ? (
-            <div className="h-[350px] w-full flex items-center justify-center">
-              <Skeleton className="h-[300px] w-full rounded-md" />
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart
-                data={salesData || []}
-                margin={{
-                  top: 5,
-                  right: 30,
-                  left: 20,
-                  bottom: 5,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="sales" fill="hsl(var(--chart-1))" name="Sales ($)" />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
+          <Tabs defaultValue="sales">
+            <TabsList className="mb-4">
+              <TabsTrigger value="sales">Sales Performance</TabsTrigger>
+              <TabsTrigger value="categories">Product Categories</TabsTrigger>
+              <TabsTrigger value="trends">Market Trends</TabsTrigger>
+              <TabsTrigger value="medicalAid">Medical Aid Claims</TabsTrigger>
+            </TabsList>
+            
+            {/* Sales Performance Tab */}
+            <TabsContent value="sales">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Sales Performance Analytics</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="text-sm font-medium text-muted-foreground mb-1">Current Month Revenue</div>
+                      <div className="text-2xl font-bold">$8,450</div>
+                      <div className="text-xs text-green-600 flex items-center">
+                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                        </svg>
+                        20.1% from last month
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="text-sm font-medium text-muted-foreground mb-1">Average Order Value</div>
+                      <div className="text-2xl font-bold">$42.80</div>
+                      <div className="text-xs text-green-600 flex items-center">
+                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                        </svg>
+                        5.3% from last month
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="text-sm font-medium text-muted-foreground mb-1">Total Transactions</div>
+                      <div className="text-2xl font-bold">197</div>
+                      <div className="text-xs text-green-600 flex items-center">
+                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                        </svg>
+                        12.8% from last month
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                {salesLoading ? (
+                  <div className="h-[350px] w-full flex items-center justify-center">
+                    <Skeleton className="h-[300px] w-full rounded-md" />
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={350}>
+                    <BarChart
+                      data={salesData || []}
+                      margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="sales" fill="hsl(var(--chart-1))" name="Sales ($)" />
+                      <Bar dataKey="transactions" fill="hsl(var(--chart-2))" name="Transactions" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+                
+                <div className="flex justify-end mt-4">
+                  <Link href="/pharmacy-portal/analytics/sales">
+                    <Button variant="outline" size="sm">View Detailed Sales Report</Button>
+                  </Link>
+                </div>
+              </div>
+            </TabsContent>
+            
+            {/* Product Categories Tab */}
+            <TabsContent value="categories">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Product Category Analysis</h3>
+                
+                {categoryLoading ? (
+                  <div className="h-[350px] w-full flex items-center justify-center">
+                    <Skeleton className="h-[300px] w-full rounded-md" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="h-[350px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={categoryData || []}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                            outerRadius={120}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {categoryData?.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                          <Legend />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <Card>
+                        <CardContent className="p-4">
+                          <h4 className="font-medium mb-2">Top Performing Categories</h4>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span>Pain Relievers</span>
+                              <span className="font-medium">32%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-blue-500 h-2 rounded-full" style={{ width: '32%' }}></div>
+                            </div>
+                            
+                            <div className="flex justify-between items-center">
+                              <span>Antibiotics</span>
+                              <span className="font-medium">24%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-yellow-500 h-2 rounded-full" style={{ width: '24%' }}></div>
+                            </div>
+                            
+                            <div className="flex justify-between items-center">
+                              <span>Vitamins & Supplements</span>
+                              <span className="font-medium">18%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-green-500 h-2 rounded-full" style={{ width: '18%' }}></div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardContent className="p-4">
+                          <h4 className="font-medium mb-2">Growth Opportunities</h4>
+                          <p className="text-sm text-gray-500 mb-2">Categories with rising demand:</p>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm">Chronic Medication</span>
+                              <Badge variant="outline" className="bg-green-50 text-green-700">+15% Growth</Badge>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm">Diabetes Care</span>
+                              <Badge variant="outline" className="bg-green-50 text-green-700">+12% Growth</Badge>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex justify-end mt-4">
+                  <Link href="/pharmacy-portal/analytics/categories">
+                    <Button variant="outline" size="sm">View Category Details</Button>
+                  </Link>
+                </div>
+              </div>
+            </TabsContent>
+            
+            {/* Market Trends Tab */}
+            <TabsContent value="trends">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Market Trend Analysis</h3>
+                
+                {trendsLoading ? (
+                  <div className="h-[350px] w-full flex items-center justify-center">
+                    <Skeleton className="h-[300px] w-full rounded-md" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="md:col-span-2">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Seasonal Demand Forecast</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[250px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart
+                              data={trendsData || []}
+                              margin={{
+                                top: 5,
+                                right: 10,
+                                left: 10,
+                                bottom: 5,
+                              }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="month" />
+                              <YAxis />
+                              <Tooltip />
+                              <Legend />
+                              <Line type="monotone" dataKey="cold_flu" stroke="#8884d8" name="Cold & Flu" />
+                              <Line type="monotone" dataKey="allergy" stroke="#82ca9d" name="Allergy" />
+                              <Line type="monotone" dataKey="vitamins" stroke="#ffc658" name="Vitamins" />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Predicted Demand</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-sm font-medium">Cold & Flu Medication</span>
+                              <span className="text-sm font-medium">High</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-blue-500 h-2 rounded-full" style={{ width: '85%' }}></div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-sm font-medium">Allergy Medication</span>
+                              <span className="text-sm font-medium">Medium</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-green-500 h-2 rounded-full" style={{ width: '60%' }}></div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-sm font-medium">Vitamin Supplements</span>
+                              <span className="text-sm font-medium">Rising</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-yellow-500 h-2 rounded-full" style={{ width: '45%' }}></div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-sm font-medium">Pain Relievers</span>
+                              <span className="text-sm font-medium">Stable</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-gray-500 h-2 rounded-full" style={{ width: '50%' }}></div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+                
+                <div className="flex justify-end mt-4">
+                  <Link href="/pharmacy-portal/analytics/trends">
+                    <Button variant="outline" size="sm">View Market Trend Report</Button>
+                  </Link>
+                </div>
+              </div>
+            </TabsContent>
+            
+            {/* Medical Aid Claims Tab */}
+            <TabsContent value="medicalAid">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Medical Aid Claims Analytics</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="text-sm font-medium text-muted-foreground mb-1">Total Claims</div>
+                      <div className="text-2xl font-bold">{medicalAidAnalytics?.total || '0'}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="text-sm font-medium text-muted-foreground mb-1">Pending Claims</div>
+                      <div className="text-2xl font-bold">{medicalAidAnalytics?.pending || '0'}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="text-sm font-medium text-muted-foreground mb-1">Approved Claims</div>
+                      <div className="text-2xl font-bold">{medicalAidAnalytics?.approved || '0'}</div>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="text-sm font-medium text-muted-foreground mb-1">Total Value</div>
+                      <div className="text-2xl font-bold">${medicalAidAnalytics?.totalValue?.toFixed(2) || '0.00'}</div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                {medicalAidLoading ? (
+                  <div className="h-[350px] w-full flex items-center justify-center">
+                    <Skeleton className="h-[300px] w-full rounded-md" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Claims by Status</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[250px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={[
+                                  { name: 'Approved', value: medicalAidAnalytics?.approved || 0 },
+                                  { name: 'Pending', value: medicalAidAnalytics?.pending || 0 },
+                                  { name: 'Rejected', value: medicalAidAnalytics?.rejected || 0 },
+                                ]}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                outerRadius={80}
+                                fill="#8884d8"
+                                dataKey="value"
+                              >
+                                <Cell fill="#4ade80" />
+                                <Cell fill="#facc15" />
+                                <Cell fill="#f87171" />
+                              </Pie>
+                              <Tooltip />
+                              <Legend />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Claims by Provider</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-sm font-medium">PSMAS</span>
+                              <span className="text-sm font-medium">42%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-blue-500 h-2 rounded-full" style={{ width: '42%' }}></div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-sm font-medium">CIMAS</span>
+                              <span className="text-sm font-medium">28%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-green-500 h-2 rounded-full" style={{ width: '28%' }}></div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-sm font-medium">First Mutual</span>
+                              <span className="text-sm font-medium">15%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-yellow-500 h-2 rounded-full" style={{ width: '15%' }}></div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <div className="flex justify-between mb-1">
+                              <span className="text-sm font-medium">Other Providers</span>
+                              <span className="text-sm font-medium">15%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-gray-500 h-2 rounded-full" style={{ width: '15%' }}></div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+                
+                <div className="flex justify-end mt-4">
+                  <Link href="/pharmacy-portal/analytics/medical-aid">
+                    <Button variant="outline" size="sm">View Detailed Medical Aid Report</Button>
+                  </Link>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 

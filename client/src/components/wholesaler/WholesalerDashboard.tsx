@@ -55,6 +55,31 @@ const WholesalerDashboard = () => {
   const { data: salesData, isLoading: salesLoading } = useQuery<any[]>({
     queryKey: ['/api/v1/wholesaler/analytics/sales'],
   });
+  
+  // Fetch supply chain analytics
+  const { data: supplyChainData, isLoading: supplyChainLoading } = useQuery<any[]>({
+    queryKey: ['/api/v1/wholesaler/analytics/supply-chain'],
+  });
+  
+  // Fetch market demand forecasts
+  const { data: demandForecastData, isLoading: demandForecastLoading } = useQuery<any[]>({
+    queryKey: ['/api/v1/wholesaler/analytics/demand-forecast'],
+  });
+  
+  // Fetch pharmacy distribution data
+  const { data: distributionData, isLoading: distributionLoading } = useQuery<any[]>({
+    queryKey: ['/api/v1/wholesaler/analytics/distribution'],
+  });
+  
+  // Fetch medical aid claims impact on wholesale
+  const { data: medicalAidData, isLoading: medicalAidLoading } = useQuery<{
+    claimsImpact: number;
+    preferredProviders: { provider: string; volume: number }[];
+    topMedicines: { name: string; claimVolume: number }[];
+    growth: number;
+  }>({
+    queryKey: ['/api/v1/wholesaler/analytics/medical-aid-impact'],
+  });
 
   // Format date function
   const formatDate = (dateString: string) => {
