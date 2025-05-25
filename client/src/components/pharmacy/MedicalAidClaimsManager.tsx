@@ -407,7 +407,7 @@ const MedicalAidClaimsManager = () => {
                   <SelectValue placeholder="Filter by provider" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Providers</SelectItem>
+                  <SelectItem value="ALL_PROVIDERS">All Providers</SelectItem>
                   {providers.map((provider: string) => (
                     <SelectItem key={provider} value={provider}>{provider}</SelectItem>
                   ))}
