@@ -311,7 +311,7 @@ const InventoryManagement = () => {
           <TabsTrigger value="expiring-soon">
             Expiring Soon
             {nearExpiryItems.length > 0 && (
-              <Badge variant="warning" className="ml-2">{nearExpiryItems.length}</Badge>
+              <Badge variant="outline" className="ml-2 bg-yellow-100 text-yellow-800 border-yellow-300">{nearExpiryItems.length}</Badge>
             )}
           </TabsTrigger>
         </TabsList>
@@ -584,7 +584,7 @@ const InventoryManagement = () => {
                               if (daysUntilExpiry <= 0) {
                                 return <Badge variant="destructive" className="ml-2">Expired</Badge>;
                               } else if (daysUntilExpiry <= 30) {
-                                return <Badge variant="warning" className="ml-2">Soon</Badge>;
+                                return <Badge variant="outline" className="ml-2 bg-yellow-100 text-yellow-800 border-yellow-300">Soon</Badge>;
                               }
                               return null;
                             })()}
@@ -592,7 +592,7 @@ const InventoryManagement = () => {
                           <TableCell>{formatCurrency(item.unitPrice)}</TableCell>
                           <TableCell>
                             {item.status === 'IN_STOCK' && <Badge>In Stock</Badge>}
-                            {item.status === 'LOW_STOCK' && <Badge variant="warning">Low Stock</Badge>}
+                            {item.status === 'LOW_STOCK' && <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">Low Stock</Badge>}
                             {item.status === 'OUT_OF_STOCK' && <Badge variant="destructive">Out of Stock</Badge>}
                             {item.status === 'EXPIRED' && <Badge variant="destructive">Expired</Badge>}
                           </TableCell>
@@ -724,7 +724,7 @@ const InventoryManagement = () => {
                             <TableCell>
                               {daysUntilExpiry} days
                               {daysUntilExpiry <= 7 && <Badge variant="destructive" className="ml-2">Critical</Badge>}
-                              {daysUntilExpiry > 7 && daysUntilExpiry <= 30 && <Badge variant="warning" className="ml-2">Warning</Badge>}
+                              {daysUntilExpiry > 7 && daysUntilExpiry <= 30 && <Badge variant="outline" className="ml-2 bg-yellow-100 text-yellow-800 border-yellow-300">Warning</Badge>}
                             </TableCell>
                             <TableCell>{item.quantity}</TableCell>
                             <TableCell>
