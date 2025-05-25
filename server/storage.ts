@@ -29,6 +29,7 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // User methods
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
@@ -54,6 +55,110 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  // Medical aid provider methods
+  async getMedicalAidProviders(): Promise<MedicalAidProvider[]> {
+    return await db.select().from(medicalAidProviders).where(eq(medicalAidProviders.isActive, true));
+  }
+
+  async getMedicalAidProvider(id: number): Promise<MedicalAidProvider | undefined> {
+    const [provider] = await db.select().from(medicalAidProviders).where(eq(medicalAidProviders.id, id));
+    return provider || undefined;
+  }
+
+  async getMedicalAidProviderByCode(code: string): Promise<MedicalAidProvider | undefined> {
+    const [provider] = await db.select().from(medicalAidProviders).where(eq(medicalAidProviders.code, code));
+    return provider || undefined;
+  }
+
+  async createMedicalAidProvider(provider: InsertMedicalAidProvider): Promise<MedicalAidProvider> {
+    const [newProvider] = await db
+      .insert(medicalAidProviders)
+      .values({
+        ...provider,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return newProvider;
+  }
+
+  async updateMedicalAidProvider(id: number, provider: Partial<InsertMedicalAidProvider>): Promise<MedicalAidProvider | undefined> {
+    const [updatedProvider] = await db
+      .update(medicalAidProviders)
+      .set({
+        ...provider,
+        updatedAt: new Date()
+      })
+      .where(eq(medicalAidProviders.id, id))
+      .returning();
+    return updatedProvider || undefined;
+  }
+
+  // Medical aid claims methods
+  async getMedicalAidClaims(patientId?: number): Promise<MedicalAidClaim[]> {
+    if (patientId) {
+      return await db
+        .select()
+        .from(medicalAidClaims)
+        .where(eq(medicalAidClaims.patientId, patientId))
+        .orderBy(desc(medicalAidClaims.createdAt));
+    }
+    return await db
+      .select()
+      .from(medicalAidClaims)
+      .orderBy(desc(medicalAidClaims.createdAt));
+  }
+
+  async getMedicalAidClaim(id: number): Promise<MedicalAidClaim | undefined> {
+    const [claim] = await db.select().from(medicalAidClaims).where(eq(medicalAidClaims.id, id));
+    return claim || undefined;
+  }
+
+  async getMedicalAidClaimByClaimNumber(claimNumber: string): Promise<MedicalAidClaim | undefined> {
+    const [claim] = await db.select().from(medicalAidClaims).where(eq(medicalAidClaims.claimNumber, claimNumber));
+    return claim || undefined;
+  }
+
+  async getMedicalAidClaimsForOrder(orderId: number): Promise<MedicalAidClaim[]> {
+    return await db
+      .select()
+      .from(medicalAidClaims)
+      .where(eq(medicalAidClaims.orderId, orderId))
+      .orderBy(desc(medicalAidClaims.createdAt));
+  }
+
+  async createMedicalAidClaim(claim: InsertMedicalAidClaim): Promise<MedicalAidClaim> {
+    // Generate a unique claim number
+    const claimNumber = `CL-${Date.now()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+    
+    const [newClaim] = await db
+      .insert(medicalAidClaims)
+      .values({
+        ...claim,
+        claimNumber,
+        claimDate: new Date(),
+        lastUpdated: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return newClaim;
+  }
+
+  async updateMedicalAidClaimStatus(id: number, status: string, updateData?: Partial<InsertMedicalAidClaim>): Promise<MedicalAidClaim | undefined> {
+    const [updatedClaim] = await db
+      .update(medicalAidClaims)
+      .set({
+        ...updateData,
+        status,
+        lastUpdated: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(medicalAidClaims.id, id))
+      .returning();
+    return updatedClaim || undefined;
   }
 }
 

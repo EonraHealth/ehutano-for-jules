@@ -11,10 +11,13 @@ import {
   insertReminderSchema, 
   insertWellnessActivitySchema, 
   insertBlogPostSchema,
+  insertMedicalAidProviderSchema,
+  insertMedicalAidClaimSchema,
   UserRole,
   PrescriptionStatus,
   OrderStatus,
-  VerificationStatus
+  VerificationStatus,
+  MedicalAidStatus
 } from "@shared/schema";
 import { authenticateUser, generateToken, hashPassword, verifyPassword } from "./auth";
 import { authenticateJWT, authorizeRoles } from "./middleware";
@@ -857,6 +860,259 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(200).json(post);
     } catch (error) {
       console.error("Get blog post details error:", error);
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+  
+  // ===== Medical Aid Provider Routes =====
+  
+  // Get all medical aid providers
+  app.get("/api/v1/medical-aid/providers", async (req: Request, res: Response) => {
+    try {
+      const providers = await storage.getMedicalAidProviders();
+      return res.status(200).json(providers);
+    } catch (error) {
+      console.error("Get medical aid providers error:", error);
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+  
+  // Get medical aid provider details
+  app.get("/api/v1/medical-aid/providers/:providerId", async (req: Request, res: Response) => {
+    try {
+      const providerId = parseInt(req.params.providerId);
+      
+      if (isNaN(providerId)) {
+        return res.status(400).json({ message: "Invalid provider ID" });
+      }
+      
+      const provider = await storage.getMedicalAidProvider(providerId);
+      
+      if (!provider) {
+        return res.status(404).json({ message: "Medical aid provider not found" });
+      }
+      
+      return res.status(200).json(provider);
+    } catch (error) {
+      console.error("Get medical aid provider details error:", error);
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+  
+  // Create a medical aid provider (admin only)
+  app.post("/api/v1/medical-aid/providers", authenticateJWT, authorizeRoles([UserRole.ADMIN]), async (req: Request, res: Response) => {
+    try {
+      const providerData = insertMedicalAidProviderSchema.parse(req.body);
+      
+      // Check if provider with same code already exists
+      const existingProvider = await storage.getMedicalAidProviderByCode(providerData.code);
+      if (existingProvider) {
+        return res.status(400).json({ message: "Provider with that code already exists" });
+      }
+      
+      const provider = await storage.createMedicalAidProvider(providerData);
+      return res.status(201).json(provider);
+    } catch (error) {
+      console.error("Create medical aid provider error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data provided", errors: error.errors });
+      }
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+  
+  // Update a medical aid provider (admin only)
+  app.put("/api/v1/medical-aid/providers/:providerId", authenticateJWT, authorizeRoles([UserRole.ADMIN]), async (req: Request, res: Response) => {
+    try {
+      const providerId = parseInt(req.params.providerId);
+      
+      if (isNaN(providerId)) {
+        return res.status(400).json({ message: "Invalid provider ID" });
+      }
+      
+      const providerData = req.body;
+      
+      const provider = await storage.getMedicalAidProvider(providerId);
+      if (!provider) {
+        return res.status(404).json({ message: "Medical aid provider not found" });
+      }
+      
+      const updatedProvider = await storage.updateMedicalAidProvider(providerId, providerData);
+      return res.status(200).json(updatedProvider);
+    } catch (error) {
+      console.error("Update medical aid provider error:", error);
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+  
+  // ===== Medical Aid Claims Routes =====
+  
+  // Get patient's medical aid claims
+  app.get("/api/v1/patient/medical-aid/claims", authenticateJWT, authorizeRoles([UserRole.PATIENT]), async (req: Request, res: Response) => {
+    try {
+      const claims = await storage.getMedicalAidClaims(req.user.id);
+      return res.status(200).json(claims);
+    } catch (error) {
+      console.error("Get patient medical aid claims error:", error);
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+  
+  // Get specific claim details
+  app.get("/api/v1/patient/medical-aid/claims/:claimId", authenticateJWT, authorizeRoles([UserRole.PATIENT]), async (req: Request, res: Response) => {
+    try {
+      const claimId = parseInt(req.params.claimId);
+      
+      if (isNaN(claimId)) {
+        return res.status(400).json({ message: "Invalid claim ID" });
+      }
+      
+      const claim = await storage.getMedicalAidClaim(claimId);
+      
+      if (!claim) {
+        return res.status(404).json({ message: "Medical aid claim not found" });
+      }
+      
+      // Ensure patient can only view their own claims
+      if (claim.patientId !== req.user.id) {
+        return res.status(403).json({ message: "You don't have permission to view this claim" });
+      }
+      
+      return res.status(200).json(claim);
+    } catch (error) {
+      console.error("Get medical aid claim details error:", error);
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+  
+  // Submit a medical aid claim for an order
+  app.post("/api/v1/patient/orders/:orderId/submit-claim", authenticateJWT, authorizeRoles([UserRole.PATIENT]), async (req: Request, res: Response) => {
+    try {
+      const orderId = parseInt(req.params.orderId);
+      
+      if (isNaN(orderId)) {
+        return res.status(400).json({ message: "Invalid order ID" });
+      }
+      
+      // Validate the request body against the schema
+      const { providerId, membershipNumber, dependentCode } = req.body;
+      
+      if (!providerId || !membershipNumber) {
+        return res.status(400).json({ message: "Provider ID and membership number are required" });
+      }
+      
+      // Get the order details to ensure it belongs to the patient
+      const order = await storage.getOrderById(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      // Ensure the order belongs to the patient
+      if (order.patientId !== req.user.id) {
+        return res.status(403).json({ message: "You don't have permission to submit a claim for this order" });
+      }
+      
+      // Check if a claim for this order already exists
+      const existingClaims = await storage.getMedicalAidClaimsForOrder(orderId);
+      if (existingClaims.length > 0) {
+        return res.status(400).json({ message: "A claim for this order already exists" });
+      }
+      
+      // Create the medical aid claim
+      const claim = await storage.createMedicalAidClaim({
+        orderId,
+        patientId: req.user.id,
+        providerId,
+        membershipNumber,
+        dependentCode,
+        totalAmount: order.totalAmount,
+        status: MedicalAidStatus.PENDING_PATIENT_AUTH
+      });
+      
+      // Update order's medical aid status
+      await storage.updateOrder(orderId, {
+        medicalAidStatus: MedicalAidStatus.PENDING_PATIENT_AUTH
+      });
+      
+      return res.status(201).json(claim);
+    } catch (error) {
+      console.error("Submit medical aid claim error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data provided", errors: error.errors });
+      }
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+  
+  // Update a claim status (pharmacy staff)
+  app.put("/api/v1/pharmacy/medical-aid/claims/:claimId/status", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const claimId = parseInt(req.params.claimId);
+      
+      if (isNaN(claimId)) {
+        return res.status(400).json({ message: "Invalid claim ID" });
+      }
+      
+      const { status, notes, coveredAmount, rejectionReason, approvalCode } = req.body;
+      
+      if (!status || !Object.values(MedicalAidStatus).includes(status)) {
+        return res.status(400).json({ message: "Valid status is required" });
+      }
+      
+      // Get the claim
+      const claim = await storage.getMedicalAidClaim(claimId);
+      if (!claim) {
+        return res.status(404).json({ message: "Medical aid claim not found" });
+      }
+      
+      // Update the claim status
+      const updatedClaim = await storage.updateMedicalAidClaimStatus(claimId, status, {
+        notes,
+        coveredAmount,
+        rejectionReason,
+        approvalCode,
+        patientResponsibility: coveredAmount ? claim.totalAmount - coveredAmount : claim.totalAmount
+      });
+      
+      // If the order exists, update its medical aid status as well
+      if (claim.orderId) {
+        await storage.updateOrder(claim.orderId, {
+          medicalAidStatus: status,
+          amountCoveredByAid: coveredAmount || 0
+        });
+      }
+      
+      return res.status(200).json(updatedClaim);
+    } catch (error) {
+      console.error("Update medical aid claim status error:", error);
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+  
+  // Check claim status by claim number (public)
+  app.get("/api/v1/medical-aid/check-claim/:claimNumber", async (req: Request, res: Response) => {
+    try {
+      const claimNumber = req.params.claimNumber;
+      
+      if (!claimNumber) {
+        return res.status(400).json({ message: "Claim number is required" });
+      }
+      
+      const claim = await storage.getMedicalAidClaimByClaimNumber(claimNumber);
+      
+      if (!claim) {
+        return res.status(404).json({ message: "Claim not found" });
+      }
+      
+      // Return limited info for public queries
+      return res.status(200).json({
+        claimNumber: claim.claimNumber,
+        status: claim.status,
+        claimDate: claim.claimDate,
+        lastUpdated: claim.lastUpdated
+      });
+    } catch (error) {
+      console.error("Check claim status error:", error);
       return res.status(500).json({ message: "An error occurred" });
     }
   });

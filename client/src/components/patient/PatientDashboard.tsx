@@ -4,13 +4,15 @@ import { Link } from 'wouter';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FileText, ShoppingBag, Shield, Calendar } from 'lucide-react';
+import { FileText, ShoppingBag, Shield, Calendar, CreditCard } from 'lucide-react';
 import RecentOrders from './RecentOrders';
 import MedicineVerification from './MedicineVerification';
 import Prescriptions from './Prescriptions';
 import WellnessActivities from './WellnessActivities';
 import HealthBlog from './HealthBlog';
 import PartnerLogos from './PartnerLogos';
+import MedicalAidSection from './MedicalAidSection';
+import MedicalAidClaimsHistory from './MedicalAidClaimsHistory';
 
 const PatientDashboard = () => {
   const { user } = useAuth();
