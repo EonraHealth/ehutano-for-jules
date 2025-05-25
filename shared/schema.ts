@@ -37,9 +37,14 @@ export const MedicalAidStatus = {
   NOT_APPLICABLE: "NOT_APPLICABLE",
   PENDING_PATIENT_AUTH: "PENDING_PATIENT_AUTH",
   CLAIM_SUBMITTED: "CLAIM_SUBMITTED",
+  PENDING_APPROVAL: "PENDING_APPROVAL",
+  AWAITING_INFORMATION: "AWAITING_INFORMATION",
+  UNDER_REVIEW: "UNDER_REVIEW",
+  APPROVED: "APPROVED",
   RECEIVED: "RECEIVED",
   PAID: "PAID",
-  REJECTED: "REJECTED"
+  REJECTED: "REJECTED",
+  APPEALED: "APPEALED"
 } as const;
 
 // Verification status enum
@@ -293,6 +298,49 @@ export const wholesalerStaff = pgTable("wholesaler_staff", {
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
+// Medical aid providers table
+export const medicalAidProviders = pgTable("medical_aid_providers", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  code: text("code").notNull().unique(),
+  contactEmail: text("contact_email").notNull(),
+  contactPhone: text("contact_phone").notNull(),
+  address: text("address").notNull(),
+  apiEndpoint: text("api_endpoint"),
+  apiKey: text("api_key"),
+  isActive: boolean("is_active").default(true).notNull(),
+  supportedClaimTypes: text("supported_claim_types").array(),
+  processingTimeHours: integer("processing_time_hours"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Medical aid claims table
+export const medicalAidClaims = pgTable("medical_aid_claims", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").references(() => orders.id),
+  prescriptionId: integer("prescription_id").references(() => prescriptions.id),
+  patientId: integer("patient_id").notNull().references(() => users.id),
+  providerId: integer("provider_id").notNull().references(() => medicalAidProviders.id),
+  membershipNumber: text("membership_number").notNull(),
+  dependentCode: text("dependent_code"),
+  claimNumber: text("claim_number").unique(),
+  claimDate: timestamp("claim_date").defaultNow().notNull(),
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  coveredAmount: numeric("covered_amount", { precision: 10, scale: 2 }),
+  patientResponsibility: numeric("patient_responsibility", { precision: 10, scale: 2 }),
+  status: text("status").notNull().default(MedicalAidStatus.PENDING_PATIENT_AUTH),
+  notes: text("notes"),
+  rejectionReason: text("rejection_reason"),
+  approvalCode: text("approval_code"),
+  submissionData: jsonb("submission_data"),
+  responseData: jsonb("response_data"),
+  attachments: text("attachments").array(),
+  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -348,6 +396,21 @@ export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
   updatedAt: true
 });
 
+export const insertMedicalAidProviderSchema = createInsertSchema(medicalAidProviders).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertMedicalAidClaimSchema = createInsertSchema(medicalAidClaims).omit({
+  id: true,
+  claimNumber: true,
+  claimDate: true,
+  lastUpdated: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -377,3 +440,9 @@ export type InsertWellnessActivity = z.infer<typeof insertWellnessActivitySchema
 
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+
+export type MedicalAidProvider = typeof medicalAidProviders.$inferSelect;
+export type InsertMedicalAidProvider = z.infer<typeof insertMedicalAidProviderSchema>;
+
+export type MedicalAidClaim = typeof medicalAidClaims.$inferSelect;
+export type InsertMedicalAidClaim = z.infer<typeof insertMedicalAidClaimSchema>;
