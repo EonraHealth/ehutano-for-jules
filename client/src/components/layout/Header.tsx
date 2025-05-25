@@ -24,9 +24,10 @@ const Header = () => {
     { label: 'Wellness Hub', href: '/wellness-hub', role: null }
   ];
 
-  const filteredNavItems = navItems.filter(item => 
-    item.role === null || (isAuthenticated && item.role === user?.role) || (!isAuthenticated && item.role === null)
-  );
+  // Show all portal items for all authenticated users
+  const filteredNavItems = isAuthenticated 
+    ? navItems 
+    : navItems.filter(item => item.role === null);
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">

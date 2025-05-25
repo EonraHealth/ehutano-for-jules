@@ -49,12 +49,10 @@ const MobileNavbar = () => {
     }
   ];
 
-  // Filter navigation items based on user role
-  const navItems = baseNavItems.filter(item => {
-    if (!item.roles) return true;
-    if (!isAuthenticated) return false;
-    return item.roles.includes(user?.role || '');
-  });
+  // Show all navigation items for authenticated users
+  const navItems = isAuthenticated 
+    ? baseNavItems 
+    : baseNavItems.filter(item => !item.roles);
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
