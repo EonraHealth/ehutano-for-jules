@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import MedicalAidClaimsManagement from './MedicalAidClaimsManagement';
 import { 
   PieChart, 
   Pie, 
@@ -323,6 +324,16 @@ const PharmacyDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Medical Aid Claims Management */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Medical Aid Claims Management</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <MedicalAidClaimsManagement />
+        </CardContent>
+      </Card>
 
       {/* Analytics Charts */}
       <Card>

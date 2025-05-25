@@ -106,6 +106,14 @@ const PatientDashboard = () => {
                   </div>
                 </a>
               </Link>
+              <Link href="/patient-portal/medical-aid-claims">
+                <a className="block p-3 bg-cyan-50 rounded-lg text-cyan-700 font-medium hover:bg-cyan-100 transition duration-150">
+                  <div className="flex items-center">
+                    <CreditCard className="h-5 w-5 mr-3" />
+                    Medical Aid Claims
+                  </div>
+                </a>
+              </Link>
               <Link href="/wellness-hub/activities">
                 <a className="block p-3 bg-yellow-50 rounded-lg text-yellow-700 font-medium hover:bg-yellow-100 transition duration-150">
                   <div className="flex items-center">
@@ -248,6 +256,12 @@ const PatientDashboard = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Medical Aid Section */}
+        <MedicalAidSection />
+
+        {/* Medical Aid Claims History */}
+        <MedicalAidClaimsHistory />
 
         {/* Recent Orders */}
         <RecentOrders />
