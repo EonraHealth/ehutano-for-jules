@@ -314,6 +314,189 @@ export const mockOrders = [
 ];
 
 // Mock medical aid claims data
+// Mock delivery partners data
+export const mockDeliveryPartners = [
+  {
+    id: 1,
+    name: "Swift Courier Zimbabwe",
+    contactEmail: "dispatch@swiftcourier.co.zw",
+    contactPhone: "+263772123456",
+    website: "https://swiftcourier.co.zw",
+    logoUrl: "/assets/logos/swift-courier.png",
+    isActive: true,
+    supportedAreas: ["Harare", "Bulawayo", "Mutare"],
+    averageDeliveryTime: 120, // 2 hours in minutes
+    costPerKm: 0.50,
+    minimumFee: 5.00
+  },
+  {
+    id: 2,
+    name: "MedExpress Delivery",
+    contactEmail: "operations@medexpress.co.zw",
+    contactPhone: "+263712987654",
+    website: "https://medexpress.co.zw",
+    logoUrl: "/assets/logos/medexpress.png",
+    isActive: true,
+    supportedAreas: ["Harare", "Chitungwiza", "Norton", "Ruwa"],
+    averageDeliveryTime: 90, // 1.5 hours in minutes
+    costPerKm: 0.65,
+    minimumFee: 7.50
+  },
+  {
+    id: 3,
+    name: "HealthRider Logistics",
+    contactEmail: "support@healthrider.co.zw",
+    contactPhone: "+263782456789",
+    website: "https://healthrider.co.zw",
+    logoUrl: "/assets/logos/healthrider.png",
+    isActive: true,
+    supportedAreas: ["Harare", "Bulawayo", "Gweru", "Kwekwe", "Kadoma"],
+    averageDeliveryTime: 150, // 2.5 hours in minutes
+    costPerKm: 0.45,
+    minimumFee: 6.00
+  },
+  {
+    id: 4,
+    name: "Rural Health Connect",
+    contactEmail: "dispatch@ruralhealthconnect.org",
+    contactPhone: "+263733789012",
+    website: "https://ruralhealthconnect.org",
+    logoUrl: "/assets/logos/rural-health.png",
+    isActive: true,
+    supportedAreas: ["Masvingo", "Marondera", "Mutoko", "Murewa", "Chipinge"],
+    averageDeliveryTime: 240, // 4 hours in minutes
+    costPerKm: 0.40,
+    minimumFee: 8.00
+  }
+];
+
+// Mock deliveries data
+export const mockDeliveries = [
+  {
+    id: 1,
+    orderId: 2,
+    orderNumber: mockOrders[1].orderNumber,
+    partnerId: 1,
+    partnerName: "Swift Courier Zimbabwe",
+    trackingNumber: "SCZ-12345",
+    deliveryType: "STANDARD",
+    status: "DELIVERED",
+    scheduledDate: "2023-05-18",
+    scheduledTimeSlot: "14:00-16:00",
+    driverName: "Tendai Moyo",
+    driverPhone: "+263772111222",
+    estimatedDeliveryTime: "2023-05-18T15:30:00Z",
+    actualPickupTime: "2023-05-18T14:10:00Z",
+    actualDeliveryTime: "2023-05-18T15:45:00Z",
+    deliveryAddress: "45 Park Avenue, Bulawayo",
+    recipientName: "Mary Johnson",
+    recipientPhone: "+263 77 987 6543",
+    deliveryFee: 8.50,
+    distance: 7.2,
+    signature: "/assets/signatures/delivery-1.png",
+    photoProof: "/assets/photos/delivery-1.jpg",
+    createdAt: "2023-05-18T09:30:00Z"
+  },
+  {
+    id: 2,
+    orderId: 4,
+    orderNumber: mockOrders[3].orderNumber,
+    partnerId: 2,
+    partnerName: "MedExpress Delivery",
+    trackingNumber: "MED-67890",
+    deliveryType: "EXPRESS",
+    status: "IN_TRANSIT",
+    scheduledDate: "2023-05-21",
+    scheduledTimeSlot: "16:00-18:00",
+    driverName: "Chido Makoni",
+    driverPhone: "+263772333444",
+    estimatedDeliveryTime: "2023-05-21T17:15:00Z",
+    actualPickupTime: "2023-05-21T16:05:00Z",
+    actualDeliveryTime: null,
+    deliveryAddress: "12 Highland Drive, Gweru",
+    recipientName: "Sarah Brown",
+    recipientPhone: "+263 77 567 8901",
+    deliveryFee: 12.00,
+    distance: 5.8,
+    lastLocationLat: -19.516667,
+    lastLocationLng: 29.833333,
+    lastLocationUpdate: "2023-05-21T16:45:00Z",
+    createdAt: "2023-05-21T14:15:00Z"
+  },
+  {
+    id: 3,
+    orderId: 3,
+    orderNumber: mockOrders[2].orderNumber,
+    partnerId: 3,
+    partnerName: "HealthRider Logistics",
+    trackingNumber: "HRL-54321",
+    deliveryType: "SCHEDULED",
+    status: "PENDING",
+    scheduledDate: "2023-05-25",
+    scheduledTimeSlot: "10:00-12:00",
+    driverName: null,
+    driverPhone: null,
+    estimatedDeliveryTime: "2023-05-25T11:00:00Z",
+    actualPickupTime: null,
+    actualDeliveryTime: null,
+    deliveryAddress: "78 River Road, Mutare",
+    recipientName: "David Williams",
+    recipientPhone: "+263 77 456 7890",
+    deliveryFee: 10.25,
+    distance: 8.5,
+    createdAt: "2023-05-20T14:20:00Z"
+  },
+  {
+    id: 4,
+    orderId: 6,
+    orderNumber: "ORD-20230523-001",
+    partnerId: 1,
+    partnerName: "Swift Courier Zimbabwe",
+    trackingNumber: "SCZ-67890",
+    deliveryType: "SAME_DAY",
+    status: "ASSIGNED",
+    scheduledDate: "2023-05-23",
+    scheduledTimeSlot: "12:00-14:00",
+    driverName: "Farai Dube",
+    driverPhone: "+263772777888",
+    estimatedDeliveryTime: "2023-05-23T13:30:00Z",
+    actualPickupTime: null,
+    actualDeliveryTime: null,
+    deliveryAddress: "34 Samora Machel Ave, Harare",
+    recipientName: "Elizabeth Taylor",
+    recipientPhone: "+263712345678",
+    deliveryFee: 9.75,
+    distance: 6.8,
+    createdAt: "2023-05-23T09:45:00Z"
+  },
+  {
+    id: 5,
+    orderId: 7,
+    orderNumber: "ORD-20230524-003",
+    partnerId: 4,
+    partnerName: "Rural Health Connect",
+    trackingNumber: "RHC-13579",
+    deliveryType: "STANDARD",
+    status: "PICKED_UP",
+    scheduledDate: "2023-05-24",
+    scheduledTimeSlot: "09:00-13:00",
+    driverName: "Tatenda Mhuri",
+    driverPhone: "+263772999000",
+    estimatedDeliveryTime: "2023-05-24T12:00:00Z",
+    actualPickupTime: "2023-05-24T09:15:00Z",
+    actualDeliveryTime: null,
+    deliveryAddress: "15 Main Street, Masvingo",
+    recipientName: "Robert Miller",
+    recipientPhone: "+263712765432",
+    deliveryFee: 15.50,
+    distance: 18.2,
+    lastLocationLat: -20.072300,
+    lastLocationLng: 30.828751,
+    lastLocationUpdate: "2023-05-24T10:30:00Z",
+    createdAt: "2023-05-24T08:20:00Z"
+  }
+];
+
 export const mockMedicalAidClaims = [
   {
     id: 1,

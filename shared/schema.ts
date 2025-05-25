@@ -22,6 +22,25 @@ export const OrderStatus = {
   CANCELLED: "CANCELLED"
 } as const;
 
+// Delivery status enum
+export const DeliveryStatus = {
+  PENDING: "PENDING",
+  ASSIGNED: "ASSIGNED",
+  PICKED_UP: "PICKED_UP",
+  IN_TRANSIT: "IN_TRANSIT",
+  DELIVERED: "DELIVERED",
+  FAILED: "FAILED",
+  CANCELLED: "CANCELLED"
+} as const;
+
+// Delivery types enum
+export const DeliveryType = {
+  STANDARD: "STANDARD",
+  EXPRESS: "EXPRESS",
+  SAME_DAY: "SAME_DAY",
+  SCHEDULED: "SCHEDULED"
+} as const;
+
 // Prescription status enum
 export const PrescriptionStatus = {
   PENDING_REVIEW: "PENDING_REVIEW",
@@ -277,6 +296,59 @@ export const blogPosts = pgTable("blog_posts", {
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
+// Delivery partners table
+export const deliveryPartners = pgTable("delivery_partners", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  contactEmail: text("contact_email").notNull(),
+  contactPhone: text("contact_phone").notNull(),
+  website: text("website"),
+  logoUrl: text("logo_url"),
+  apiEndpoint: text("api_endpoint"),
+  apiKey: text("api_key"),
+  trackingUrlPattern: text("tracking_url_pattern"),
+  isActive: boolean("is_active").default(true).notNull(),
+  supportedAreas: text("supported_areas").array(),
+  averageDeliveryTime: integer("average_delivery_time"), // in minutes
+  costPerKm: numeric("cost_per_km", { precision: 10, scale: 2 }),
+  minimumFee: numeric("minimum_fee", { precision: 10, scale: 2 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Deliveries table
+export const deliveries = pgTable("deliveries", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id").notNull().references(() => orders.id),
+  partnerId: integer("partner_id").references(() => deliveryPartners.id),
+  trackingNumber: text("tracking_number"),
+  deliveryType: text("delivery_type").notNull().default(DeliveryType.STANDARD),
+  status: text("status").notNull().default(DeliveryStatus.PENDING),
+  scheduledDate: timestamp("scheduled_date"),
+  scheduledTimeSlot: text("scheduled_time_slot"),
+  driverName: text("driver_name"),
+  driverPhone: text("driver_phone"),
+  driverNotes: text("driver_notes"),
+  estimatedDeliveryTime: timestamp("estimated_delivery_time"),
+  actualPickupTime: timestamp("actual_pickup_time"),
+  actualDeliveryTime: timestamp("actual_delivery_time"),
+  deliveryAddress: text("delivery_address").notNull(),
+  recipientName: text("recipient_name").notNull(),
+  recipientPhone: text("recipient_phone").notNull(),
+  deliveryFee: numeric("delivery_fee", { precision: 10, scale: 2 }).notNull(),
+  distance: numeric("distance", { precision: 10, scale: 2 }), // in km
+  specialInstructions: text("special_instructions"),
+  signature: text("signature"), // URL to signature image
+  photoProof: text("photo_proof"), // URL to delivery photo proof
+  lastLocationLat: numeric("last_location_lat", { precision: 10, scale: 6 }),
+  lastLocationLng: numeric("last_location_lng", { precision: 10, scale: 6 }),
+  lastLocationUpdate: timestamp("last_location_update"),
+  statusHistory: jsonb("status_history"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
 // Wholesalers table
 export const wholesalers = pgTable("wholesalers", {
   id: serial("id").primaryKey(),
@@ -411,6 +483,18 @@ export const insertMedicalAidClaimSchema = createInsertSchema(medicalAidClaims).
   updatedAt: true
 });
 
+export const insertDeliveryPartnerSchema = createInsertSchema(deliveryPartners).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertDeliverySchema = createInsertSchema(deliveries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -446,3 +530,9 @@ export type InsertMedicalAidProvider = z.infer<typeof insertMedicalAidProviderSc
 
 export type MedicalAidClaim = typeof medicalAidClaims.$inferSelect;
 export type InsertMedicalAidClaim = z.infer<typeof insertMedicalAidClaimSchema>;
+
+export type DeliveryPartner = typeof deliveryPartners.$inferSelect;
+export type InsertDeliveryPartner = z.infer<typeof insertDeliveryPartnerSchema>;
+
+export type Delivery = typeof deliveries.$inferSelect;
+export type InsertDelivery = z.infer<typeof insertDeliverySchema>;
