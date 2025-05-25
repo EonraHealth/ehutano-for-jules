@@ -49,10 +49,8 @@ const MobileNavbar = () => {
     }
   ];
 
-  // Show all navigation items for authenticated users
-  const navItems = isAuthenticated 
-    ? baseNavItems 
-    : baseNavItems.filter(item => !item.roles);
+  // Show all navigation items regardless of authentication status
+  const navItems = baseNavItems;
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
