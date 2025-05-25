@@ -96,7 +96,7 @@ const DeliveryProgressTracker = ({ status }: { status: string }) => {
 const DeliveryCard = ({ delivery }: { delivery: any }) => {
   const [showDetails, setShowDetails] = useState(false);
   
-  const formattedDate = delivery.scheduledDate ? formatDate(new Date(delivery.scheduledDate)) : 'Not scheduled';
+  const formattedDate = delivery.scheduledDate ? formatDate(delivery.scheduledDate) : 'Not scheduled';
   const estimatedTime = delivery.estimatedDeliveryTime ? formatTime(delivery.estimatedDeliveryTime) : 'Unknown';
   
   return (

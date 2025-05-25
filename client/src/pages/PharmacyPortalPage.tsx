@@ -5,6 +5,7 @@ import PharmacyDashboard from '@/components/pharmacy/PharmacyDashboard';
 import InventoryManagement from '@/components/pharmacy/InventoryManagement';
 import OrderProcessing from '@/components/pharmacy/OrderProcessing';
 import MedicalAidClaimsManager from '@/components/pharmacy/MedicalAidClaimsManager';
+import DeliveryManagement from '@/components/pharmacy/DeliveryManagement';
 import Sidebar from '@/components/layout/Sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,10 +14,11 @@ import {
   PackageSearch, 
   ClipboardList, 
   FileText,
-  PieChart
+  PieChart,
+  Truck
 } from 'lucide-react';
 
-type TabValue = 'dashboard' | 'inventory' | 'orders' | 'claims' | 'analytics';
+type TabValue = 'dashboard' | 'inventory' | 'orders' | 'claims' | 'delivery' | 'analytics';
 
 const PharmacyPortalPage = () => {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -56,7 +58,7 @@ const PharmacyPortalPage = () => {
         </div>
 
         <Tabs defaultValue="dashboard" value={activeTab} onValueChange={(value) => setActiveTab(value as TabValue)}>
-          <TabsList className="mb-6 grid grid-cols-5 w-full">
+          <TabsList className="mb-6 grid grid-cols-6 w-full">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -68,6 +70,10 @@ const PharmacyPortalPage = () => {
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ClipboardList className="h-4 w-4" />
               <span className="hidden sm:inline">Orders</span>
+            </TabsTrigger>
+            <TabsTrigger value="delivery" className="flex items-center gap-2">
+              <Truck className="h-4 w-4" />
+              <span className="hidden sm:inline">Delivery</span>
             </TabsTrigger>
             <TabsTrigger value="claims" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -89,6 +95,10 @@ const PharmacyPortalPage = () => {
 
           <TabsContent value="orders">
             <OrderProcessing />
+          </TabsContent>
+
+          <TabsContent value="delivery">
+            <DeliveryManagement />
           </TabsContent>
 
           <TabsContent value="claims">
