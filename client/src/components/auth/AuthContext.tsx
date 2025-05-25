@@ -48,10 +48,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Effect to handle redirection when user state changes
+  // Effect to handle redirection when user state changes, but only on login/register
+  // not on every component render to avoid redirection loops
+  const initialRedirect = (user: User) => {
+    const currentPath = window.location.pathname;
+    const userRole = user.role;
+    
+    // Only redirect if we're on login, register, or home page
+    const shouldRedirect = 
+      currentPath === '/' || 
+      currentPath === '/login' || 
+      currentPath === '/register';
+      
+    if (shouldRedirect) {
+      redirectBasedOnRole(userRole);
+    }
+  };
+  
   useEffect(() => {
     if (user) {
-      redirectBasedOnRole(user.role);
+      initialRedirect(user);
     }
   }, [user]);
 

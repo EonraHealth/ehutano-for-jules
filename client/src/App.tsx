@@ -43,21 +43,57 @@ function Router() {
           <Route path="/login" component={LoginPage} />
           <Route path="/register" component={RegisterPage} />
           
-          {/* Protected Routes */}
+          {/* Protected Routes with strict role-based access */}
           <Route path="/patient-portal">
-            {isAuthenticated && user?.role === "PATIENT" ? <PatientPortalPage /> : <LoginPage />}
+            {isAuthenticated && user?.role === "PATIENT" ? 
+              <PatientPortalPage /> : 
+              <LoginPage />
+            }
           </Route>
           
           <Route path="/pharmacy-portal">
-            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? <PharmacyPortalPage /> : <LoginPage />}
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+              <PharmacyPortalPage /> : 
+              isAuthenticated ? 
+                <div className="min-h-screen flex items-center justify-center">
+                  <div className="text-center max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+                    <h2 className="text-xl font-bold text-red-600 mb-4">Access Denied</h2>
+                    <p className="mb-4">You don't have permission to access the Pharmacy Portal.</p>
+                    <p className="text-sm text-gray-600">Please log in with a pharmacy staff account to access this area.</p>
+                  </div>
+                </div> : 
+                <LoginPage />
+            }
           </Route>
           
           <Route path="/doctor-portal">
-            {isAuthenticated && user?.role === "DOCTOR" ? <DoctorPortalPage /> : <LoginPage />}
+            {isAuthenticated && user?.role === "DOCTOR" ? 
+              <DoctorPortalPage /> : 
+              isAuthenticated ? 
+                <div className="min-h-screen flex items-center justify-center">
+                  <div className="text-center max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+                    <h2 className="text-xl font-bold text-red-600 mb-4">Access Denied</h2>
+                    <p className="mb-4">You don't have permission to access the Doctor Portal.</p>
+                    <p className="text-sm text-gray-600">Please log in with a doctor account to access this area.</p>
+                  </div>
+                </div> : 
+                <LoginPage />
+            }
           </Route>
           
           <Route path="/wholesaler-portal">
-            {isAuthenticated && user?.role === "WHOLESALER_STAFF" ? <WholesalerPortalPage /> : <LoginPage />}
+            {isAuthenticated && user?.role === "WHOLESALER_STAFF" ? 
+              <WholesalerPortalPage /> : 
+              isAuthenticated ? 
+                <div className="min-h-screen flex items-center justify-center">
+                  <div className="text-center max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+                    <h2 className="text-xl font-bold text-red-600 mb-4">Access Denied</h2>
+                    <p className="mb-4">You don't have permission to access the Wholesaler Portal.</p>
+                    <p className="text-sm text-gray-600">Please log in with a wholesaler staff account to access this area.</p>
+                  </div>
+                </div> : 
+                <LoginPage />
+            }
           </Route>
           
           <Route path="/wellness-hub" component={WellnessHubPage} />
