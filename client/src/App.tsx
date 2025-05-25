@@ -10,7 +10,7 @@ import MobileNavbar from "./components/layout/MobileNavbar";
 import { useAuth } from "./hooks/useAuth";
 import { AuthProvider } from "./components/auth/AuthContext";
 
-// Pages
+// Main Pages
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -19,6 +19,20 @@ import PharmacyPortalPage from "./pages/PharmacyPortalPage";
 import DoctorPortalPage from "./pages/DoctorPortalPage";
 import WholesalerPortalPage from "./pages/WholesalerPortalPage";
 import WellnessHubPage from "./pages/WellnessHubPage";
+import ProfilePage from "./pages/ProfilePage";
+import SettingsPage from "./pages/SettingsPage";
+import GenericPage from "./pages/GenericPage";
+
+// Access Denied Component
+const AccessDenied = ({ role }: { role: string }) => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="text-center max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-xl font-bold text-red-600 mb-4">Access Denied</h2>
+      <p className="mb-4">You don't have permission to access the {role} Portal.</p>
+      <p className="text-sm text-gray-600">Please log in with a {role.toLowerCase()} account to access this area.</p>
+    </div>
+  </div>
+);
 
 function Router() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -43,60 +57,153 @@ function Router() {
           <Route path="/login" component={LoginPage} />
           <Route path="/register" component={RegisterPage} />
           
-          {/* Protected Routes with strict role-based access */}
+          {/* Access Denied component to reduce repetition */}
+          {/* Common routes */}
+          <Route path="/profile">
+            {isAuthenticated ? <ProfilePage /> : <LoginPage />}
+          </Route>
+          <Route path="/settings">
+            {isAuthenticated ? <SettingsPage /> : <LoginPage />}
+          </Route>
+          
+
+        
+          {/* Patient Portal Routes */}
           <Route path="/patient-portal">
+            {isAuthenticated && user?.role === "PATIENT" ? <PatientPortalPage /> : 
+             isAuthenticated ? <AccessDenied role="Patient" /> : <LoginPage />}
+          </Route>
+          <Route path="/patient-portal/prescriptions">
             {isAuthenticated && user?.role === "PATIENT" ? 
-              <PatientPortalPage /> : 
-              <LoginPage />
-            }
+             <GenericPage title="My Prescriptions" description="View and manage your prescriptions here" /> : 
+             isAuthenticated ? <AccessDenied role="Patient" /> : <LoginPage />}
+          </Route>
+          <Route path="/patient-portal/order-medicine">
+            {isAuthenticated && user?.role === "PATIENT" ? 
+             <GenericPage title="Order Medicine" description="Search and order medicines from our catalog" /> : 
+             isAuthenticated ? <AccessDenied role="Patient" /> : <LoginPage />}
+          </Route>
+          <Route path="/patient-portal/orders">
+            {isAuthenticated && user?.role === "PATIENT" ? 
+             <GenericPage title="My Orders" description="Track and view your medicine orders" /> : 
+             isAuthenticated ? <AccessDenied role="Patient" /> : <LoginPage />}
+          </Route>
+          <Route path="/patient-portal/verify-medicine">
+            {isAuthenticated && user?.role === "PATIENT" ? 
+             <GenericPage title="Verify Medicine" description="Verify the authenticity of your medicine" /> : 
+             isAuthenticated ? <AccessDenied role="Patient" /> : <LoginPage />}
+          </Route>
+          <Route path="/patient-portal/cart">
+            {isAuthenticated && user?.role === "PATIENT" ? 
+             <GenericPage title="Shopping Cart" description="Review and checkout your selected medicines" /> : 
+             isAuthenticated ? <AccessDenied role="Patient" /> : <LoginPage />}
           </Route>
           
+          {/* Pharmacy Portal Routes */}
           <Route path="/pharmacy-portal">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? <PharmacyPortalPage /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/orders">
             {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
-              <PharmacyPortalPage /> : 
-              isAuthenticated ? 
-                <div className="min-h-screen flex items-center justify-center">
-                  <div className="text-center max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-                    <h2 className="text-xl font-bold text-red-600 mb-4">Access Denied</h2>
-                    <p className="mb-4">You don't have permission to access the Pharmacy Portal.</p>
-                    <p className="text-sm text-gray-600">Please log in with a pharmacy staff account to access this area.</p>
-                  </div>
-                </div> : 
-                <LoginPage />
-            }
+             <GenericPage title="Manage Orders" description="View and manage customer orders" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/orders/new">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <GenericPage title="New Orders" description="View and process new incoming orders" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/orders/processing">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <GenericPage title="Processing Orders" description="View orders currently being processed" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/orders/ready">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <GenericPage title="Ready for Pickup" description="Orders ready for customer pickup or delivery" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/orders/completed">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <GenericPage title="Completed Orders" description="View history of completed orders" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/inventory">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <GenericPage title="Inventory Management" description="Manage pharmacy medicine inventory" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/prescriptions">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <GenericPage title="Prescriptions" description="Process and verify patient prescriptions" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/claims">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <GenericPage title="Medical Aid Claims" description="Process and manage medical aid claims" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/analytics">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <GenericPage title="Analytics Dashboard" description="View pharmacy performance metrics and analytics" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
           </Route>
           
+          {/* Doctor Portal Routes */}
           <Route path="/doctor-portal">
+            {isAuthenticated && user?.role === "DOCTOR" ? <DoctorPortalPage /> : 
+             isAuthenticated ? <AccessDenied role="Doctor" /> : <LoginPage />}
+          </Route>
+          <Route path="/doctor-portal/patients">
             {isAuthenticated && user?.role === "DOCTOR" ? 
-              <DoctorPortalPage /> : 
-              isAuthenticated ? 
-                <div className="min-h-screen flex items-center justify-center">
-                  <div className="text-center max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-                    <h2 className="text-xl font-bold text-red-600 mb-4">Access Denied</h2>
-                    <p className="mb-4">You don't have permission to access the Doctor Portal.</p>
-                    <p className="text-sm text-gray-600">Please log in with a doctor account to access this area.</p>
-                  </div>
-                </div> : 
-                <LoginPage />
-            }
+             <GenericPage title="My Patients" description="Manage and view patient information" /> : 
+             isAuthenticated ? <AccessDenied role="Doctor" /> : <LoginPage />}
+          </Route>
+          <Route path="/doctor-portal/prescriptions">
+            {isAuthenticated && user?.role === "DOCTOR" ? 
+             <GenericPage title="E-Prescriptions" description="Create and manage electronic prescriptions" /> : 
+             isAuthenticated ? <AccessDenied role="Doctor" /> : <LoginPage />}
+          </Route>
+          <Route path="/doctor-portal/appointments">
+            {isAuthenticated && user?.role === "DOCTOR" ? 
+             <GenericPage title="Appointments" description="View and manage patient appointments" /> : 
+             isAuthenticated ? <AccessDenied role="Doctor" /> : <LoginPage />}
           </Route>
           
+          {/* Wholesaler Portal Routes */}
           <Route path="/wholesaler-portal">
+            {isAuthenticated && user?.role === "WHOLESALER_STAFF" ? <WholesalerPortalPage /> : 
+             isAuthenticated ? <AccessDenied role="Wholesaler" /> : <LoginPage />}
+          </Route>
+          <Route path="/wholesaler-portal/catalog">
             {isAuthenticated && user?.role === "WHOLESALER_STAFF" ? 
-              <WholesalerPortalPage /> : 
-              isAuthenticated ? 
-                <div className="min-h-screen flex items-center justify-center">
-                  <div className="text-center max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-                    <h2 className="text-xl font-bold text-red-600 mb-4">Access Denied</h2>
-                    <p className="mb-4">You don't have permission to access the Wholesaler Portal.</p>
-                    <p className="text-sm text-gray-600">Please log in with a wholesaler staff account to access this area.</p>
-                  </div>
-                </div> : 
-                <LoginPage />
-            }
+             <GenericPage title="Medicine Catalog" description="Manage your medicine catalog" /> : 
+             isAuthenticated ? <AccessDenied role="Wholesaler" /> : <LoginPage />}
+          </Route>
+          <Route path="/wholesaler-portal/orders">
+            {isAuthenticated && user?.role === "WHOLESALER_STAFF" ? 
+             <GenericPage title="Pharmacy Orders" description="Manage orders from pharmacies" /> : 
+             isAuthenticated ? <AccessDenied role="Wholesaler" /> : <LoginPage />}
+          </Route>
+          <Route path="/wholesaler-portal/pharmacies">
+            {isAuthenticated && user?.role === "WHOLESALER_STAFF" ? 
+             <GenericPage title="Pharmacy Clients" description="Manage your pharmacy client relationships" /> : 
+             isAuthenticated ? <AccessDenied role="Wholesaler" /> : <LoginPage />}
+          </Route>
+          <Route path="/wholesaler-portal/analytics">
+            {isAuthenticated && user?.role === "WHOLESALER_STAFF" ? 
+             <GenericPage title="Analytics Dashboard" description="View wholesaler performance metrics and analytics" /> : 
+             isAuthenticated ? <AccessDenied role="Wholesaler" /> : <LoginPage />}
           </Route>
           
+          {/* Public Routes */}
           <Route path="/wellness-hub" component={WellnessHubPage} />
+          <Route path="/wellness-hub/activities">
+            {isAuthenticated && user?.role === "PATIENT" ? 
+             <GenericPage title="Wellness Activities" description="Browse and book wellness activities" /> : 
+             isAuthenticated ? <AccessDenied role="Patient" /> : <LoginPage />}
+          </Route>
           
           {/* Fallback to 404 */}
           <Route component={NotFound} />
