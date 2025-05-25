@@ -197,6 +197,14 @@ function Router() {
              isAuthenticated ? <AccessDenied role="Wholesaler" /> : <LoginPage />}
           </Route>
           
+          {/* Profile & Settings Routes */}
+          <Route path="/profile">
+            {isAuthenticated ? <ProfilePage /> : <LoginPage />}
+          </Route>
+          <Route path="/settings">
+            {isAuthenticated ? <SettingsPage /> : <LoginPage />}
+          </Route>
+          
           {/* Public Routes */}
           <Route path="/wellness-hub" component={WellnessHubPage} />
           <Route path="/wellness-hub/activities">
