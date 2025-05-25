@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import PatientDashboard from '@/components/patient/PatientDashboard';
+import Sidebar from '@/components/layout/Sidebar';
 
 const PatientPortalPage = () => {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -28,7 +29,14 @@ const PatientPortalPage = () => {
     return null;
   }
 
-  return <PatientDashboard />;
+  return (
+    <div className="flex">
+      <Sidebar className="hidden md:block" />
+      <div className="flex-1 p-6">
+        <PatientDashboard />
+      </div>
+    </div>
+  );
 };
 
 export default PatientPortalPage;
