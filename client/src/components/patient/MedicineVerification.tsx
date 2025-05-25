@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { apiRequest } from '@/lib/queryClient';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Camera, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, Camera, CheckCircle, XCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { VerificationStatus } from '@/types';
 
@@ -96,7 +96,7 @@ const MedicineVerification = () => {
       <CardContent className="p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Medicine Verification</h3>
-          <a href="#" className="text-sm font-medium text-primary-600 hover:text-primary-700">Learn More</a>
+          <span className="text-sm font-medium text-primary-600 hover:text-primary-700 cursor-pointer">Learn More</span>
         </div>
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex-1 bg-purple-50 rounded-lg p-4 flex flex-col items-center justify-center">
@@ -108,7 +108,7 @@ const MedicineVerification = () => {
           </div>
           <div className="flex-1 bg-blue-50 rounded-lg p-4 flex flex-col items-center justify-center">
             <div className="bg-blue-100 rounded-full p-3 mb-3">
-              <Shield className="h-6 w-6 text-blue-600" />
+              <ShieldCheck className="h-6 w-6 text-blue-600" />
             </div>
             <h4 className="text-sm font-medium text-blue-700 mb-1">Verify Authenticity</h4>
             <p className="text-xs text-blue-600 text-center">Our system will check if the medicine is genuine and not expired</p>
