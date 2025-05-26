@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import PharmacyDashboard from '@/components/pharmacy/PharmacyDashboard';
 import InventoryManagement from '@/components/pharmacy/InventoryManagement';
 import OrderProcessing from '@/components/pharmacy/OrderProcessing';
+import PrescriptionManagement from '@/components/pharmacy/PrescriptionManagement';
 import MedicalAidClaimsManager from '@/components/pharmacy/MedicalAidClaimsManager';
 import DeliveryManagement from '@/components/pharmacy/DeliveryManagement';
 import PharmacyAnalytics from '@/components/pharmacy/PharmacyAnalytics';
@@ -19,7 +20,7 @@ import {
   Truck
 } from 'lucide-react';
 
-type TabValue = 'dashboard' | 'inventory' | 'orders' | 'claims' | 'delivery' | 'analytics';
+type TabValue = 'dashboard' | 'inventory' | 'orders' | 'prescriptions' | 'claims' | 'delivery' | 'analytics';
 
 const PharmacyPortalPage = () => {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -72,6 +73,10 @@ const PharmacyPortalPage = () => {
               <ClipboardList className="h-4 w-4" />
               <span className="hidden sm:inline">Orders</span>
             </TabsTrigger>
+            <TabsTrigger value="prescriptions" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              <span className="hidden sm:inline">Prescriptions</span>
+            </TabsTrigger>
             <TabsTrigger value="delivery" className="flex items-center gap-2">
               <Truck className="h-4 w-4" />
               <span className="hidden sm:inline">Delivery</span>
@@ -96,6 +101,10 @@ const PharmacyPortalPage = () => {
 
           <TabsContent value="orders">
             <OrderProcessing />
+          </TabsContent>
+
+          <TabsContent value="prescriptions">
+            <PrescriptionManagement />
           </TabsContent>
 
           <TabsContent value="delivery">

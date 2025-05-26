@@ -615,6 +615,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get pharmacy prescriptions
+  app.get("/api/v1/pharmacy/prescriptions", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      // Get pharmacy ID for the authenticated pharmacy staff
+      const pharmacyStaff = await storage.getPharmacyStaffByUserId(req.user.id);
+      
+      if (!pharmacyStaff) {
+        return res.status(404).json({ message: "Pharmacy staff record not found" });
+      }
+      
+      // Mock prescription data for now - replace with actual database query
+      const prescriptions = [
+        {
+          id: 1,
+          patientName: "John Mukamuri",
+          patientPhone: "+263777123456",
+          doctorName: "Dr. Sarah Chiweshe",
+          prescriptionDate: "2025-01-25",
+          status: "PENDING_REVIEW",
+          medicines: [
+            {
+              id: 1,
+              name: "Metformin 500mg",
+              dosage: "500mg twice daily",
+              quantity: 60,
+              instructions: "Take with meals",
+              price: 25.50
+            },
+            {
+              id: 2,
+              name: "Amlodipine 5mg",
+              dosage: "5mg once daily",
+              quantity: 30,
+              instructions: "Take in morning",
+              price: 18.75
+            }
+          ],
+          totalAmount: 44.25,
+          notes: "Patient has diabetes and hypertension"
+        },
+        {
+          id: 2,
+          patientName: "Grace Mutasa",
+          patientPhone: "+263712987654",
+          doctorName: "Dr. James Moyo",
+          prescriptionDate: "2025-01-24",
+          status: "VERIFIED",
+          medicines: [
+            {
+              id: 3,
+              name: "Paracetamol 500mg",
+              dosage: "500mg as needed",
+              quantity: 20,
+              instructions: "For pain relief, max 8 tablets per day",
+              price: 8.50
+            }
+          ],
+          totalAmount: 8.50,
+          verificationNotes: "Prescription verified, ready for dispensing"
+        },
+        {
+          id: 3,
+          patientName: "Peter Nyamhunga",
+          patientPhone: "+263773456789",
+          doctorName: "Dr. Mary Chikwanha",
+          prescriptionDate: "2025-01-23",
+          status: "READY_FOR_PICKUP",
+          medicines: [
+            {
+              id: 4,
+              name: "Amoxicillin 250mg",
+              dosage: "250mg three times daily",
+              quantity: 21,
+              instructions: "Complete full course",
+              price: 15.30
+            },
+            {
+              id: 5,
+              name: "Ibuprofen 400mg",
+              dosage: "400mg twice daily",
+              quantity: 14,
+              instructions: "Take with food",
+              price: 12.80
+            }
+          ],
+          totalAmount: 28.10,
+          verificationNotes: "All medicines prepared and ready for collection"
+        }
+      ];
+      
+      return res.status(200).json(prescriptions);
+    } catch (error) {
+      console.error("Get pharmacy prescriptions error:", error);
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+
+  // Update prescription status
+  app.put("/api/v1/pharmacy/prescriptions/:prescriptionId/status", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const prescriptionId = parseInt(req.params.prescriptionId);
+      const { status, notes } = req.body;
+      
+      if (isNaN(prescriptionId)) {
+        return res.status(400).json({ message: "Invalid prescription ID" });
+      }
+      
+      // Mock response - replace with actual database update
+      return res.status(200).json({
+        id: prescriptionId,
+        status,
+        notes,
+        updatedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Update prescription status error:", error);
+      return res.status(500).json({ message: "An error occurred" });
+    }
+  });
+
   // Get pharmacy inventory
   app.get("/api/v1/pharmacy/inventory", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
     try {
