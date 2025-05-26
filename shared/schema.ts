@@ -383,6 +383,15 @@ export const medicalAidProviders = pgTable("medical_aid_providers", {
   isActive: boolean("is_active").default(true).notNull(),
   supportedClaimTypes: text("supported_claim_types").array(),
   processingTimeHours: integer("processing_time_hours"),
+  // Direct integration enhancements
+  supportsDirectClaims: boolean("supports_direct_claims").default(false).notNull(),
+  authenticationMethod: text("authentication_method"), // 'API_KEY', 'OAUTH2', 'BASIC_AUTH'
+  webhookUrl: text("webhook_url"),
+  testMode: boolean("test_mode").default(true).notNull(),
+  realTimeValidation: boolean("real_time_validation").default(false).notNull(),
+  autoApprovalLimit: numeric("auto_approval_limit", { precision: 10, scale: 2 }),
+  integrationConfig: jsonb("integration_config"),
+  lastSyncAt: timestamp("last_sync_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
@@ -408,6 +417,16 @@ export const medicalAidClaims = pgTable("medical_aid_claims", {
   submissionData: jsonb("submission_data"),
   responseData: jsonb("response_data"),
   attachments: text("attachments").array(),
+  // Direct integration enhancements
+  isDirectSubmission: boolean("is_direct_submission").default(false).notNull(),
+  submissionReference: text("submission_reference"),
+  authorizationNumber: text("authorization_number"),
+  providerClaimId: text("provider_claim_id"),
+  realTimeValidated: boolean("real_time_validated").default(false).notNull(),
+  autoProcessed: boolean("auto_processed").default(false).notNull(),
+  integrationStatus: text("integration_status").default("MANUAL"),
+  webhookReceived: timestamp("webhook_received"),
+  processingDurationMs: integer("processing_duration_ms"),
   lastUpdated: timestamp("last_updated").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()

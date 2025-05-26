@@ -2,6 +2,7 @@ import { Express, Request, Response } from "express";
 import { createServer, Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
+import { medicalAidIntegration } from "./medicalAidIntegration";
 import { 
   insertUserSchema, 
   insertPatientProfileSchema, 
@@ -955,6 +956,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // ===== Medical Aid Claims Routes =====
   
+  // Direct claims submission endpoint
+  app.post("/api/v1/medical-aid/submit-direct-claim", authenticateJWT, async (req: Request, res: Response) => {
+    try {
+      const claimRequest = {
+        patientId: req.user!.id,
+        providerId: req.body.providerId,
+        orderId: req.body.orderId,
+        prescriptionId: req.body.prescriptionId,
+        membershipNumber: req.body.membershipNumber,
+        dependentCode: req.body.dependentCode,
+        totalAmount: parseFloat(req.body.totalAmount),
+        benefitType: req.body.benefitType || 'PHARMACY',
+        diagnosisCode: req.body.diagnosisCode,
+        treatmentCode: req.body.treatmentCode,
+        serviceDate: new Date(req.body.serviceDate || Date.now()),
+        items: req.body.items || []
+      };
+
+      const result = await medicalAidIntegration.submitDirectClaim(claimRequest);
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error submitting direct claim:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to submit claim",
+        status: 'ERROR'
+      });
+    }
+  });
+
+  // Validate medical aid membership
+  app.post("/api/v1/medical-aid/validate-membership", authenticateJWT, async (req: Request, res: Response) => {
+    try {
+      const { providerId, membershipNumber, dependentCode } = req.body;
+      
+      const validation = await medicalAidIntegration.validateMembership(
+        providerId, 
+        membershipNumber, 
+        dependentCode
+      );
+      
+      res.json(validation);
+    } catch (error) {
+      console.error("Error validating membership:", error);
+      res.status(500).json({ 
+        valid: false, 
+        message: "Validation service unavailable" 
+      });
+    }
+  });
+
   // Get patient's medical aid claims
   app.get("/api/v1/patient/medical-aid/claims", authenticateJWT, authorizeRoles([UserRole.PATIENT]), async (req: Request, res: Response) => {
     try {
