@@ -1,4 +1,4 @@
-import { users, medicalAidProviders, medicalAidClaims, wellnessActivities, wellnessBookings, blogPosts,
+import { users, medicalAidProviders, medicalAidClaims, wellnessActivities, wellnessBookings, blogPosts, inventoryItems,
   type User, type InsertUser, 
   type MedicalAidProvider, type InsertMedicalAidProvider,
   type MedicalAidClaim, type InsertMedicalAidClaim,
@@ -20,6 +20,12 @@ export interface IStorage {
   getInventoryByPharmacyId(pharmacyId: number): Promise<any[]>;
   getOrderById(orderId: number): Promise<any>;
   updateOrder(orderId: number, data: any): Promise<any>;
+  
+  // Inventory management methods
+  getAllInventoryItems(): Promise<any[]>;
+  createInventoryItem(item: any): Promise<any>;
+  updateInventoryItem(id: number, item: any): Promise<any>;
+  deleteInventoryItem(id: number): Promise<boolean>;
   
   // Medical aid provider methods
   getMedicalAidProviders(): Promise<MedicalAidProvider[]>;
@@ -339,6 +345,51 @@ export class DatabaseStorage implements IStorage {
       return { ...order, ...data };
     }
     return null;
+  }
+
+  // Inventory management methods
+  async getAllInventoryItems(): Promise<any[]> {
+    return await db.select().from(inventoryItems);
+  }
+
+  async createInventoryItem(item: any): Promise<any> {
+    const [newItem] = await db
+      .insert(inventoryItems)
+      .values({
+        medicineId: item.medicineId || 1,
+        pharmacyId: item.pharmacyId || 1,
+        stock: item.stock,
+        reorderLevel: item.reorderLevel || 10,
+        unitPrice: item.price?.toString() || "0",
+        expiryDate: item.expiryDate || new Date(),
+        batchNumber: item.batchNumber || `BATCH-${Date.now()}`,
+        status: 'available',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return newItem;
+  }
+
+  async updateInventoryItem(id: number, item: any): Promise<any> {
+    const [updatedItem] = await db
+      .update(inventoryItems)
+      .set({
+        stock: item.stock,
+        reorderLevel: item.reorderLevel,
+        unitPrice: item.price?.toString(),
+        updatedAt: new Date()
+      })
+      .where(eq(inventoryItems.id, id))
+      .returning();
+    return updatedItem;
+  }
+
+  async deleteInventoryItem(id: number): Promise<boolean> {
+    const result = await db
+      .delete(inventoryItems)
+      .where(eq(inventoryItems.id, id));
+    return result.rowCount > 0;
   }
 }
 

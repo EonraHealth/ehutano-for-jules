@@ -94,9 +94,13 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
     
     if (pageKey.includes('inventory')) {
       return [
-        { id: 1, name: 'Paracetamol 500mg', stock: 150, price: 12.50, reorderLevel: 50 },
-        { id: 2, name: 'Amoxicillin 250mg', stock: 8, price: 25.00, reorderLevel: 20 },
-        { id: 3, name: 'Vitamin C 1000mg', stock: 75, price: 18.75, reorderLevel: 30 }
+        { id: 1, name: 'Paracetamol 500mg', category: 'Pain Relief', stock: 150, price: 12.50, reorderLevel: 50, supplier: 'PharmaCorp' },
+        { id: 2, name: 'Amoxicillin 250mg', category: 'Antibiotics', stock: 8, price: 25.00, reorderLevel: 20, supplier: 'MedSupply' },
+        { id: 3, name: 'Vitamin C 1000mg', category: 'Vitamins', stock: 75, price: 18.75, reorderLevel: 30, supplier: 'HealthPlus' },
+        { id: 4, name: 'Ibuprofen 400mg', category: 'Pain Relief', stock: 25, price: 15.30, reorderLevel: 40, supplier: 'PharmaCorp' },
+        { id: 5, name: 'Aspirin 75mg', category: 'Cardiovascular', stock: 0, price: 27.00, reorderLevel: 15, supplier: 'CardioMed' },
+        { id: 6, name: 'Multivitamin', category: 'Vitamins', stock: 120, price: 32.40, reorderLevel: 25, supplier: 'HealthPlus' },
+        { id: 7, name: 'Cough Syrup', category: 'Respiratory', stock: 5, price: 18.90, reorderLevel: 12, supplier: 'RespiroCare' }
       ];
     }
     
@@ -104,7 +108,7 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
   };
 
   // Use real data if available, otherwise fall back to functional demo data
-  const displayData = data || (error ? getMockData() : []);
+  const displayData = data || getMockData();
 
   // Enhanced content based on page type and data
   const renderContent = () => {
@@ -353,7 +357,7 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
     }, [items, searchTerm, categoryFilter, stockFilter]);
 
     // Get unique categories
-    const categories = [...new Set(items.map((item: any) => item.category).filter(Boolean))];
+    const categories = Array.from(new Set(items.map((item: any) => item.category).filter(Boolean)));
 
     const handleAddItem = () => {
       const id = Math.max(...items.map((item: any) => item.id || 0), 0) + 1;
@@ -380,7 +384,7 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
 
     const handleUpdateItem = () => {
       setItems(items.map((item: any) => 
-        item.id === selectedItem?.id ? { ...newItem } : item
+        item.id === (selectedItem as any)?.id ? { ...newItem } : item
       ));
       setIsEditModalOpen(false);
       setSelectedItem(null);
