@@ -44,14 +44,14 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
   const getApiEndpoint = () => {
     const pageKey = title.toLowerCase().replace(/\s+/g, '-');
     
-    // For pharmacy orders, skip API call due to auth issues - use mock data instead
-    if (location.includes('pharmacy') && pageKey.includes('order')) {
-      return null; // Force use of mock data
-    }
-    
     // Check user role for appropriate endpoints
     if (user?.role === 'PHARMACY_STAFF' || location.includes('pharmacy')) {
       switch (pageKey) {
+        case 'manage-orders':
+        case 'new-orders':
+        case 'processing-orders':
+        case 'completed-orders':
+          return null; // Use mock data for orders temporarily
         case 'manage-inventory':
         case 'add-medicine':
         case 'stock-levels':
@@ -359,21 +359,35 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
     // Get unique categories
     const categories = Array.from(new Set(items.map((item: any) => item.category).filter(Boolean)));
 
-    const handleAddItem = () => {
-      const id = Math.max(...items.map((item: any) => item.id || 0), 0) + 1;
-      const itemToAdd = { ...newItem, id };
-      setItems([...items, itemToAdd]);
-      setNewItem({
-        name: '',
-        category: '',
-        stock: 0,
-        price: 0,
-        reorderLevel: 10,
-        supplier: '',
-        barcode: '',
-        description: ''
-      });
-      setIsAddModalOpen(false);
+    const handleAddItem = async () => {
+      try {
+        const response = await fetch('/api/v1/pharmacy/inventory', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newItem),
+        });
+        
+        if (response.ok) {
+          const addedItem = await response.json();
+          setItems([...items, addedItem]);
+          setNewItem({
+            name: '',
+            category: '',
+            stock: 0,
+            price: 0,
+            reorderLevel: 10,
+            supplier: '',
+            barcode: '',
+            description: ''
+          });
+          setIsAddModalOpen(false);
+          refetch(); // Refresh data from server
+        }
+      } catch (error) {
+        console.error('Error adding item:', error);
+      }
     };
 
     const handleEditItem = (item: any) => {
@@ -382,16 +396,43 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
       setIsEditModalOpen(true);
     };
 
-    const handleUpdateItem = () => {
-      setItems(items.map((item: any) => 
-        item.id === (selectedItem as any)?.id ? { ...newItem } : item
-      ));
-      setIsEditModalOpen(false);
-      setSelectedItem(null);
+    const handleUpdateItem = async () => {
+      try {
+        const response = await fetch(`/api/v1/pharmacy/inventory/${(selectedItem as any)?.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newItem),
+        });
+        
+        if (response.ok) {
+          const updatedItem = await response.json();
+          setItems(items.map((item: any) => 
+            item.id === (selectedItem as any)?.id ? updatedItem : item
+          ));
+          setIsEditModalOpen(false);
+          setSelectedItem(null);
+          refetch(); // Refresh data from server
+        }
+      } catch (error) {
+        console.error('Error updating item:', error);
+      }
     };
 
-    const handleDeleteItem = (itemId: number) => {
-      setItems(items.filter((item: any) => item.id !== itemId));
+    const handleDeleteItem = async (itemId: number) => {
+      try {
+        const response = await fetch(`/api/v1/pharmacy/inventory/${itemId}`, {
+          method: 'DELETE',
+        });
+        
+        if (response.ok) {
+          setItems(items.filter((item: any) => item.id !== itemId));
+          refetch(); // Refresh data from server
+        }
+      } catch (error) {
+        console.error('Error deleting item:', error);
+      }
     };
 
     const handleStockUpdate = (itemId: number, newStock: number) => {
