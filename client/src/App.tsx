@@ -26,6 +26,7 @@ import SettingsPage from "./pages/SettingsPage";
 import GenericPage from "./pages/GenericPage";
 import Sidebar from "./components/layout/Sidebar";
 import PharmacyAnalytics from "./components/pharmacy/PharmacyAnalytics";
+import PrescriptionManagement from "@/components/pharmacy/PrescriptionManagement";
 
 // Access Denied Component
 const AccessDenied = ({ role }: { role: string }) => (
@@ -166,7 +167,12 @@ function Router() {
           </Route>
           <Route path="/pharmacy-portal/prescriptions">
             {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
-             <GenericPage title="Prescriptions" description="Process and verify patient prescriptions" /> : 
+             <div className="flex">
+               <Sidebar className="hidden md:block" />
+               <div className="flex-1 p-6">
+                 <PrescriptionManagement />
+               </div>
+             </div> : 
              isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
           </Route>
           <Route path="/pharmacy-portal/claims">
