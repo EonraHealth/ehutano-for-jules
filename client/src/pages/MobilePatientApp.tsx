@@ -626,10 +626,16 @@ export default function MobilePatientApp() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center py-2 px-1 ${
+                onClick={() => {
+                  if (navigator.vibrate) {
+                    navigator.vibrate(30);
+                  }
+                  setActiveTab(tab.id);
+                  console.log(`${tab.label} tab clicked`);
+                }}
+                className={`flex flex-col items-center py-3 px-1 min-h-[60px] touch-manipulation active:scale-95 transition-all duration-150 ${
                   activeTab === tab.id 
-                    ? "text-blue-600" 
+                    ? "text-blue-600 bg-blue-50" 
                     : "text-gray-500"
                 }`}
               >
