@@ -77,8 +77,8 @@ function Router() {
 
           {/* Medical Aid Claims */}
           <Route path="/medical-aid-claims">
-            {isAuthenticated && user?.role === "PATIENT" ? <MedicalAidClaimsPage /> : 
-             isAuthenticated ? <AccessDenied role="Patient" /> : <LoginPage />}
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? <MedicalAidClaimsPage /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
           </Route>
 
           {/* Patient Portal Routes */}
