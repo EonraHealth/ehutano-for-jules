@@ -49,10 +49,18 @@ export default function MobilePatientApp() {
   ];
 
   // Medicine reminders
-  const upcomingReminders = [
-    { medicine: "Metformin", time: "2:00 PM", taken: false },
-    { medicine: "Vitamin D", time: "6:00 PM", taken: false }
-  ];
+  const [upcomingReminders, setUpcomingReminders] = useState([
+    { id: 1, medicine: "Metformin", time: "2:00 PM", taken: false },
+    { id: 2, medicine: "Vitamin D", time: "6:00 PM", taken: false }
+  ]);
+
+  const handleMarkTaken = (id: number) => {
+    setUpcomingReminders(prev => 
+      prev.map(reminder => 
+        reminder.id === id ? { ...reminder, taken: true } : reminder
+      )
+    );
+  };
 
   const HomeTab = () => (
     <div className="space-y-6">
@@ -95,12 +103,14 @@ export default function MobilePatientApp() {
           <Badge variant="outline">{upcomingReminders.length} pending</Badge>
         </div>
         <div className="space-y-3">
-          {upcomingReminders.map((reminder, index) => (
-            <Card key={index}>
+          {upcomingReminders.map((reminder) => (
+            <Card key={reminder.id} className={reminder.taken ? "bg-green-50 border-green-200" : ""}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="bg-blue-100 text-blue-600 w-10 h-10 rounded-full flex items-center justify-center">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      reminder.taken ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
+                    }`}>
                       <Pill className="h-5 w-5" />
                     </div>
                     <div>
@@ -108,8 +118,13 @@ export default function MobilePatientApp() {
                       <p className="text-sm text-gray-500">{reminder.time}</p>
                     </div>
                   </div>
-                  <Button size="sm" variant={reminder.taken ? "outline" : "default"}>
-                    {reminder.taken ? "Taken" : "Mark Taken"}
+                  <Button 
+                    size="sm" 
+                    variant={reminder.taken ? "outline" : "default"}
+                    onClick={() => handleMarkTaken(reminder.id)}
+                    disabled={reminder.taken}
+                  >
+                    {reminder.taken ? "✓ Taken" : "Mark Taken"}
                   </Button>
                 </div>
               </CardContent>
@@ -156,6 +171,22 @@ export default function MobilePatientApp() {
           placeholder="Search medicines..."
           className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+      </div>
+
+      {/* Quick Medicine Actions */}
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+          <CardContent className="p-4 text-center">
+            <QrCode className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+            <p className="text-sm font-medium">Scan QR Code</p>
+          </CardContent>
+        </Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow">
+          <CardContent className="p-4 text-center">
+            <Shield className="h-8 w-8 text-green-600 mx-auto mb-2" />
+            <p className="text-sm font-medium">Verify Medicine</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Active Prescriptions */}
@@ -250,14 +281,48 @@ export default function MobilePatientApp() {
         <CardHeader>
           <CardTitle className="flex items-center">
             <MapPin className="h-5 w-5 mr-2" />
-            Find Nearby Pharmacies
+            Nearby Pharmacies
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-600 mb-3">Locate pharmacies near you for quick pickup</p>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-gray-600 mb-3">Find pharmacies near your location</p>
+          
+          {/* Pharmacy List */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p className="font-medium">Central Pharmacy</p>
+                <p className="text-sm text-gray-600">0.8 km away • Open until 8 PM</p>
+              </div>
+              <div className="flex space-x-1">
+                <Button size="sm" variant="outline">
+                  <Phone className="h-3 w-3" />
+                </Button>
+                <Button size="sm" variant="outline">
+                  <MapPin className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div>
+                <p className="font-medium">HealthFirst Pharmacy</p>
+                <p className="text-sm text-gray-600">1.2 km away • Open 24/7</p>
+              </div>
+              <div className="flex space-x-1">
+                <Button size="sm" variant="outline">
+                  <Phone className="h-3 w-3" />
+                </Button>
+                <Button size="sm" variant="outline">
+                  <MapPin className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          
           <Button className="w-full">
             <MapPin className="h-4 w-4 mr-2" />
-            Find Pharmacies
+            View All on Map
           </Button>
         </CardContent>
       </Card>
