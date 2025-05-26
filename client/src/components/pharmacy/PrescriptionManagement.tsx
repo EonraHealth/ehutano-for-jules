@@ -41,9 +41,17 @@ const PrescriptionManagement = () => {
   const { toast } = useToast();
 
   // Fetch prescriptions using working analytics pattern
-  const { data: prescriptions, isLoading, error } = useQuery<Prescription[]>({
+  const { data: prescriptions = [], isLoading, error } = useQuery<Prescription[]>({
     queryKey: ['/api/v1/pharmacy/analytics/prescriptions'],
-    staleTime: 30000 // 30 seconds
+    staleTime: 30000, // 30 seconds
+    retry: 3,
+    retryDelay: 1000,
+    onSuccess: (data) => {
+      console.log('Prescriptions loaded successfully:', data);
+    },
+    onError: (error) => {
+      console.error('Error loading prescriptions:', error);
+    }
   });
 
   // Update prescription status mutation
@@ -105,16 +113,14 @@ const PrescriptionManagement = () => {
     return prescriptions?.filter(p => p.status === status).length || 0;
   };
 
-  // Only show error if there's actually a real error and no data
-  if (error && !prescriptions) {
+  // Show loading state while data is being fetched
+  if (isLoading) {
     return (
       <Card>
         <CardContent className="pt-6">
           <div className="text-center">
-            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-red-700 mb-2">Unable to Load Prescriptions</h3>
-            <p className="text-red-600 mb-4">There was an error loading prescription data.</p>
-            <Button onClick={() => window.location.reload()}>Try Again</Button>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading prescriptions...</p>
           </div>
         </CardContent>
       </Card>
