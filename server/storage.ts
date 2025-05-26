@@ -217,7 +217,7 @@ export class DatabaseStorage implements IStorage {
   async getPharmacyStaffByUserId(userId: number): Promise<any> {
     // For pharmacy staff users, return a default pharmacy association
     const user = await this.getUser(userId);
-    if (user?.role === 'pharmacy_staff') {
+    if (user?.role === 'PHARMACY_STAFF') {
       return {
         id: 1,
         userId: userId,
