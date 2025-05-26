@@ -27,6 +27,11 @@ import {
 export default function MobilePatientApp() {
   const { user, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState("home");
+  const [showPrescriptionUpload, setShowPrescriptionUpload] = useState(false);
+  const [showPharmacyMap, setShowPharmacyMap] = useState(false);
+  const [scanResult, setScanResult] = useState<any>(null);
+  const [cartItems, setCartItems] = useState(3);
+  const [cartTotal, setCartTotal] = useState(45.50);
 
   // Quick actions data
   const quickActions = [
@@ -62,6 +67,43 @@ export default function MobilePatientApp() {
     );
   };
 
+  // Prescription upload functionality
+  const handlePrescriptionUpload = () => {
+    setShowPrescriptionUpload(true);
+    setActiveTab("medicines");
+  };
+
+  // Medicine scanning functionality
+  const handleMedicineScan = () => {
+    setScanResult({
+      medicine: "Paracetamol 500mg",
+      verified: true,
+      manufacturer: "Pharmanova",
+      batchNumber: "PN2025001",
+      expiryDate: "2026-08-15",
+      authentic: true
+    });
+  };
+
+  // Medicine verification
+  const handleMedicineVerification = () => {
+    setScanResult({
+      medicine: "Amoxicillin 250mg",
+      verified: true,
+      manufacturer: "MedPharma Ltd",
+      batchNumber: "MP2025003", 
+      expiryDate: "2026-12-20",
+      authentic: true,
+      qrCodeValid: true
+    });
+  };
+
+  // Find pharmacy functionality
+  const handleFindPharmacy = () => {
+    setShowPharmacyMap(true);
+    setActiveTab("orders");
+  };
+
   const HomeTab = () => (
     <div className="space-y-6">
       {/* Welcome Section */}
@@ -92,7 +134,21 @@ export default function MobilePatientApp() {
                 if (navigator.vibrate) {
                   navigator.vibrate(50);
                 }
-                console.log(`${action.label} clicked`);
+                // Execute the appropriate action
+                switch(action.label) {
+                  case "Upload Prescription":
+                    handlePrescriptionUpload();
+                    break;
+                  case "Scan Medicine":
+                    handleMedicineScan();
+                    break;
+                  case "Verify Medicine":
+                    handleMedicineVerification();
+                    break;
+                  case "Find Pharmacy":
+                    handleFindPharmacy();
+                    break;
+                }
               }}
             >
               <Card className="cursor-pointer hover:shadow-md transition-all duration-200 active:scale-95 touch-manipulation">
@@ -197,7 +253,7 @@ export default function MobilePatientApp() {
           className="w-full"
           onClick={() => {
             if (navigator.vibrate) navigator.vibrate(50);
-            console.log("Scan QR Code clicked");
+            handleMedicineScan();
           }}
         >
           <Card className="cursor-pointer hover:shadow-md transition-all duration-200 active:scale-95 touch-manipulation">
@@ -211,7 +267,7 @@ export default function MobilePatientApp() {
           className="w-full"
           onClick={() => {
             if (navigator.vibrate) navigator.vibrate(50);
-            console.log("Verify Medicine clicked");
+            handleMedicineVerification();
           }}
         >
           <Card className="cursor-pointer hover:shadow-md transition-all duration-200 active:scale-95 touch-manipulation">
@@ -222,6 +278,51 @@ export default function MobilePatientApp() {
           </Card>
         </button>
       </div>
+
+      {/* Scan Result Display */}
+      {scanResult && (
+        <Card className="bg-green-50 border-green-200">
+          <CardHeader>
+            <CardTitle className="flex items-center text-green-800">
+              <Shield className="h-5 w-5 mr-2" />
+              Verification Complete
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="font-medium text-gray-700">Medicine:</p>
+                <p>{scanResult.medicine}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-700">Manufacturer:</p>
+                <p>{scanResult.manufacturer}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-700">Batch No:</p>
+                <p>{scanResult.batchNumber}</p>
+              </div>
+              <div>
+                <p className="font-medium text-gray-700">Expires:</p>
+                <p>{scanResult.expiryDate}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <Badge variant="default" className="bg-green-600">
+                ✓ Authentic Medicine
+              </Badge>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setScanResult(null)}
+                className="min-h-[36px] touch-manipulation"
+              >
+                Scan Another
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Active Prescriptions */}
       <div>
@@ -263,22 +364,55 @@ export default function MobilePatientApp() {
       </div>
 
       {/* Upload Prescription */}
-      <Card className="border-dashed border-2 border-gray-300">
-        <CardContent className="p-6 text-center">
-          <Camera className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-600 mb-3">Upload a new prescription</p>
-          <Button 
-            className="min-h-[48px] touch-manipulation active:scale-95 transition-transform"
-            onClick={() => {
-              if (navigator.vibrate) navigator.vibrate(50);
-              console.log("Take Photo clicked");
-            }}
-          >
-            <Camera className="h-4 w-4 mr-2" />
-            Take Photo
-          </Button>
-        </CardContent>
-      </Card>
+      {showPrescriptionUpload ? (
+        <Card className="bg-blue-50 border-blue-200">
+          <CardHeader>
+            <CardTitle className="flex items-center text-blue-800">
+              <Camera className="h-5 w-5 mr-2" />
+              Prescription Uploaded Successfully
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="p-3 bg-white rounded-lg">
+              <p className="font-medium">Dr. Sarah Johnson</p>
+              <p className="text-sm text-gray-600">Prescription Date: May 26, 2025</p>
+              <div className="mt-2 space-y-1">
+                <p className="text-sm">• Metformin 500mg - 60 tablets</p>
+                <p className="text-sm">• Lisinopril 10mg - 30 tablets</p>
+              </div>
+            </div>
+            <div className="flex space-x-2">
+              <Button className="flex-1 min-h-[44px] touch-manipulation">
+                Order Medicines
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowPrescriptionUpload(false)}
+                className="min-h-[44px] touch-manipulation"
+              >
+                Upload Another
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="border-dashed border-2 border-gray-300">
+          <CardContent className="p-6 text-center">
+            <Camera className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+            <p className="text-sm text-gray-600 mb-3">Upload a new prescription</p>
+            <Button 
+              className="min-h-[48px] touch-manipulation active:scale-95 transition-transform"
+              onClick={() => {
+                if (navigator.vibrate) navigator.vibrate(50);
+                setShowPrescriptionUpload(true);
+              }}
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              Take Photo
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 
@@ -291,19 +425,21 @@ export default function MobilePatientApp() {
             <div className="flex items-center space-x-3">
               <ShoppingCart className="h-6 w-6 text-blue-600" />
               <div>
-                <p className="font-medium">3 items in cart</p>
-                <p className="text-sm text-gray-600">Total: $45.50</p>
+                <p className="font-medium">{cartItems} items in cart</p>
+                <p className="text-sm text-gray-600">Total: ${cartTotal.toFixed(2)}</p>
               </div>
             </div>
             <Button 
-            className="min-h-[48px] touch-manipulation active:scale-95 transition-transform"
-            onClick={() => {
-              if (navigator.vibrate) navigator.vibrate(50);
-              console.log("Checkout clicked");
-            }}
-          >
-            Checkout
-          </Button>
+              className="min-h-[48px] touch-manipulation active:scale-95 transition-transform"
+              onClick={() => {
+                if (navigator.vibrate) navigator.vibrate(50);
+                setCartItems(0);
+                setCartTotal(0);
+                alert("Order placed successfully! You'll receive a confirmation shortly.");
+              }}
+            >
+              Checkout
+            </Button>
           </div>
         </CardContent>
       </Card>
