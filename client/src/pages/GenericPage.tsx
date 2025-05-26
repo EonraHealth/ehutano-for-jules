@@ -57,7 +57,7 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
         case 'add-medicine':
         case 'low-stock-alert':
         case 'stock-reports':
-          return '/api/v1/pharmacy/inventory';
+          return '/api/v1/pharmacy/inventory/summary';
         default:
           return null;
       }
