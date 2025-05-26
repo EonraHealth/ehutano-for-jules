@@ -729,16 +729,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get pharmacy inventory
+  // Get pharmacy inventory - simplified like analytics
   app.get("/api/v1/pharmacy/inventory", async (req: Request, res: Response) => {
-    try {
-      // Return sample inventory data like analytics endpoints
-      const inventory = await storage.getAllInventoryItems();
-      return res.status(200).json(inventory);
-    } catch (error) {
-      console.error("Get pharmacy inventory error:", error);
-      return res.status(500).json({ message: "An error occurred" });
-    }
+    console.log("Inventory endpoint hit - no auth middleware");
+    return res.status(200).json(await storage.getAllInventoryItems());
   });
   
   // Update inventory item
