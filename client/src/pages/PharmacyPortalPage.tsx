@@ -6,6 +6,7 @@ import InventoryManagement from '@/components/pharmacy/InventoryManagement';
 import OrderProcessing from '@/components/pharmacy/OrderProcessing';
 import MedicalAidClaimsManager from '@/components/pharmacy/MedicalAidClaimsManager';
 import DeliveryManagement from '@/components/pharmacy/DeliveryManagement';
+import PharmacyAnalytics from '@/components/pharmacy/PharmacyAnalytics';
 import Sidebar from '@/components/layout/Sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,7 +59,7 @@ const PharmacyPortalPage = () => {
         </div>
 
         <Tabs defaultValue="dashboard" value={activeTab} onValueChange={(value) => setActiveTab(value as TabValue)}>
-          <TabsList className="mb-6 grid grid-cols-6 w-full">
+          <TabsList className="mb-6 grid grid-cols-7 w-full">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
