@@ -250,7 +250,12 @@ function Router() {
           <Route path="/wellness-hub" component={WellnessHubPage} />
           <Route path="/wellness-hub/activities">
             {isAuthenticated && user?.role === "PATIENT" ? 
-             <GenericPage title="Wellness Activities" description="Browse and book wellness activities" /> : 
+             <div className="flex">
+               <Sidebar className="hidden md:block" />
+               <div className="flex-1 p-6">
+                 <WellnessHubPage />
+               </div>
+             </div> : 
              isAuthenticated ? <AccessDenied role="Patient" /> : <LoginPage />}
           </Route>
           
