@@ -1,8 +1,9 @@
-import { users, medicalAidProviders, medicalAidClaims, wellnessActivities, wellnessBookings,
+import { users, medicalAidProviders, medicalAidClaims, wellnessActivities, wellnessBookings, blogPosts,
   type User, type InsertUser, 
   type MedicalAidProvider, type InsertMedicalAidProvider,
   type MedicalAidClaim, type InsertMedicalAidClaim,
-  type WellnessActivity, type WellnessBooking, type InsertWellnessBooking } from "@shared/schema";
+  type WellnessActivity, type WellnessBooking, type InsertWellnessBooking,
+  type BlogPost } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
 
@@ -32,6 +33,10 @@ export interface IStorage {
   getWellnessActivities(): Promise<WellnessActivity[]>;
   getWellnessActivity(id: number): Promise<WellnessActivity | undefined>;
   createWellnessBooking(booking: InsertWellnessBooking): Promise<WellnessBooking>;
+  
+  // Blog posts methods
+  getBlogPosts(): Promise<BlogPost[]>;
+  getBlogPost(id: number): Promise<BlogPost | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -183,6 +188,16 @@ export class DatabaseStorage implements IStorage {
       .values(booking)
       .returning();
     return newBooking;
+  }
+
+  // Blog posts methods
+  async getBlogPosts(): Promise<BlogPost[]> {
+    return await db.select().from(blogPosts).orderBy(desc(blogPosts.publishDate));
+  }
+
+  async getBlogPost(id: number): Promise<BlogPost | undefined> {
+    const [post] = await db.select().from(blogPosts).where(eq(blogPosts.id, id));
+    return post || undefined;
   }
 }
 
