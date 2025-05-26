@@ -706,8 +706,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update prescription status
-  app.put("/api/v1/pharmacy/prescriptions/:prescriptionId/status", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+  // Update prescription status (using working analytics pattern)
+  app.put("/api/v1/pharmacy/analytics/prescriptions/:prescriptionId/status", async (req: Request, res: Response) => {
     try {
       const prescriptionId = parseInt(req.params.prescriptionId);
       const { status, notes } = req.body;

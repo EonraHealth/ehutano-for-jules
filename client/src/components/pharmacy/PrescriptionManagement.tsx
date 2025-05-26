@@ -49,12 +49,12 @@ const PrescriptionManagement = () => {
   // Update prescription status mutation
   const updateStatusMutation = useMutation({
     mutationFn: (data: { prescriptionId: number; status: string; notes?: string }) =>
-      apiRequest(`/api/v1/pharmacy/prescriptions/${data.prescriptionId}/status`, {
+      apiRequest(`/api/v1/pharmacy/analytics/prescriptions/${data.prescriptionId}/status`, {
         method: 'PUT',
         body: JSON.stringify({ status: data.status, notes: data.notes })
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/v1/pharmacy/prescriptions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/v1/pharmacy/analytics/prescriptions'] });
       toast({
         title: "Success",
         description: "Prescription status updated successfully",
