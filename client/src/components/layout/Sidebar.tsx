@@ -125,8 +125,14 @@ const Sidebar = ({ className }: SidebarProps) => {
     {
       title: 'Medical Aid Claims',
       href: '/pharmacy-portal/claims',
-      icon: <FileText className="h-5 w-5" />,
-      roles: ['PHARMACY_STAFF']
+      icon: <Shield className="h-5 w-5" />,
+      roles: ['PHARMACY_STAFF'],
+      submenu: [
+        { title: 'Direct Claims Processing', href: '/medical-aid-claims' },
+        { title: 'Claims Dashboard', href: '/pharmacy-portal/claims' },
+        { title: 'Provider Network', href: '/medical-aid-claims?tab=providers' },
+        { title: 'Claims Analytics', href: '/medical-aid-claims?tab=analytics' }
+      ]
     },
     {
       title: 'Analytics',
