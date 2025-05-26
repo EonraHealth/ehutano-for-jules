@@ -24,6 +24,8 @@ import MedicalAidClaimsPage from "./pages/MedicalAidClaimsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import GenericPage from "./pages/GenericPage";
+import Sidebar from "./components/layout/Sidebar";
+import PharmacyAnalytics from "./components/pharmacy/PharmacyAnalytics";
 
 // Access Denied Component
 const AccessDenied = ({ role }: { role: string }) => (
@@ -174,7 +176,12 @@ function Router() {
           </Route>
           <Route path="/pharmacy-portal/analytics">
             {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
-             <GenericPage title="Analytics Dashboard" description="View pharmacy performance metrics and analytics" /> : 
+             <div className="flex">
+               <Sidebar className="hidden md:block" />
+               <div className="flex-1 p-6">
+                 <PharmacyAnalytics />
+               </div>
+             </div> : 
              isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
           </Route>
           
