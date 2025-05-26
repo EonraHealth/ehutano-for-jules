@@ -497,10 +497,26 @@ export default function MobilePatientApp() {
                 <p className="text-sm text-gray-600">0.8 km away • Open until 8 PM</p>
               </div>
               <div className="flex space-x-1">
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="min-h-[36px] touch-manipulation"
+                  onClick={() => {
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    window.open("tel:+263123456789", "_self");
+                  }}
+                >
                   <Phone className="h-3 w-3" />
                 </Button>
-                <Button size="sm" variant="outline">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  className="min-h-[36px] touch-manipulation"
+                  onClick={() => {
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    alert("Opening map to Central Pharmacy...");
+                  }}
+                >
                   <MapPin className="h-3 w-3" />
                 </Button>
               </div>
