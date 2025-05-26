@@ -732,13 +732,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get pharmacy inventory
   app.get("/api/v1/pharmacy/inventory", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
     try {
+      console.log("Getting inventory for user:", req.user?.id, "role:", req.user?.role);
+      
       // Get pharmacy ID for the authenticated pharmacy staff
-      const pharmacyStaff = await storage.getPharmacyStaffByUserId(req.user.id);
+      const pharmacyStaff = await storage.getPharmacyStaffByUserId(req.user!.id);
       
       if (!pharmacyStaff) {
+        console.log("No pharmacy staff record found for user:", req.user?.id);
         return res.status(404).json({ message: "Pharmacy staff record not found" });
       }
       
+      console.log("Found pharmacy staff:", pharmacyStaff);
       const inventory = await storage.getInventoryByPharmacyId(pharmacyStaff.pharmacyId);
       
       return res.status(200).json(inventory);
