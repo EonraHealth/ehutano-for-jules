@@ -546,8 +546,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ===== Pharmacy Portal Routes =====
   
   // Get pharmacy orders
-  app.get("/api/v1/pharmacy/orders", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+  app.get("/api/v1/pharmacy/orders", authenticateJWT, async (req: Request, res: Response) => {
     try {
+      console.log("Pharmacy orders request - User role:", req.user?.role);
+      
+      // Check if user has pharmacy staff role
+      if (!req.user || req.user.role !== UserRole.PHARMACY_STAFF) {
+        console.log("Access denied - Expected:", UserRole.PHARMACY_STAFF, "Got:", req.user?.role);
+        return res.status(403).json({ message: "Access denied - pharmacy staff only" });
+      }
+      
       // Get pharmacy ID for the authenticated pharmacy staff
       const pharmacyStaff = await storage.getPharmacyStaffByUserId(req.user.id);
       
