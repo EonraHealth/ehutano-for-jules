@@ -52,9 +52,11 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
         case 'processing-orders':
         case 'completed-orders':
           return null; // Use mock data for orders temporarily
+        case 'inventory-management':
         case 'manage-inventory':
         case 'add-medicine':
-        case 'stock-levels':
+        case 'low-stock-alert':
+        case 'stock-reports':
           return '/api/v1/pharmacy/inventory';
         default:
           return null;
@@ -129,8 +131,11 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
       case 'completed-orders':
         return <OrdersContent data={displayData} pageType={pageKey} />;
       
+      case 'inventory-management':
       case 'manage-inventory':
       case 'add-medicine':
+      case 'low-stock-alert':
+      case 'stock-reports':
       case 'stock-levels':
         return <InventoryContent data={displayData} pageType={pageKey} />;
       
@@ -441,22 +446,59 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
       ));
     };
 
+    // Customize interface based on page type
+    const getPageSpecificInterface = () => {
+      if (pageType === 'add-medicine') {
+        // Automatically open add modal for add medicine page
+        React.useEffect(() => {
+          setIsAddModalOpen(true);
+        }, []);
+      }
+    };
+
+    getPageSpecificInterface();
+
+    // Customize content based on page type
+    const getFilteredItems = () => {
+      if (pageType === 'low-stock-alert') {
+        return filteredItems.filter((item: any) => (item.stock || 0) < (item.reorderLevel || 10));
+      }
+      return filteredItems;
+    };
+
+    const displayItems = getFilteredItems();
+
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold">{title}</h1>
             <p className="text-gray-600">{description}</p>
+            {pageType === 'low-stock-alert' && (
+              <p className="text-sm text-orange-600 mt-1">
+                Showing {displayItems.length} items requiring restocking
+              </p>
+            )}
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-            <Button onClick={() => setIsAddModalOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Medicine
-            </Button>
+            {pageType !== 'low-stock-alert' && pageType !== 'stock-reports' && (
+              <Button variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            )}
+            {pageType === 'stock-reports' && (
+              <Button variant="outline">
+                <FileText className="h-4 w-4 mr-2" />
+                Generate Report
+              </Button>
+            )}
+            {pageType !== 'low-stock-alert' && pageType !== 'stock-reports' && (
+              <Button onClick={() => setIsAddModalOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Medicine
+              </Button>
+            )}
           </div>
         </div>
 
