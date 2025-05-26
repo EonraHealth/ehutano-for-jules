@@ -528,6 +528,9 @@ export type InsertReminder = z.infer<typeof insertReminderSchema>;
 export type WellnessActivity = typeof wellnessActivities.$inferSelect;
 export type InsertWellnessActivity = z.infer<typeof insertWellnessActivitySchema>;
 
+export type WellnessBooking = typeof wellnessBookings.$inferSelect;
+export type InsertWellnessBooking = z.infer<typeof insertWellnessBookingSchema>;
+
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
 
