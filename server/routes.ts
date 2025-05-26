@@ -730,15 +730,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get pharmacy inventory
-  app.get("/api/v1/pharmacy/inventory", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+  app.get("/api/v1/pharmacy/inventory", async (req: Request, res: Response) => {
     try {
-      console.log("Getting inventory for user:", req.user?.id, "role:", req.user?.role);
+      // Use session-based authentication like other working endpoints
+      if (!req.session?.user || req.session.user.role !== 'PHARMACY_STAFF') {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      console.log("Getting inventory for user:", req.session.user.id, "role:", req.session.user.role);
       
       // Get pharmacy ID for the authenticated pharmacy staff
-      const pharmacyStaff = await storage.getPharmacyStaffByUserId(req.user!.id);
+      const pharmacyStaff = await storage.getPharmacyStaffByUserId(req.session.user.id);
       
       if (!pharmacyStaff) {
-        console.log("No pharmacy staff record found for user:", req.user?.id);
+        console.log("No pharmacy staff record found for user:", req.session.user.id);
         return res.status(404).json({ message: "Pharmacy staff record not found" });
       }
       
