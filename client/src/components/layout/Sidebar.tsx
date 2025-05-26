@@ -108,7 +108,13 @@ const Sidebar = ({ className }: SidebarProps) => {
       title: 'Inventory',
       href: '/pharmacy-portal/inventory',
       icon: <Package className="h-5 w-5" />,
-      roles: ['PHARMACY_STAFF']
+      roles: ['PHARMACY_STAFF'],
+      submenu: [
+        { title: 'Manage Inventory', href: '/pharmacy-portal/inventory' },
+        { title: 'Add Medicine', href: '/pharmacy-portal/inventory/add' },
+        { title: 'Low Stock Alert', href: '/pharmacy-portal/inventory/low-stock' },
+        { title: 'Stock Reports', href: '/pharmacy-portal/inventory/reports' }
+      ]
     },
     {
       title: 'Prescriptions',

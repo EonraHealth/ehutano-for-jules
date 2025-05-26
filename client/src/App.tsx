@@ -147,6 +147,21 @@ function Router() {
              <GenericPage title="Inventory Management" description="Manage pharmacy medicine inventory" /> : 
              isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
           </Route>
+          <Route path="/pharmacy-portal/inventory/add">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <GenericPage title="Add Medicine" description="Add new medicines to inventory" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/inventory/low-stock">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <GenericPage title="Low Stock Alert" description="Monitor medicines with low stock levels" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/inventory/reports">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <GenericPage title="Stock Reports" description="Generate inventory reports and analytics" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
           <Route path="/pharmacy-portal/prescriptions">
             {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
              <GenericPage title="Prescriptions" description="Process and verify patient prescriptions" /> : 
