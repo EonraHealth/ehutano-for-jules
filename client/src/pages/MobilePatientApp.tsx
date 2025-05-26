@@ -84,14 +84,26 @@ export default function MobilePatientApp() {
         <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
         <div className="grid grid-cols-2 gap-4">
           {quickActions.map((action, index) => (
-            <Card key={index} className="cursor-pointer hover:shadow-md transition-shadow">
-              <CardContent className="p-4 text-center">
-                <div className={`w-12 h-12 ${action.color} rounded-full flex items-center justify-center mx-auto mb-2`}>
-                  <action.icon className="h-6 w-6" />
-                </div>
-                <p className="text-sm font-medium">{action.label}</p>
-              </CardContent>
-            </Card>
+            <button
+              key={index}
+              className="w-full"
+              onClick={() => {
+                // Add haptic feedback for mobile
+                if (navigator.vibrate) {
+                  navigator.vibrate(50);
+                }
+                console.log(`${action.label} clicked`);
+              }}
+            >
+              <Card className="cursor-pointer hover:shadow-md transition-all duration-200 active:scale-95 touch-manipulation">
+                <CardContent className="p-4 text-center">
+                  <div className={`w-12 h-12 ${action.color} rounded-full flex items-center justify-center mx-auto mb-2`}>
+                    <action.icon className="h-6 w-6" />
+                  </div>
+                  <p className="text-sm font-medium">{action.label}</p>
+                </CardContent>
+              </Card>
+            </button>
           ))}
         </div>
       </div>
@@ -121,8 +133,14 @@ export default function MobilePatientApp() {
                   <Button 
                     size="sm" 
                     variant={reminder.taken ? "outline" : "default"}
-                    onClick={() => handleMarkTaken(reminder.id)}
+                    onClick={() => {
+                      if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                      }
+                      handleMarkTaken(reminder.id);
+                    }}
                     disabled={reminder.taken}
+                    className="min-h-[44px] px-4 touch-manipulation active:scale-95 transition-transform"
                   >
                     {reminder.taken ? "✓ Taken" : "Mark Taken"}
                   </Button>
@@ -175,18 +193,34 @@ export default function MobilePatientApp() {
 
       {/* Quick Medicine Actions */}
       <div className="grid grid-cols-2 gap-3">
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardContent className="p-4 text-center">
-            <QrCode className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-            <p className="text-sm font-medium">Scan QR Code</p>
-          </CardContent>
-        </Card>
-        <Card className="cursor-pointer hover:shadow-md transition-shadow">
-          <CardContent className="p-4 text-center">
-            <Shield className="h-8 w-8 text-green-600 mx-auto mb-2" />
-            <p className="text-sm font-medium">Verify Medicine</p>
-          </CardContent>
-        </Card>
+        <button
+          className="w-full"
+          onClick={() => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            console.log("Scan QR Code clicked");
+          }}
+        >
+          <Card className="cursor-pointer hover:shadow-md transition-all duration-200 active:scale-95 touch-manipulation">
+            <CardContent className="p-4 text-center">
+              <QrCode className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+              <p className="text-sm font-medium">Scan QR Code</p>
+            </CardContent>
+          </Card>
+        </button>
+        <button
+          className="w-full"
+          onClick={() => {
+            if (navigator.vibrate) navigator.vibrate(50);
+            console.log("Verify Medicine clicked");
+          }}
+        >
+          <Card className="cursor-pointer hover:shadow-md transition-all duration-200 active:scale-95 touch-manipulation">
+            <CardContent className="p-4 text-center">
+              <Shield className="h-8 w-8 text-green-600 mx-auto mb-2" />
+              <p className="text-sm font-medium">Verify Medicine</p>
+            </CardContent>
+          </Card>
+        </button>
       </div>
 
       {/* Active Prescriptions */}
@@ -209,7 +243,15 @@ export default function MobilePatientApp() {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium">{prescription.remaining} pills</p>
-                    <Button size="sm" variant="outline" className="mt-1">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="mt-1 min-h-[40px] px-3 touch-manipulation active:scale-95 transition-transform"
+                      onClick={() => {
+                        if (navigator.vibrate) navigator.vibrate(50);
+                        console.log("Refill clicked");
+                      }}
+                    >
                       Refill
                     </Button>
                   </div>
@@ -225,7 +267,13 @@ export default function MobilePatientApp() {
         <CardContent className="p-6 text-center">
           <Camera className="h-8 w-8 text-gray-400 mx-auto mb-2" />
           <p className="text-sm text-gray-600 mb-3">Upload a new prescription</p>
-          <Button>
+          <Button 
+            className="min-h-[48px] touch-manipulation active:scale-95 transition-transform"
+            onClick={() => {
+              if (navigator.vibrate) navigator.vibrate(50);
+              console.log("Take Photo clicked");
+            }}
+          >
             <Camera className="h-4 w-4 mr-2" />
             Take Photo
           </Button>
@@ -247,7 +295,15 @@ export default function MobilePatientApp() {
                 <p className="text-sm text-gray-600">Total: $45.50</p>
               </div>
             </div>
-            <Button>Checkout</Button>
+            <Button 
+            className="min-h-[48px] touch-manipulation active:scale-95 transition-transform"
+            onClick={() => {
+              if (navigator.vibrate) navigator.vibrate(50);
+              console.log("Checkout clicked");
+            }}
+          >
+            Checkout
+          </Button>
           </div>
         </CardContent>
       </Card>
@@ -268,7 +324,17 @@ export default function MobilePatientApp() {
                 <p className="text-sm text-gray-600 mb-2">{order.items}</p>
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-gray-400">{order.date}</p>
-                  <Button variant="outline" size="sm">View Details</Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="min-h-[40px] touch-manipulation active:scale-95 transition-transform"
+                    onClick={() => {
+                      if (navigator.vibrate) navigator.vibrate(50);
+                      console.log("View Details clicked");
+                    }}
+                  >
+                    View Details
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -320,7 +386,13 @@ export default function MobilePatientApp() {
             </div>
           </div>
           
-          <Button className="w-full">
+          <Button 
+            className="w-full min-h-[48px] touch-manipulation active:scale-95 transition-transform"
+            onClick={() => {
+              if (navigator.vibrate) navigator.vibrate(50);
+              console.log("View All on Map clicked");
+            }}
+          >
             <MapPin className="h-4 w-4 mr-2" />
             View All on Map
           </Button>
