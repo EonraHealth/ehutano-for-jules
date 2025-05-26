@@ -20,6 +20,7 @@ import DoctorPortalPage from "./pages/DoctorPortalPage";
 import WholesalerPortalPage from "./pages/WholesalerPortalPage";
 import WellnessHubPage from "./pages/WellnessHubPage";
 import MobilePatientApp from "./pages/MobilePatientApp";
+import MedicalAidClaimsPage from "./pages/MedicalAidClaimsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import GenericPage from "./pages/GenericPage";
@@ -72,6 +73,12 @@ function Router() {
           {/* Mobile Patient App */}
           <Route path="/mobile-app">
             <MobilePatientApp />
+          </Route>
+
+          {/* Medical Aid Claims */}
+          <Route path="/medical-aid-claims">
+            {isAuthenticated && user?.role === "PATIENT" ? <MedicalAidClaimsPage /> : 
+             isAuthenticated ? <AccessDenied role="Patient" /> : <LoginPage />}
           </Route>
 
           {/* Patient Portal Routes */}
