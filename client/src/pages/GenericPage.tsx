@@ -57,7 +57,7 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
         case 'add-medicine':
         case 'low-stock-alert':
         case 'stock-reports':
-          return '/api/v1/pharmacy/inventory/summary';
+          return '/api/v1/pharmacy/inventory';
         default:
           return null;
       }
@@ -80,6 +80,8 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: [getApiEndpoint()],
     enabled: !!getApiEndpoint() && isAuthenticated,
+    retry: 1,
+    staleTime: 60000 // 1 minute
   });
 
   // Create mock data when API isn't available
