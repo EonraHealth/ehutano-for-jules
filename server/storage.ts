@@ -1,7 +1,8 @@
-import { users, medicalAidProviders, medicalAidClaims, 
+import { users, medicalAidProviders, medicalAidClaims, wellnessActivities, wellnessBookings,
   type User, type InsertUser, 
   type MedicalAidProvider, type InsertMedicalAidProvider,
-  type MedicalAidClaim, type InsertMedicalAidClaim } from "@shared/schema";
+  type MedicalAidClaim, type InsertMedicalAidClaim,
+  type WellnessActivity, type WellnessBooking, type InsertWellnessBooking } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc } from "drizzle-orm";
 
@@ -26,6 +27,11 @@ export interface IStorage {
   getMedicalAidClaimsForOrder(orderId: number): Promise<MedicalAidClaim[]>;
   createMedicalAidClaim(claim: InsertMedicalAidClaim): Promise<MedicalAidClaim>;
   updateMedicalAidClaimStatus(id: number, status: string, updateData?: Partial<InsertMedicalAidClaim>): Promise<MedicalAidClaim | undefined>;
+
+  // Wellness activities methods
+  getWellnessActivities(): Promise<WellnessActivity[]>;
+  getWellnessActivity(id: number): Promise<WellnessActivity | undefined>;
+  createWellnessBooking(booking: InsertWellnessBooking): Promise<WellnessBooking>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -159,6 +165,24 @@ export class DatabaseStorage implements IStorage {
       .where(eq(medicalAidClaims.id, id))
       .returning();
     return updatedClaim || undefined;
+  }
+
+  // Wellness activities methods
+  async getWellnessActivities(): Promise<WellnessActivity[]> {
+    return await db.select().from(wellnessActivities);
+  }
+
+  async getWellnessActivity(id: number): Promise<WellnessActivity | undefined> {
+    const [activity] = await db.select().from(wellnessActivities).where(eq(wellnessActivities.id, id));
+    return activity || undefined;
+  }
+
+  async createWellnessBooking(booking: InsertWellnessBooking): Promise<WellnessBooking> {
+    const [newBooking] = await db
+      .insert(wellnessBookings)
+      .values(booking)
+      .returning();
+    return newBooking;
   }
 }
 

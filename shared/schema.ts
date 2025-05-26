@@ -462,6 +462,12 @@ export const insertWellnessActivitySchema = createInsertSchema(wellnessActivitie
   updatedAt: true
 });
 
+export const insertWellnessBookingSchema = createInsertSchema(wellnessBookings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
   id: true,
   createdAt: true,
