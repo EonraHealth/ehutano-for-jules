@@ -19,6 +19,7 @@ import PharmacyPortalPage from "./pages/PharmacyPortalPage";
 import DoctorPortalPage from "./pages/DoctorPortalPage";
 import WholesalerPortalPage from "./pages/WholesalerPortalPage";
 import WellnessHubPage from "./pages/WellnessHubPage";
+import MobilePatientApp from "./pages/MobilePatientApp";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import GenericPage from "./pages/GenericPage";
@@ -68,6 +69,11 @@ function Router() {
           
 
         
+          {/* Mobile Patient App */}
+          <Route path="/mobile-app">
+            <MobilePatientApp />
+          </Route>
+
           {/* Patient Portal Routes */}
           <Route path="/patient-portal">
             {isAuthenticated && user?.role === "PATIENT" ? <PatientPortalPage /> : 
