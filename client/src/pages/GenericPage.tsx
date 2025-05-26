@@ -296,7 +296,105 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
   };
 
   const InventoryContent = ({ data, pageType }: { data: any; pageType: string }) => {
-    const items = Array.isArray(data) ? data : [];
+    const [items, setItems] = useState(Array.isArray(data) ? data : []);
+    const [filteredItems, setFilteredItems] = useState(items);
+    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [stockFilter, setStockFilter] = useState('all');
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [newItem, setNewItem] = useState({
+      name: '',
+      category: '',
+      stock: 0,
+      price: 0,
+      reorderLevel: 10,
+      supplier: '',
+      barcode: '',
+      description: ''
+    });
+
+    // Update items when data changes
+    React.useEffect(() => {
+      if (Array.isArray(data) && data.length > 0) {
+        setItems(data);
+      }
+    }, [data]);
+
+    // Filter items based on search term, category, and stock status
+    React.useEffect(() => {
+      let filtered = items;
+
+      // Search filter
+      if (searchTerm) {
+        filtered = filtered.filter((item: any) =>
+          item.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.category?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+
+      // Category filter
+      if (categoryFilter !== 'all') {
+        filtered = filtered.filter((item: any) => item.category === categoryFilter);
+      }
+
+      // Stock filter
+      if (stockFilter !== 'all') {
+        if (stockFilter === 'low') {
+          filtered = filtered.filter((item: any) => (item.stock || 0) < (item.reorderLevel || 10));
+        } else if (stockFilter === 'out') {
+          filtered = filtered.filter((item: any) => (item.stock || 0) === 0);
+        } else if (stockFilter === 'in-stock') {
+          filtered = filtered.filter((item: any) => (item.stock || 0) > (item.reorderLevel || 10));
+        }
+      }
+
+      setFilteredItems(filtered);
+    }, [items, searchTerm, categoryFilter, stockFilter]);
+
+    // Get unique categories
+    const categories = [...new Set(items.map((item: any) => item.category).filter(Boolean))];
+
+    const handleAddItem = () => {
+      const id = Math.max(...items.map((item: any) => item.id || 0), 0) + 1;
+      const itemToAdd = { ...newItem, id };
+      setItems([...items, itemToAdd]);
+      setNewItem({
+        name: '',
+        category: '',
+        stock: 0,
+        price: 0,
+        reorderLevel: 10,
+        supplier: '',
+        barcode: '',
+        description: ''
+      });
+      setIsAddModalOpen(false);
+    };
+
+    const handleEditItem = (item: any) => {
+      setSelectedItem(item);
+      setNewItem({ ...item });
+      setIsEditModalOpen(true);
+    };
+
+    const handleUpdateItem = () => {
+      setItems(items.map((item: any) => 
+        item.id === selectedItem?.id ? { ...newItem } : item
+      ));
+      setIsEditModalOpen(false);
+      setSelectedItem(null);
+    };
+
+    const handleDeleteItem = (itemId: number) => {
+      setItems(items.filter((item: any) => item.id !== itemId));
+    };
+
+    const handleStockUpdate = (itemId: number, newStock: number) => {
+      setItems(items.map((item: any) => 
+        item.id === itemId ? { ...item, stock: newStock } : item
+      ));
+    };
 
     return (
       <div className="space-y-6">
@@ -306,20 +404,51 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
             <p className="text-gray-600">{description}</p>
           </div>
           <div className="flex space-x-2">
-            <Input
-              placeholder="Search inventory..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-64"
-            />
-            <Button>
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button onClick={() => setIsAddModalOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
-              Add Item
+              Add Medicine
             </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Filters */}
+        <div className="flex flex-wrap gap-4 items-center">
+          <Input
+            placeholder="Search medicines..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-64"
+          />
+          
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="px-3 py-2 border rounded-md"
+          >
+            <option value="all">All Categories</option>
+            {categories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
+          </select>
+
+          <select
+            value={stockFilter}
+            onChange={(e) => setStockFilter(e.target.value)}
+            className="px-3 py-2 border rounded-md"
+          >
+            <option value="all">All Stock Levels</option>
+            <option value="in-stock">In Stock</option>
+            <option value="low">Low Stock</option>
+            <option value="out">Out of Stock</option>
+          </select>
+        </div>
+
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center">
@@ -349,6 +478,20 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center">
+                <Package className="h-8 w-8 text-gray-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Out of Stock</p>
+                  <p className="text-2xl font-bold">
+                    {items.filter((item: any) => (item.stock || 0) === 0).length}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center">
                 <TrendingUp className="h-8 w-8 text-green-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Value</p>
@@ -361,36 +504,55 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
           </Card>
         </div>
 
+        {/* Inventory Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Inventory Items</CardTitle>
+            <CardTitle>Inventory Items ({filteredItems.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            {items.length === 0 ? (
+            {filteredItems.length === 0 ? (
               <div className="text-center py-8">
                 <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600">No inventory items found</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {items.map((item: any, index: number) => (
-                  <div key={item.id || index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <Package className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium">{item.name || `Item ${index + 1}`}</p>
-                        <p className="text-sm text-gray-600">
-                          Stock: {item.stock || 0} • Price: ${(item.price || 0).toFixed(2)}
-                        </p>
+                {filteredItems.map((item: any, index: number) => (
+                  <div key={item.id || index} className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 border rounded-lg items-center">
+                    <div className="md:col-span-2">
+                      <div className="flex items-center space-x-3">
+                        <Package className="h-5 w-5 text-gray-400" />
+                        <div>
+                          <p className="font-medium">{item.name || `Item ${index + 1}`}</p>
+                          <p className="text-sm text-gray-600">{item.category || 'Uncategorized'}</p>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <Badge variant={(item.stock || 0) < (item.reorderLevel || 10) ? 'destructive' : 'default'}>
-                        {(item.stock || 0) < (item.reorderLevel || 10) ? 'Low Stock' : 'In Stock'}
+                    
+                    <div className="text-center">
+                      <p className="font-medium">{item.stock || 0}</p>
+                      <p className="text-sm text-gray-600">Stock</p>
+                    </div>
+                    
+                    <div className="text-center">
+                      <p className="font-medium">${(item.price || 0).toFixed(2)}</p>
+                      <p className="text-sm text-gray-600">Price</p>
+                    </div>
+                    
+                    <div className="text-center">
+                      <Badge variant={(item.stock || 0) === 0 ? 'destructive' : (item.stock || 0) < (item.reorderLevel || 10) ? 'secondary' : 'default'}>
+                        {(item.stock || 0) === 0 ? 'Out of Stock' : (item.stock || 0) < (item.reorderLevel || 10) ? 'Low Stock' : 'In Stock'}
                       </Badge>
-                      <Button variant="outline" size="sm">
+                    </div>
+                    
+                    <div className="flex space-x-2 justify-end">
+                      <Button variant="outline" size="sm" onClick={() => handleEditItem(item)}>
                         <Edit className="h-3 w-3 mr-1" />
                         Edit
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDeleteItem(item.id)}>
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
                       </Button>
                     </div>
                   </div>
@@ -399,6 +561,108 @@ const GenericPage = ({ title, description }: GenericPageProps) => {
             )}
           </CardContent>
         </Card>
+
+        {/* Add Item Modal */}
+        {isAddModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-4">Add New Medicine</h3>
+              <div className="space-y-4">
+                <Input
+                  placeholder="Medicine name"
+                  value={newItem.name}
+                  onChange={(e) => setNewItem({...newItem, name: e.target.value})}
+                />
+                <Input
+                  placeholder="Category"
+                  value={newItem.category}
+                  onChange={(e) => setNewItem({...newItem, category: e.target.value})}
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Stock quantity"
+                    value={newItem.stock}
+                    onChange={(e) => setNewItem({...newItem, stock: parseInt(e.target.value) || 0})}
+                  />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="Price"
+                    value={newItem.price}
+                    onChange={(e) => setNewItem({...newItem, price: parseFloat(e.target.value) || 0})}
+                  />
+                </div>
+                <Input
+                  type="number"
+                  placeholder="Reorder level"
+                  value={newItem.reorderLevel}
+                  onChange={(e) => setNewItem({...newItem, reorderLevel: parseInt(e.target.value) || 10})}
+                />
+                <Input
+                  placeholder="Supplier"
+                  value={newItem.supplier}
+                  onChange={(e) => setNewItem({...newItem, supplier: e.target.value})}
+                />
+              </div>
+              <div className="flex space-x-2 mt-6">
+                <Button onClick={handleAddItem} className="flex-1">Add Medicine</Button>
+                <Button variant="outline" onClick={() => setIsAddModalOpen(false)} className="flex-1">Cancel</Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Item Modal */}
+        {isEditModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-4">Edit Medicine</h3>
+              <div className="space-y-4">
+                <Input
+                  placeholder="Medicine name"
+                  value={newItem.name}
+                  onChange={(e) => setNewItem({...newItem, name: e.target.value})}
+                />
+                <Input
+                  placeholder="Category"
+                  value={newItem.category}
+                  onChange={(e) => setNewItem({...newItem, category: e.target.value})}
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="number"
+                    placeholder="Stock quantity"
+                    value={newItem.stock}
+                    onChange={(e) => setNewItem({...newItem, stock: parseInt(e.target.value) || 0})}
+                  />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="Price"
+                    value={newItem.price}
+                    onChange={(e) => setNewItem({...newItem, price: parseFloat(e.target.value) || 0})}
+                  />
+                </div>
+                <Input
+                  type="number"
+                  placeholder="Reorder level"
+                  value={newItem.reorderLevel}
+                  onChange={(e) => setNewItem({...newItem, reorderLevel: parseInt(e.target.value) || 10})}
+                />
+                <Input
+                  placeholder="Supplier"
+                  value={newItem.supplier}
+                  onChange={(e) => setNewItem({...newItem, supplier: e.target.value})}
+                />
+              </div>
+              <div className="flex space-x-2 mt-6">
+                <Button onClick={handleUpdateItem} className="flex-1">Update Medicine</Button>
+                <Button variant="outline" onClick={() => setIsEditModalOpen(false)} className="flex-1">Cancel</Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
