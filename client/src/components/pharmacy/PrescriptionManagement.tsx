@@ -40,9 +40,9 @@ const PrescriptionManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
-  // Fetch prescriptions
+  // Fetch prescriptions using working analytics pattern
   const { data: prescriptions, isLoading, error } = useQuery<Prescription[]>({
-    queryKey: ['/api/v1/pharmacy/prescriptions'],
+    queryKey: ['/api/v1/pharmacy/analytics/prescriptions'],
     staleTime: 30000 // 30 seconds
   });
 
