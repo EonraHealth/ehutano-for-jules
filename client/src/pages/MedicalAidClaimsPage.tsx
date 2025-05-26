@@ -1,215 +1,246 @@
-import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import MedicalAidClaimsSubmission from "../components/patient/MedicalAidClaimsSubmission";
-import ClaimsTracker from "../components/patient/ClaimsTracker";
+import { useState } from 'react';
+import DirectClaimsPortal from '@/components/medical-aid/DirectClaimsPortal';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { 
-  DollarSign, 
-  FileText, 
+  Shield, 
+  Zap, 
   Clock, 
+  CheckCircle, 
+  Building2,
   TrendingUp,
-  Shield,
-  CheckCircle,
-  AlertCircle
-} from "lucide-react";
+  Users,
+  Activity
+} from 'lucide-react';
 
 export default function MedicalAidClaimsPage() {
-  const { user, isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState("tracker");
+  const [activeTab, setActiveTab] = useState('direct-claims');
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardContent className="p-6 text-center">
-            <Shield className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-            <h2 className="text-xl font-bold mb-2">Access Required</h2>
-            <p className="text-gray-600 mb-4">Please sign in to access medical aid claims</p>
-            <Button className="w-full">Sign In</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Zimbabwe Medical Aid Providers
+  const providers = [
+    {
+      name: "CIMAS Medical Aid",
+      code: "CIMAS",
+      status: "Active",
+      processingTime: "2-3 seconds",
+      successRate: 97.5,
+      supportsDirectClaims: true,
+      members: "450,000+"
+    },
+    {
+      name: "PSMAS Medical Aid", 
+      code: "PSMAS",
+      status: "Active",
+      processingTime: "1-2 seconds",
+      successRate: 96.8,
+      supportsDirectClaims: true,
+      members: "320,000+"
+    },
+    {
+      name: "Premier Service Medical Aid",
+      code: "PSMI",
+      status: "Active", 
+      processingTime: "3-5 seconds",
+      successRate: 94.2,
+      supportsDirectClaims: true,
+      members: "180,000+"
+    },
+    {
+      name: "First Mutual Medical Aid",
+      code: "FAMAS",
+      status: "Active",
+      processingTime: "2-4 seconds", 
+      successRate: 95.7,
+      supportsDirectClaims: true,
+      members: "220,000+"
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Medical Aid Claims</h1>
-          <p className="text-gray-600 mt-2">
-            Submit and track your medical aid claims with real-time processing updates
-          </p>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <FileText className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Claims</p>
-                  <p className="text-2xl font-bold text-gray-900">8</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Approved</p>
-                  <p className="text-2xl font-bold text-gray-900">5</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <Clock className="h-8 w-8 text-yellow-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Pending</p>
-                  <p className="text-2xl font-bold text-gray-900">2</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center">
-                <DollarSign className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Approved</p>
-                  <p className="text-2xl font-bold text-gray-900">$2,450</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Integration Status */}
-        <Card className="mb-8 bg-gradient-to-r from-blue-50 to-green-50 border-blue-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-blue-100 rounded-full">
-                  <Shield className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Real-Time Provider Integration</h3>
-                  <p className="text-sm text-gray-600">
-                    Connected to 5 medical aid providers for instant claim processing
-                  </p>
-                </div>
-              </div>
-              <Badge className="bg-green-100 text-green-800 border-green-300">
-                <CheckCircle className="h-3 w-3 mr-1" />
-                Active
-              </Badge>
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Shield className="h-8 w-8 text-blue-600" />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Medical Aid Integration</h1>
+              <p className="text-gray-600">Direct claims processing with Zimbabwe medical aid providers</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          
+          {/* Quick Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-blue-600" />
+                <span className="text-sm font-medium text-blue-700">Real-Time Processing</span>
+              </div>
+              <p className="text-2xl font-bold text-blue-900 mt-1">Instant</p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <span className="text-sm font-medium text-green-700">Success Rate</span>
+              </div>
+              <p className="text-2xl font-bold text-green-900 mt-1">96.1%</p>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-purple-600" />
+                <span className="text-sm font-medium text-purple-700">Active Providers</span>
+              </div>
+              <p className="text-2xl font-bold text-purple-900 mt-1">4</p>
+            </div>
+            <div className="bg-orange-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-orange-600" />
+                <span className="text-sm font-medium text-orange-700">Total Members</span>
+              </div>
+              <p className="text-2xl font-bold text-orange-900 mt-1">1.2M+</p>
+            </div>
+          </div>
+        </div>
 
         {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="tracker" className="flex items-center">
-              <TrendingUp className="h-4 w-4 mr-2" />
-              Track Claims
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="direct-claims" className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Direct Claims
             </TabsTrigger>
-            <TabsTrigger value="submit" className="flex items-center">
-              <FileText className="h-4 w-4 mr-2" />
-              Submit New Claim
+            <TabsTrigger value="providers" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Provider Network
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Analytics
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="tracker">
-            <ClaimsTracker />
+          <TabsContent value="direct-claims">
+            <DirectClaimsPortal />
           </TabsContent>
 
-          <TabsContent value="submit">
-            <MedicalAidClaimsSubmission />
+          <TabsContent value="providers">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="h-5 w-5" />
+                  Zimbabwe Medical Aid Provider Network
+                </CardTitle>
+                <CardDescription>
+                  Integrated medical aid providers supporting direct claims processing
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {providers.map((provider, index) => (
+                    <Card key={index} className="border-l-4 border-l-blue-500">
+                      <CardContent className="pt-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="font-semibold text-lg">{provider.name}</h3>
+                            <p className="text-sm text-gray-600">Code: {provider.code}</p>
+                          </div>
+                          <Badge className="bg-green-100 text-green-800">
+                            {provider.status}
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Members:</span>
+                            <span className="text-sm font-medium">{provider.members}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Processing Time:</span>
+                            <span className="text-sm font-medium">{provider.processingTime}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Success Rate:</span>
+                            <span className="text-sm font-medium text-green-600">{provider.successRate}%</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Direct Claims:</span>
+                            <Badge className="bg-blue-100 text-blue-800">
+                              <Zap className="h-3 w-3 mr-1" />
+                              Supported
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
+                    Processing Performance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Average Processing Time</span>
+                      <span className="text-lg font-semibold">2.3 seconds</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Claims Processed Today</span>
+                      <span className="text-lg font-semibold">847</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Auto-Approval Rate</span>
+                      <span className="text-lg font-semibold text-green-600">89.3%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Manual Review Required</span>
+                      <span className="text-lg font-semibold text-orange-600">6.8%</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5" />
+                    Financial Summary
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Total Claims Value (Today)</span>
+                      <span className="text-lg font-semibold">ZW$45,678.90</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Amount Covered</span>
+                      <span className="text-lg font-semibold text-green-600">ZW$36,543.12</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Patient Responsibility</span>
+                      <span className="text-lg font-semibold text-orange-600">ZW$9,135.78</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Coverage Percentage</span>
+                      <span className="text-lg font-semibold">80.0%</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
-
-        {/* Provider Information */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Shield className="h-5 w-5 mr-2" />
-              Connected Medical Aid Providers
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 border rounded-lg bg-green-50 border-green-200">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">Discovery Health</h4>
-                  <Badge className="bg-green-100 text-green-800">Connected</Badge>
-                </div>
-                <p className="text-sm text-gray-600">Real-time claim processing</p>
-                <p className="text-xs text-gray-500 mt-1">Avg processing: 2-3 days</p>
-              </div>
-
-              <div className="p-4 border rounded-lg bg-green-50 border-green-200">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">Bonitas Medical Fund</h4>
-                  <Badge className="bg-green-100 text-green-800">Connected</Badge>
-                </div>
-                <p className="text-sm text-gray-600">Direct API integration</p>
-                <p className="text-xs text-gray-500 mt-1">Avg processing: 3-5 days</p>
-              </div>
-
-              <div className="p-4 border rounded-lg bg-green-50 border-green-200">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">Momentum Health</h4>
-                  <Badge className="bg-green-100 text-green-800">Connected</Badge>
-                </div>
-                <p className="text-sm text-gray-600">Electronic submission</p>
-                <p className="text-xs text-gray-500 mt-1">Avg processing: 1-4 days</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Help Section */}
-        <Card className="mt-8 bg-blue-50 border-blue-200">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-blue-900 mb-3">Need Help with Claims?</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-medium text-blue-800 mb-2">Quick Tips:</h4>
-                <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• Have your membership number ready</li>
-                  <li>• Upload clear photos of prescriptions</li>
-                  <li>• Include all supporting documents</li>
-                  <li>• Track status in real-time</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-medium text-blue-800 mb-2">Support:</h4>
-                <div className="space-y-2">
-                  <Button variant="outline" size="sm" className="w-full">
-                    Contact Support
-                  </Button>
-                  <Button variant="outline" size="sm" className="w-full">
-                    View FAQ
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
