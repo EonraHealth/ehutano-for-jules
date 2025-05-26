@@ -105,7 +105,8 @@ const PrescriptionManagement = () => {
     return prescriptions?.filter(p => p.status === status).length || 0;
   };
 
-  if (error) {
+  // Only show error if there's actually a real error and no data
+  if (error && !prescriptions) {
     return (
       <Card>
         <CardContent className="pt-6">
