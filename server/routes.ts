@@ -616,13 +616,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get pharmacy prescriptions
-  app.get("/api/v1/pharmacy/prescriptions", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+  app.get("/api/v1/pharmacy/prescriptions", authenticateJWT, async (req: Request, res: Response) => {
     try {
-      // Get pharmacy ID for the authenticated pharmacy staff
-      const pharmacyStaff = await storage.getPharmacyStaffByUserId(req.user.id);
-      
-      if (!pharmacyStaff) {
-        return res.status(404).json({ message: "Pharmacy staff record not found" });
+      // Use same working authentication approach as other pharmacy endpoints
+      if (!req.user || req.user.role !== UserRole.PHARMACY_STAFF) {
+        return res.status(403).json({ message: "Access denied" });
       }
       
       // Mock prescription data for now - replace with actual database query
