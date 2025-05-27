@@ -252,12 +252,7 @@ function Router() {
           </Route>
           <Route path="/wholesaler-portal/analytics">
             {isAuthenticated && user?.role === "WHOLESALER_STAFF" ? 
-             <div className="flex">
-               <Sidebar className="hidden md:block" />
-               <div className="flex-1 p-6">
-                 <WholesalerPortalPage />
-               </div>
-             </div> : 
+             <WholesalerPortalPage /> : 
              isAuthenticated ? <AccessDenied role="Wholesaler" /> : <LoginPage />}
           </Route>
           
