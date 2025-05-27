@@ -219,17 +219,32 @@ function Router() {
           </Route>
           <Route path="/wholesaler-portal/catalog">
             {isAuthenticated && user?.role === "WHOLESALER_STAFF" ? 
-             <GenericPage title="Medicine Catalog" description="Manage your medicine catalog" /> : 
+             <div className="flex">
+               <Sidebar className="hidden md:block" />
+               <div className="flex-1 p-6">
+                 <WholesalerCatalog />
+               </div>
+             </div> : 
              isAuthenticated ? <AccessDenied role="Wholesaler" /> : <LoginPage />}
           </Route>
           <Route path="/wholesaler-portal/orders">
             {isAuthenticated && user?.role === "WHOLESALER_STAFF" ? 
-             <GenericPage title="Pharmacy Orders" description="Manage orders from pharmacies" /> : 
+             <div className="flex">
+               <Sidebar className="hidden md:block" />
+               <div className="flex-1 p-6">
+                 <WholesalerOrders />
+               </div>
+             </div> : 
              isAuthenticated ? <AccessDenied role="Wholesaler" /> : <LoginPage />}
           </Route>
           <Route path="/wholesaler-portal/pharmacies">
             {isAuthenticated && user?.role === "WHOLESALER_STAFF" ? 
-             <GenericPage title="Pharmacy Clients" description="Manage your pharmacy client relationships" /> : 
+             <div className="flex">
+               <Sidebar className="hidden md:block" />
+               <div className="flex-1 p-6">
+                 <PharmacyClients />
+               </div>
+             </div> : 
              isAuthenticated ? <AccessDenied role="Wholesaler" /> : <LoginPage />}
           </Route>
           <Route path="/wholesaler-portal/analytics">
