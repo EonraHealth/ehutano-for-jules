@@ -31,6 +31,9 @@ import WholesalerCatalog from "./components/wholesaler/WholesalerCatalog";
 import WholesalerOrders from "./components/wholesaler/WholesalerOrders";
 import PharmacyClients from "./components/wholesaler/PharmacyClients";
 import WholesalerAnalytics from "./components/wholesaler/WholesalerAnalytics";
+import DoctorPatients from "./components/doctor/DoctorPatients";
+import DoctorPrescriptions from "./components/doctor/DoctorPrescriptions";
+import DoctorAppointments from "./components/doctor/DoctorAppointments";
 
 // Access Denied Component
 const AccessDenied = ({ role }: { role: string }) => (
@@ -202,17 +205,32 @@ function Router() {
           </Route>
           <Route path="/doctor-portal/patients">
             {isAuthenticated && user?.role === "DOCTOR" ? 
-             <GenericPage title="My Patients" description="Manage and view patient information" /> : 
+             <div className="flex">
+               <Sidebar className="hidden md:block" />
+               <div className="flex-1 p-6">
+                 <DoctorPatients />
+               </div>
+             </div> : 
              isAuthenticated ? <AccessDenied role="Doctor" /> : <LoginPage />}
           </Route>
           <Route path="/doctor-portal/prescriptions">
             {isAuthenticated && user?.role === "DOCTOR" ? 
-             <GenericPage title="E-Prescriptions" description="Create and manage electronic prescriptions" /> : 
+             <div className="flex">
+               <Sidebar className="hidden md:block" />
+               <div className="flex-1 p-6">
+                 <DoctorPrescriptions />
+               </div>
+             </div> : 
              isAuthenticated ? <AccessDenied role="Doctor" /> : <LoginPage />}
           </Route>
           <Route path="/doctor-portal/appointments">
             {isAuthenticated && user?.role === "DOCTOR" ? 
-             <GenericPage title="Appointments" description="View and manage patient appointments" /> : 
+             <div className="flex">
+               <Sidebar className="hidden md:block" />
+               <div className="flex-1 p-6">
+                 <DoctorAppointments />
+               </div>
+             </div> : 
              isAuthenticated ? <AccessDenied role="Doctor" /> : <LoginPage />}
           </Route>
           
