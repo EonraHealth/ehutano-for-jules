@@ -27,6 +27,9 @@ import GenericPage from "./pages/GenericPage";
 import Sidebar from "./components/layout/Sidebar";
 import PharmacyAnalytics from "./components/pharmacy/PharmacyAnalytics";
 import PrescriptionManagement from "@/components/pharmacy/PrescriptionManagement";
+import WholesalerCatalog from "./components/wholesaler/WholesalerCatalog";
+import WholesalerOrders from "./components/wholesaler/WholesalerOrders";
+import PharmacyClients from "./components/wholesaler/PharmacyClients";
 
 // Access Denied Component
 const AccessDenied = ({ role }: { role: string }) => (
