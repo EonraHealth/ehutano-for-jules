@@ -13,6 +13,7 @@ import HealthBlog from './HealthBlog';
 import PartnerLogos from './PartnerLogos';
 import MedicalAidSection from './MedicalAidSection';
 import MedicalAidClaimsHistory from './MedicalAidClaimsHistory';
+import MedicationReminderWidget from './MedicationReminderWidget';
 
 const PatientDashboard = () => {
   const { user } = useAuth();
