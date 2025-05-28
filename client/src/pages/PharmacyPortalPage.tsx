@@ -8,6 +8,7 @@ import PrescriptionManagement from '@/components/pharmacy/PrescriptionManagement
 import MedicalAidClaimsManager from '@/components/pharmacy/MedicalAidClaimsManager';
 import DeliveryManagement from '@/components/pharmacy/DeliveryManagement';
 import PharmacyAnalytics from '@/components/pharmacy/PharmacyAnalytics';
+import EfficientDispensingWorkflow from '@/components/pharmacy/EfficientDispensingWorkflow';
 import Sidebar from '@/components/layout/Sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,10 +19,11 @@ import {
   FileText,
   PieChart,
   Truck,
-  Shield
+  Shield,
+  Scan
 } from 'lucide-react';
 
-type TabValue = 'dashboard' | 'inventory' | 'orders' | 'prescriptions' | 'claims' | 'delivery' | 'analytics';
+type TabValue = 'dashboard' | 'inventory' | 'orders' | 'prescriptions' | 'dispensing' | 'claims' | 'delivery' | 'analytics';
 
 const PharmacyPortalPage = () => {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -61,7 +63,7 @@ const PharmacyPortalPage = () => {
         </div>
 
         <Tabs defaultValue="dashboard" value={activeTab} onValueChange={(value) => setActiveTab(value as TabValue)}>
-          <TabsList className="mb-6 grid grid-cols-7 w-full">
+          <TabsList className="mb-6 grid grid-cols-8 w-full">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -77,6 +79,10 @@ const PharmacyPortalPage = () => {
             <TabsTrigger value="prescriptions" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Prescriptions</span>
+            </TabsTrigger>
+            <TabsTrigger value="dispensing" className="flex items-center gap-2">
+              <Scan className="h-4 w-4" />
+              <span className="hidden sm:inline">Dispensing</span>
             </TabsTrigger>
             <TabsTrigger value="delivery" className="flex items-center gap-2">
               <Truck className="h-4 w-4" />
@@ -106,6 +112,10 @@ const PharmacyPortalPage = () => {
 
           <TabsContent value="prescriptions">
             <PrescriptionManagement />
+          </TabsContent>
+
+          <TabsContent value="dispensing">
+            <EfficientDispensingWorkflow />
           </TabsContent>
 
           <TabsContent value="delivery">
