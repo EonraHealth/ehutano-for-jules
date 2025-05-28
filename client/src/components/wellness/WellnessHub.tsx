@@ -118,15 +118,15 @@ const WellnessHub = () => {
                           <div className="flex flex-wrap gap-2 mt-1">
                             <Badge variant="outline" className="flex items-center gap-1 text-gray-600">
                               <CalendarClock className="h-3 w-3" />
-                              {activity.dayOfWeek}, {activity.time}
+                              {String(activity.dayOfWeek || '')}, {String(activity.time || '')}
                             </Badge>
                             <Badge variant="outline" className="flex items-center gap-1 text-gray-600">
                               <MapPin className="h-3 w-3" />
-                              {activity.location}
+                              {String(activity.location || 'TBA')}
                             </Badge>
                             <Badge variant="outline" className="flex items-center gap-1 text-gray-600">
                               <Users className="h-3 w-3" />
-                              {activity.availableSlots} of {activity.totalSlots} slots available
+                              {activity.capacity || 0} spots available
                             </Badge>
                           </div>
                         </div>
