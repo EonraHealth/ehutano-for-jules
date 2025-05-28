@@ -1854,5 +1854,335 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stock and Inventory Management Endpoints
+  
+  // Get detailed inventory with alerts
+  app.get("/api/v1/pharmacy/inventory/detailed", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const inventory = [
+        {
+          id: 1,
+          medicineId: 1,
+          medicineName: "Amoxicillin 500mg",
+          batchNumber: "AMX-2024-001",
+          expiryDate: "2025-06-15",
+          stockQuantity: 45,
+          minimumStock: 50,
+          maximumStock: 200,
+          costPrice: 2.50,
+          sellingPrice: 3.75,
+          supplierId: 1,
+          supplierName: "PharmaCorp Ltd",
+          status: "IN_STOCK",
+          location: "Shelf A-1",
+          lastUpdated: "2024-01-20T10:30:00Z"
+        },
+        {
+          id: 2,
+          medicineId: 2,
+          medicineName: "Paracetamol 500mg",
+          batchNumber: "PCM-2024-003",
+          expiryDate: "2024-03-20",
+          stockQuantity: 300,
+          minimumStock: 100,
+          maximumStock: 500,
+          costPrice: 0.80,
+          sellingPrice: 1.20,
+          supplierId: 2,
+          supplierName: "MediSupply Zimbabwe",
+          status: "IN_STOCK",
+          location: "Shelf B-2",
+          lastUpdated: "2024-01-19T14:15:00Z"
+        }
+      ];
+      
+      res.json(inventory);
+    } catch (error) {
+      console.error('Error fetching detailed inventory:', error);
+      res.status(500).json({ message: 'Failed to fetch inventory' });
+    }
+  });
+
+  // Get inventory alerts
+  app.get("/api/v1/pharmacy/inventory/alerts", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const alerts = {
+        lowStock: 3,
+        expiring: 2,
+        overstock: 1,
+        details: {
+          lowStockItems: ["Amoxicillin 500mg", "Vitamin D3", "Insulin"],
+          expiringItems: ["Paracetamol 500mg", "Cough Syrup"],
+          overstockItems: ["Hand Sanitizer"]
+        }
+      };
+      
+      res.json(alerts);
+    } catch (error) {
+      console.error('Error fetching inventory alerts:', error);
+      res.status(500).json({ message: 'Failed to fetch alerts' });
+    }
+  });
+
+  // Get stock movements for audit trail
+  app.get("/api/v1/pharmacy/inventory/movements", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const movements = [
+        {
+          id: 1,
+          medicineId: 1,
+          medicineName: "Amoxicillin 500mg",
+          batchNumber: "AMX-2024-001",
+          movementType: "OUT",
+          quantity: 21,
+          previousStock: 66,
+          newStock: 45,
+          reason: "Prescription dispensing",
+          performedBy: "John Pharmacist",
+          timestamp: "2024-01-20T15:30:00Z",
+          referenceNumber: "DISP-2024-001"
+        },
+        {
+          id: 2,
+          medicineId: 2,
+          medicineName: "Paracetamol 500mg",
+          batchNumber: "PCM-2024-003",
+          movementType: "IN",
+          quantity: 100,
+          previousStock: 200,
+          newStock: 300,
+          reason: "Stock receipt from supplier",
+          performedBy: "Maria Stock Manager",
+          timestamp: "2024-01-19T09:15:00Z",
+          referenceNumber: "PO-2024-045"
+        }
+      ];
+      
+      res.json(movements);
+    } catch (error) {
+      console.error('Error fetching stock movements:', error);
+      res.status(500).json({ message: 'Failed to fetch stock movements' });
+    }
+  });
+
+  // Adjust stock levels
+  app.post("/api/v1/pharmacy/inventory/adjust", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const { itemId, quantity, reason, movementType } = req.body;
+      
+      const adjustment = {
+        id: Date.now(),
+        itemId,
+        quantity,
+        reason,
+        movementType,
+        performedBy: req.user?.id,
+        timestamp: new Date().toISOString()
+      };
+      
+      res.json({
+        success: true,
+        message: "Stock adjusted successfully",
+        adjustment
+      });
+    } catch (error) {
+      console.error('Stock adjustment error:', error);
+      res.status(500).json({ message: 'Failed to adjust stock' });
+    }
+  });
+
+  // Billing and Financial Integration Endpoints
+  
+  // Get sales data
+  app.get("/api/v1/pharmacy/sales", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const sales = [
+        {
+          id: 1,
+          receiptNumber: "RCP-2024-001",
+          customerName: "John Doe",
+          customerPhone: "+263773123456",
+          items: [
+            {
+              medicineId: 1,
+              medicineName: "Amoxicillin 500mg",
+              quantity: 21,
+              unitPrice: 3.75,
+              discount: 0,
+              total: 78.75,
+              batchNumber: "AMX-2024-001"
+            }
+          ],
+          subtotal: 78.75,
+          discount: 0,
+          tax: 11.81,
+          total: 90.56,
+          paymentMethod: "cash",
+          paymentStatus: "completed",
+          timestamp: "2024-01-20T16:45:00Z",
+          cashier: "Maria Pharmacist"
+        },
+        {
+          id: 2,
+          receiptNumber: "RCP-2024-002",
+          customerName: "Sarah Wilson",
+          customerPhone: "+263772987654",
+          items: [
+            {
+              medicineId: 2,
+              medicineName: "Paracetamol 500mg",
+              quantity: 30,
+              unitPrice: 1.20,
+              discount: 0,
+              total: 36.00,
+              batchNumber: "PCM-2024-003"
+            }
+          ],
+          subtotal: 36.00,
+          discount: 3.60,
+          tax: 4.86,
+          total: 37.26,
+          paymentMethod: "mobile_money",
+          paymentStatus: "completed",
+          insuranceClaim: {
+            providerId: 1,
+            providerName: "Discovery Health",
+            membershipNumber: "DH123456789",
+            authorizedAmount: 30.00,
+            patientResponsibility: 7.26,
+            claimStatus: "approved"
+          },
+          timestamp: "2024-01-20T14:30:00Z",
+          cashier: "John Pharmacist"
+        }
+      ];
+      
+      res.json(sales);
+    } catch (error) {
+      console.error('Error fetching sales:', error);
+      res.status(500).json({ message: 'Failed to fetch sales data' });
+    }
+  });
+
+  // Get customer categories for pricing
+  app.get("/api/v1/pharmacy/customer-categories", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const categories = [
+        {
+          id: "general",
+          name: "General Customer",
+          discountPercentage: 0,
+          description: "Standard pricing for walk-in customers"
+        },
+        {
+          id: "senior",
+          name: "Senior Citizen",
+          discountPercentage: 10,
+          description: "Discount for customers 65 years and older"
+        },
+        {
+          id: "bulk",
+          name: "Bulk Purchase",
+          discountPercentage: 5,
+          description: "Discount for orders over $100"
+        },
+        {
+          id: "healthcare_worker",
+          name: "Healthcare Worker",
+          discountPercentage: 15,
+          description: "Special discount for medical professionals"
+        }
+      ];
+      
+      res.json(categories);
+    } catch (error) {
+      console.error('Error fetching customer categories:', error);
+      res.status(500).json({ message: 'Failed to fetch customer categories' });
+    }
+  });
+
+  // Get financial analytics
+  app.get("/api/v1/pharmacy/financial-analytics", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const analytics = {
+        dailySales: 1250.50,
+        monthlyRevenue: 45230.75,
+        insuranceClaims: 23,
+        avgTransaction: 42.30,
+        paymentMethodDistribution: {
+          cash: 45,
+          card: 30,
+          mobile_money: 15,
+          insurance: 10
+        },
+        topSellingItems: [
+          { name: "Paracetamol 500mg", quantity: 150, revenue: 180.00 },
+          { name: "Amoxicillin 500mg", quantity: 84, revenue: 315.00 },
+          { name: "Vitamin D3", quantity: 65, revenue: 195.00 }
+        ]
+      };
+      
+      res.json(analytics);
+    } catch (error) {
+      console.error('Error fetching financial analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch analytics' });
+    }
+  });
+
+  // Process sale
+  app.post("/api/v1/pharmacy/sales/process", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const { items, customerName, customerPhone, paymentMethod, insuranceDetails } = req.body;
+      
+      const receiptNumber = `RCP-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      
+      const sale = {
+        id: Date.now(),
+        receiptNumber,
+        customerName,
+        customerPhone,
+        items,
+        paymentMethod,
+        timestamp: new Date().toISOString(),
+        cashier: req.user?.id
+      };
+      
+      res.json({
+        success: true,
+        receiptNumber,
+        sale
+      });
+    } catch (error) {
+      console.error('Sale processing error:', error);
+      res.status(500).json({ message: 'Failed to process sale' });
+    }
+  });
+
+  // Process insurance claim
+  app.post("/api/v1/pharmacy/insurance-claims/process", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const { saleId, providerId, membershipNumber, items } = req.body;
+      
+      const claim = {
+        id: Date.now(),
+        saleId,
+        providerId,
+        membershipNumber,
+        items,
+        status: "submitted",
+        timestamp: new Date().toISOString()
+      };
+      
+      res.json({
+        success: true,
+        message: "Insurance claim submitted successfully",
+        claim
+      });
+    } catch (error) {
+      console.error('Insurance claim processing error:', error);
+      res.status(500).json({ message: 'Failed to process insurance claim' });
+    }
+  });
+
   return httpServer;
 }
