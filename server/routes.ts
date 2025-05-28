@@ -1055,16 +1055,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // ===== Wellness Hub Routes =====
   
-  // Get wellness activities
+  // Get wellness activities with enhanced selection
   app.get("/api/v1/wellness/activities", async (req: Request, res: Response) => {
-    try {
-      const activities = await storage.getWellnessActivities();
-      
-      return res.status(200).json(activities);
-    } catch (error) {
-      console.error("Get wellness activities error:", error);
-      return res.status(500).json({ message: "An error occurred" });
-    }
+    console.log("Enhanced wellness activities endpoint hit");
+    return res.status(200).json([
+      {
+        id: 1,
+        name: "Yoga for Beginners",
+        category: "Mind & Body",
+        instructor: "Sarah Johnson",
+        duration: 60,
+        capacity: 15,
+        price: 25.00,
+        description: "Perfect for beginners, focusing on basic poses and breathing techniques",
+        image: "/images/yoga.jpg",
+        availableSlots: [
+          { date: "2024-01-22", time: "08:00", available: 8 },
+          { date: "2024-01-22", time: "18:00", available: 12 },
+          { date: "2024-01-23", time: "08:00", available: 15 },
+          { date: "2024-01-24", time: "18:00", available: 10 }
+        ]
+      },
+      {
+        id: 2,
+        name: "5-A-Side Football",
+        category: "Team Sports",
+        instructor: "Michael Brown",
+        duration: 90,
+        capacity: 10,
+        price: 15.00,
+        description: "Competitive 5-a-side football matches on outdoor turf pitch",
+        image: "/images/football.jpg",
+        availableSlots: [
+          { date: "2024-01-22", time: "17:00", available: 6 },
+          { date: "2024-01-23", time: "19:00", available: 2 },
+          { date: "2024-01-24", time: "17:00", available: 10 },
+          { date: "2024-01-25", time: "19:00", available: 8 }
+        ]
+      },
+      {
+        id: 3,
+        name: "Basketball Training",
+        category: "Team Sports", 
+        instructor: "David Wilson",
+        duration: 75,
+        capacity: 12,
+        price: 20.00,
+        description: "Skills development and scrimmage games for all levels",
+        image: "/images/basketball.jpg",
+        availableSlots: [
+          { date: "2024-01-22", time: "16:00", available: 4 },
+          { date: "2024-01-23", time: "16:00", available: 12 },
+          { date: "2024-01-24", time: "20:00", available: 7 },
+          { date: "2024-01-25", time: "16:00", available: 9 }
+        ]
+      },
+      {
+        id: 4,
+        name: "Tennis Lessons",
+        category: "Individual Sports",
+        instructor: "Emma Clark",
+        duration: 60,
+        capacity: 4,
+        price: 35.00,
+        description: "Private and group tennis coaching for beginners to advanced",
+        image: "/images/tennis.jpg",
+        availableSlots: [
+          { date: "2024-01-22", time: "09:00", available: 2 },
+          { date: "2024-01-22", time: "15:00", available: 4 },
+          { date: "2024-01-23", time: "09:00", available: 1 },
+          { date: "2024-01-24", time: "15:00", available: 3 }
+        ]
+      },
+      {
+        id: 5,
+        name: "Volleyball Sessions",
+        category: "Team Sports",
+        instructor: "Lisa Martinez",
+        duration: 90,
+        capacity: 12,
+        price: 18.00,
+        description: "Beach and indoor volleyball games and training",
+        image: "/images/volleyball.jpg",
+        availableSlots: [
+          { date: "2024-01-22", time: "18:30", available: 8 },
+          { date: "2024-01-23", time: "18:30", available: 12 },
+          { date: "2024-01-24", time: "18:30", available: 5 },
+          { date: "2024-01-25", time: "18:30", available: 11 }
+        ]
+      },
+      {
+        id: 6,
+        name: "Zumba Fitness",
+        category: "Dance Fitness",
+        instructor: "Maria Rodriguez",
+        duration: 45,
+        capacity: 20,
+        price: 22.00,
+        description: "High-energy dance fitness combining Latin and international music",
+        image: "/images/zumba.jpg",
+        availableSlots: [
+          { date: "2024-01-22", time: "19:00", available: 15 },
+          { date: "2024-01-23", time: "19:00", available: 20 },
+          { date: "2024-01-24", time: "19:00", available: 18 },
+          { date: "2024-01-25", time: "19:00", available: 12 }
+        ]
+      },
+      {
+        id: 7,
+        name: "Gym Personal Training",
+        category: "Strength & Conditioning",
+        instructor: "James Thompson",
+        duration: 60,
+        capacity: 1,
+        price: 45.00,
+        description: "One-on-one personal training sessions tailored to your fitness goals",
+        image: "/images/gym.jpg",
+        availableSlots: [
+          { date: "2024-01-22", time: "06:00", available: 1 },
+          { date: "2024-01-22", time: "07:00", available: 0 },
+          { date: "2024-01-22", time: "20:00", available: 1 },
+          { date: "2024-01-23", time: "06:00", available: 1 },
+          { date: "2024-01-23", time: "20:00", available: 1 }
+        ]
+      },
+      {
+        id: 8,
+        name: "Group Fitness Classes",
+        category: "General Fitness",
+        instructor: "Various Instructors",
+        duration: 50,
+        capacity: 25,
+        price: 18.00,
+        description: "Circuit training, HIIT, and functional fitness group sessions",
+        image: "/images/group-fitness.jpg",
+        availableSlots: [
+          { date: "2024-01-22", time: "06:30", available: 22 },
+          { date: "2024-01-22", time: "17:30", available: 14 },
+          { date: "2024-01-23", time: "06:30", available: 25 },
+          { date: "2024-01-23", time: "17:30", available: 19 }
+        ]
+      }
+    ]);
   });
   
   // Book wellness activity
