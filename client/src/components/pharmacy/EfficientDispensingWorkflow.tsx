@@ -76,10 +76,10 @@ const EfficientDispensingWorkflow = () => {
     mutationFn: async (data: { barcode: string; medicineId: number; prescriptionId: number }) => {
       return apiRequest('POST', '/api/v1/pharmacy/verify-barcode', data);
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       toast({
         title: 'Barcode Verified',
-        description: `Medicine verified: ${data.medicineName}`,
+        description: `Medicine verified: ${data.medicineName || 'Medicine'}`,
         variant: 'default',
       });
       updateDispensingProgress();
@@ -161,7 +161,7 @@ const EfficientDispensingWorkflow = () => {
   };
 
   const getBatchesByFEFO = (medicineId: number) => {
-    if (!inventoryBatches) return [];
+    if (!inventoryBatches || !Array.isArray(inventoryBatches)) return [];
     return inventoryBatches
       .filter((batch: any) => batch.medicineId === medicineId)
       .sort((a: any, b: any) => new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime());

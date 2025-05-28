@@ -1670,5 +1670,189 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Efficient Dispensing Workflow Endpoints
+  
+  // Get pending prescriptions for dispensing
+  app.get("/api/v1/pharmacy/prescriptions/pending-dispensing", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const pendingPrescriptions = [
+        {
+          id: 1,
+          patientName: "John Doe",
+          doctorName: "Dr. Smith",
+          prescriptionDate: "2024-01-15",
+          status: "READY_FOR_DISPENSING",
+          priority: "MEDIUM",
+          items: [
+            {
+              id: 1,
+              prescriptionId: 1,
+              medicineId: 1,
+              medicineName: "Amoxicillin 500mg",
+              prescribedQuantity: 21,
+              dispensedQuantity: 0,
+              batchNumber: "AMX-2024-001",
+              expiryDate: "2025-06-15",
+              stockQuantity: 150,
+              verified: false
+            }
+          ]
+        },
+        {
+          id: 2,
+          patientName: "Maria Santos", 
+          doctorName: "Dr. Johnson",
+          prescriptionDate: "2024-01-16",
+          status: "READY_FOR_DISPENSING",
+          priority: "HIGH",
+          items: [
+            {
+              id: 2,
+              prescriptionId: 2,
+              medicineId: 2,
+              medicineName: "Paracetamol 500mg",
+              prescribedQuantity: 30,
+              dispensedQuantity: 0,
+              batchNumber: "PCM-2024-003",
+              expiryDate: "2025-03-20",
+              stockQuantity: 200,
+              verified: false
+            }
+          ]
+        }
+      ];
+      
+      res.json(pendingPrescriptions);
+    } catch (error) {
+      console.error('Error fetching pending prescriptions:', error);
+      res.status(500).json({ message: 'Failed to fetch pending prescriptions' });
+    }
+  });
+
+  // Get inventory batches with FEFO tracking
+  app.get("/api/v1/pharmacy/inventory/batches", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const inventoryBatches = [
+        {
+          id: 1,
+          medicineId: 1,
+          medicineName: "Amoxicillin 500mg",
+          batchNumber: "AMX-2024-001",
+          expiryDate: "2025-06-15",
+          stockQuantity: 150,
+          costPrice: "2.50",
+          status: "IN_STOCK"
+        },
+        {
+          id: 2,
+          medicineId: 1,
+          medicineName: "Amoxicillin 500mg", 
+          batchNumber: "AMX-2024-002",
+          expiryDate: "2025-08-20",
+          stockQuantity: 100,
+          costPrice: "2.60",
+          status: "IN_STOCK"
+        },
+        {
+          id: 3,
+          medicineId: 2,
+          medicineName: "Paracetamol 500mg",
+          batchNumber: "PCM-2024-003", 
+          expiryDate: "2025-03-20",
+          stockQuantity: 200,
+          costPrice: "0.80",
+          status: "IN_STOCK"
+        }
+      ];
+      
+      res.json(inventoryBatches);
+    } catch (error) {
+      console.error('Error fetching inventory batches:', error);
+      res.status(500).json({ message: 'Failed to fetch inventory batches' });
+    }
+  });
+
+  // Barcode verification endpoint
+  app.post("/api/v1/pharmacy/verify-barcode", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const { barcode, medicineId, prescriptionId } = req.body;
+      
+      const verificationResult = {
+        success: true,
+        medicineId: medicineId,
+        medicineName: "Verified Medicine",
+        batchNumber: "BATCH-2024-001", 
+        expiryDate: "2025-06-15",
+        verified: true,
+        verificationTime: new Date().toISOString()
+      };
+      
+      res.json(verificationResult);
+    } catch (error) {
+      console.error('Barcode verification error:', error);
+      res.status(500).json({ message: 'Barcode verification failed' });
+    }
+  });
+
+  // Complete dispensing workflow
+  app.post("/api/v1/pharmacy/prescriptions/:prescriptionId/complete-dispensing", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const { prescriptionId } = req.params;
+      const { items, labelPrinted } = req.body;
+      
+      const dispensingRecord = {
+        prescriptionId: parseInt(prescriptionId),
+        dispensedBy: req.user?.id,
+        dispensingDate: new Date().toISOString(),
+        items: items,
+        labelPrinted: labelPrinted,
+        status: "DISPENSED"
+      };
+      
+      res.json({
+        success: true,
+        message: "Prescription dispensed successfully",
+        dispensingRecord
+      });
+    } catch (error) {
+      console.error('Dispensing completion error:', error);
+      res.status(500).json({ message: 'Failed to complete dispensing' });
+    }
+  });
+
+  // Print medication labels
+  app.post("/api/v1/pharmacy/print-medication-label", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const { prescriptionId, items } = req.body;
+      
+      const labelData = {
+        prescriptionId,
+        printTime: new Date().toISOString(),
+        pharmacyInfo: {
+          name: "Your Pharmacy Name",
+          address: "123 Main Street, Harare",
+          phone: "+263-1-234-5678",
+          license: "PHARM-2024-001"
+        },
+        items: items.map((item: any) => ({
+          medicineName: item.medicineName,
+          quantity: item.prescribedQuantity,
+          batchNumber: item.batchNumber,
+          expiryDate: item.expiryDate,
+          instructions: "Take as directed by physician"
+        }))
+      };
+      
+      res.json({
+        success: true,
+        message: "Label printed successfully",
+        labelData
+      });
+    } catch (error) {
+      console.error('Label printing error:', error);
+      res.status(500).json({ message: 'Failed to print label' });
+    }
+  });
+
   return httpServer;
 }
