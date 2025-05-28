@@ -257,25 +257,47 @@ export const medicineVerificationLogs = pgTable("medicine_verification_logs", {
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
 
-// Wellness activities table
+// Enhanced wellness activities table
 export const wellnessActivities = pgTable("wellness_activities", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  dayOfWeek: text("day_of_week").notNull(),
-  time: text("time").notNull(),
-  location: text("location").notNull(),
-  totalSlots: integer("total_slots").notNull(),
-  iconEmoji: text("icon_emoji"),
+  category: text("category").notNull(),
+  instructor: text("instructor").notNull(),
+  duration: integer("duration").notNull(), // in minutes
+  capacity: integer("capacity").notNull(),
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
   description: text("description"),
+  location: text("location"),
+  imageUrl: text("image_url"),
+  isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
-// Wellness bookings table
+// Wellness activity time slots table
+export const wellnessTimeSlots = pgTable("wellness_time_slots", {
+  id: serial("id").primaryKey(),
+  activityId: integer("activity_id").notNull().references(() => wellnessActivities.id),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  time: text("time").notNull(), // HH:MM format
+  availableSpots: integer("available_spots").notNull(),
+  totalCapacity: integer("total_capacity").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Enhanced wellness bookings table
 export const wellnessBookings = pgTable("wellness_bookings", {
   id: serial("id").primaryKey(),
   activityId: integer("activity_id").notNull().references(() => wellnessActivities.id),
+  timeSlotId: integer("time_slot_id").notNull().references(() => wellnessTimeSlots.id),
   userId: integer("user_id").notNull().references(() => users.id),
+  bookingDate: text("booking_date").notNull(), // YYYY-MM-DD format
+  bookingTime: text("booking_time").notNull(), // HH:MM format
+  status: text("status").notNull().default("CONFIRMED"),
+  paymentStatus: text("payment_status").notNull().default("PENDING"),
+  amountPaid: numeric("amount_paid", { precision: 10, scale: 2 }),
   bookingTimestamp: timestamp("booking_timestamp").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
