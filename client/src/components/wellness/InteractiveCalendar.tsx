@@ -71,10 +71,11 @@ export default function InteractiveCalendar() {
   };
 
   const getActivitiesForDate = (date: Date) => {
-    if (!activities) return [];
+    if (!activities || !Array.isArray(activities)) return [];
     const dateStr = date.toISOString().split('T')[0];
     
     return activities.filter(activity => 
+      activity.availableSlots && Array.isArray(activity.availableSlots) && 
       activity.availableSlots.some(slot => slot.date === dateStr && slot.available > 0)
     );
   };
