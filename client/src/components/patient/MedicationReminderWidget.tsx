@@ -61,7 +61,7 @@ export default function MedicationReminderWidget() {
       'diabetes': 'bg-green-400',
       'default': 'bg-pink-400'
     };
-    return colors[medicineType.toLowerCase() as keyof typeof colors] || colors.default;
+    return colors[medicineType?.toLowerCase() as keyof typeof colors] || colors.default;
   };
 
   const getTimeStatus = (dueDate: string) => {
