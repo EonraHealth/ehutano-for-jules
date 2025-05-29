@@ -6,6 +6,7 @@ import PharmacyOperations from '@/components/pharmacy/PharmacyOperations';
 import PharmacyInventory from '@/components/pharmacy/PharmacyInventory';
 import PharmacyFinancial from '@/components/pharmacy/PharmacyFinancial';
 import PharmacyAnalytics from '@/components/pharmacy/PharmacyAnalytics';
+import DeliveryManagement from '@/components/pharmacy/DeliveryManagement';
 import Sidebar from '@/components/layout/Sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +23,7 @@ import {
   DollarSign
 } from 'lucide-react';
 
-type TabValue = 'dashboard' | 'operations' | 'inventory' | 'financial' | 'analytics';
+type TabValue = 'dashboard' | 'operations' | 'inventory' | 'financial' | 'analytics' | 'delivery';
 
 const PharmacyPortalPage = () => {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -62,7 +63,7 @@ const PharmacyPortalPage = () => {
         </div>
 
         <Tabs defaultValue="dashboard" value={activeTab} onValueChange={(value) => setActiveTab(value as TabValue)}>
-          <TabsList className="mb-6 grid grid-cols-5 w-full">
+          <TabsList className="mb-6 grid grid-cols-6 w-full">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -74,6 +75,10 @@ const PharmacyPortalPage = () => {
             <TabsTrigger value="inventory" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               <span className="hidden sm:inline">Inventory</span>
+            </TabsTrigger>
+            <TabsTrigger value="delivery" className="flex items-center gap-2">
+              <Truck className="h-4 w-4" />
+              <span className="hidden sm:inline">Delivery</span>
             </TabsTrigger>
             <TabsTrigger value="financial" className="flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
@@ -95,6 +100,10 @@ const PharmacyPortalPage = () => {
 
           <TabsContent value="inventory">
             <PharmacyInventory />
+          </TabsContent>
+
+          <TabsContent value="delivery">
+            <DeliveryManagement />
           </TabsContent>
 
           <TabsContent value="financial">

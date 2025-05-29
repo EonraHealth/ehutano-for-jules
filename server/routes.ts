@@ -2309,5 +2309,217 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delivery Management Endpoints
+
+  // Get delivery orders
+  app.get("/api/v1/pharmacy/delivery/orders", async (req: Request, res: Response) => {
+    try {
+      const deliveryOrders = [
+        {
+          id: 1,
+          orderId: 1001,
+          patientName: "Sarah Moyo",
+          patientPhone: "+263777123456",
+          deliveryAddress: "123 Samora Machel Avenue, Harare CBD, near CABS Building",
+          deliveryArea: "HARARE_CBD",
+          deliveryService: "quickride",
+          status: "IN_TRANSIT",
+          estimatedDeliveryTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+          deliveryFee: 8.50,
+          deliveryNotes: "Call before arrival",
+          driverName: "James Chikwanha",
+          driverPhone: "+263712345678",
+          trackingNumber: "QR-2024-001",
+          items: [
+            { medicineName: "Metformin 500mg", quantity: 60, specialHandling: "Keep cool" },
+            { medicineName: "Lisinopril 10mg", quantity: 30 }
+          ],
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: 2,
+          orderId: 1002,
+          patientName: "John Mukamuri",
+          patientPhone: "+263773456789",
+          deliveryAddress: "45 Borrowdale Road, Borrowdale, near Sam Levy's Village",
+          deliveryArea: "BORROWDALE",
+          deliveryService: "speedy",
+          status: "PENDING",
+          estimatedDeliveryTime: new Date(Date.now() + 120 * 60 * 1000).toISOString(),
+          deliveryFee: 15.00,
+          items: [
+            { medicineName: "Insulin Glargine", quantity: 3, specialHandling: "Refrigerated transport required" },
+            { medicineName: "Blood glucose strips", quantity: 100 }
+          ],
+          createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+        }
+      ];
+      
+      res.json(deliveryOrders);
+    } catch (error) {
+      console.error("Get delivery orders error:", error);
+      res.status(500).json({ message: "Failed to fetch delivery orders" });
+    }
+  });
+
+  // Get delivery providers
+  app.get("/api/v1/pharmacy/delivery/providers", async (req: Request, res: Response) => {
+    try {
+      const providers = [
+        {
+          id: "quickride",
+          name: "QuickRide Delivery",
+          type: "MOTORCYCLE",
+          coverage: ["HARARE_CBD", "AVONDALE", "GLEN_VIEW"],
+          baseFee: 5.00,
+          perKmRate: 0.50,
+          estimatedTime: "30-45 minutes",
+          contactNumber: "+263712345678",
+          isActive: true
+        },
+        {
+          id: "speedy",
+          name: "Speedy Couriers",
+          type: "CAR",
+          coverage: ["BORROWDALE", "AVONDALE", "HARARE_CBD", "CHITUNGWIZA"],
+          baseFee: 8.00,
+          perKmRate: 0.75,
+          estimatedTime: "45-60 minutes",
+          contactNumber: "+263773456789",
+          isActive: true
+        },
+        {
+          id: "citylink",
+          name: "CityLink Express",
+          type: "BICYCLE",
+          coverage: ["HARARE_CBD", "AVONDALE"],
+          baseFee: 3.00,
+          perKmRate: 0.30,
+          estimatedTime: "60-90 minutes",
+          contactNumber: "+263734567890",
+          isActive: true
+        },
+        {
+          id: "metro",
+          name: "Metro Medical Transport",
+          type: "CAR",
+          coverage: ["NORTON", "CHITUNGWIZA", "GLEN_VIEW"],
+          baseFee: 12.00,
+          perKmRate: 1.00,
+          estimatedTime: "60-120 minutes",
+          contactNumber: "+263745678901",
+          isActive: false
+        }
+      ];
+      
+      res.json(providers);
+    } catch (error) {
+      console.error("Get delivery providers error:", error);
+      res.status(500).json({ message: "Failed to fetch delivery providers" });
+    }
+  });
+
+  // Schedule delivery
+  app.post("/api/v1/pharmacy/delivery/schedule", async (req: Request, res: Response) => {
+    try {
+      const {
+        patientName,
+        patientPhone,
+        deliveryAddress,
+        deliveryArea,
+        deliveryService,
+        urgency,
+        specialInstructions,
+        preferredTime
+      } = req.body;
+
+      const providers = [
+        { id: "quickride", baseFee: 5.00, perKmRate: 0.50 },
+        { id: "speedy", baseFee: 8.00, perKmRate: 0.75 },
+        { id: "citylink", baseFee: 3.00, perKmRate: 0.30 },
+        { id: "metro", baseFee: 12.00, perKmRate: 1.00 }
+      ];
+
+      const provider = providers.find(p => p.id === deliveryService);
+      const distanceMap: Record<string, number> = {
+        'HARARE_CBD': 5,
+        'AVONDALE': 8,
+        'BORROWDALE': 12,
+        'GLEN_VIEW': 15,
+        'CHITUNGWIZA': 25,
+        'NORTON': 35
+      };
+
+      const distance = distanceMap[deliveryArea] || 10;
+      let deliveryFee = provider ? provider.baseFee + (distance * provider.perKmRate) : 10;
+
+      if (urgency === 'EXPRESS') deliveryFee += 2.00;
+      if (urgency === 'URGENT') deliveryFee += 5.00;
+
+      const newDelivery = {
+        id: Date.now(),
+        orderId: Math.floor(Math.random() * 9000) + 1000,
+        patientName,
+        patientPhone,
+        deliveryAddress,
+        deliveryArea,
+        deliveryService,
+        status: "PENDING",
+        estimatedDeliveryTime: preferredTime || new Date(Date.now() + 120 * 60 * 1000).toISOString(),
+        deliveryFee,
+        deliveryNotes: specialInstructions,
+        items: [],
+        createdAt: new Date().toISOString()
+      };
+
+      res.status(201).json({
+        success: true,
+        message: "Delivery scheduled successfully",
+        delivery: newDelivery
+      });
+    } catch (error) {
+      console.error("Schedule delivery error:", error);
+      res.status(500).json({ message: "Failed to schedule delivery" });
+    }
+  });
+
+  // Update delivery status
+  app.put("/api/v1/pharmacy/delivery/:deliveryId/status", async (req: Request, res: Response) => {
+    try {
+      const { deliveryId } = req.params;
+      const { status, notes } = req.body;
+
+      const updatedDelivery = {
+        id: parseInt(deliveryId),
+        status,
+        notes,
+        updatedAt: new Date().toISOString()
+      };
+
+      if (status === 'ASSIGNED') {
+        Object.assign(updatedDelivery, {
+          driverName: "David Mutasa",
+          driverPhone: "+263723456789",
+          trackingNumber: `TR-${Date.now()}`
+        });
+      }
+
+      if (status === 'DELIVERED') {
+        Object.assign(updatedDelivery, {
+          actualDeliveryTime: new Date().toISOString()
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Delivery status updated successfully",
+        delivery: updatedDelivery
+      });
+    } catch (error) {
+      console.error("Update delivery status error:", error);
+      res.status(500).json({ message: "Failed to update delivery status" });
+    }
+  });
+
   return httpServer;
 }
