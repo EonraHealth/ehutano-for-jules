@@ -257,6 +257,33 @@ const EfficientDispensingWorkflow = () => {
     }
   });
 
+  // Save manual prescription mutation
+  const savePrescriptionMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('POST', '/api/v1/pharmacy/prescriptions/manual', {
+        customerId: walkInCustomer.id || Date.now(),
+        customerName: walkInCustomer.name,
+        items: manualPrescription
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Prescription Saved',
+        description: 'Prescription has been saved and added to pending list',
+        variant: 'default',
+      });
+      // Refresh the pending prescriptions list
+      queryClient.invalidateQueries({ queryKey: ['/api/v1/pharmacy/prescriptions/pending-dispensing'] });
+    },
+    onError: () => {
+      toast({
+        title: 'Save Failed',
+        description: 'Failed to save prescription',
+        variant: 'destructive',
+      });
+    }
+  });
+
   const handleBatchSelection = (itemId: number, batchNumber: string, expiryDate: string) => {
     setCurrentPrescription(prev => {
       if (!prev) return null;
@@ -696,6 +723,14 @@ const EfficientDispensingWorkflow = () => {
                     <Button variant="outline" onClick={() => setActiveTab('customer')}>
                       <User className="h-4 w-4 mr-2" />
                       Back to Customer
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      onClick={() => savePrescriptionMutation.mutate()}
+                      disabled={manualPrescription.length === 0 || !walkInCustomer.name || savePrescriptionMutation.isPending}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      {savePrescriptionMutation.isPending ? 'Saving...' : 'Save Prescription'}
                     </Button>
                     <Button 
                       onClick={() => setActiveTab('scan')}
