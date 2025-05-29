@@ -2,15 +2,10 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
 import PharmacyDashboard from '@/components/pharmacy/PharmacyDashboard';
-import InventoryManagement from '@/components/pharmacy/InventoryManagement';
-import OrderProcessing from '@/components/pharmacy/OrderProcessing';
-import PrescriptionManagement from '@/components/pharmacy/PrescriptionManagement';
-import MedicalAidClaimsManager from '@/components/pharmacy/MedicalAidClaimsManager';
-import DeliveryManagement from '@/components/pharmacy/DeliveryManagement';
+import PharmacyOperations from '@/components/pharmacy/PharmacyOperations';
+import PharmacyInventory from '@/components/pharmacy/PharmacyInventory';
+import PharmacyFinancial from '@/components/pharmacy/PharmacyFinancial';
 import PharmacyAnalytics from '@/components/pharmacy/PharmacyAnalytics';
-import EfficientDispensingWorkflow from '@/components/pharmacy/EfficientDispensingWorkflow';
-import StockInventoryManagement from '@/components/pharmacy/StockInventoryManagement';
-import BillingFinancialIntegration from '@/components/pharmacy/BillingFinancialIntegration';
 import Sidebar from '@/components/layout/Sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,7 +22,7 @@ import {
   DollarSign
 } from 'lucide-react';
 
-type TabValue = 'dashboard' | 'inventory' | 'orders' | 'prescriptions' | 'dispensing' | 'stock' | 'billing' | 'claims' | 'delivery' | 'analytics';
+type TabValue = 'dashboard' | 'operations' | 'inventory' | 'financial' | 'analytics';
 
 const PharmacyPortalPage = () => {
   const { isAuthenticated, user, isLoading } = useAuth();
@@ -67,42 +62,22 @@ const PharmacyPortalPage = () => {
         </div>
 
         <Tabs defaultValue="dashboard" value={activeTab} onValueChange={(value) => setActiveTab(value as TabValue)}>
-          <TabsList className="mb-6 grid grid-cols-5 lg:grid-cols-10 w-full">
+          <TabsList className="mb-6 grid grid-cols-5 w-full">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden sm:inline">Dashboard</span>
             </TabsTrigger>
+            <TabsTrigger value="operations" className="flex items-center gap-2">
+              <Scan className="h-4 w-4" />
+              <span className="hidden sm:inline">Operations</span>
+            </TabsTrigger>
             <TabsTrigger value="inventory" className="flex items-center gap-2">
-              <PackageSearch className="h-4 w-4" />
+              <Package className="h-4 w-4" />
               <span className="hidden sm:inline">Inventory</span>
             </TabsTrigger>
-            <TabsTrigger value="stock" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              <span className="hidden sm:inline">Stock Mgmt</span>
-            </TabsTrigger>
-            <TabsTrigger value="billing" className="flex items-center gap-2">
+            <TabsTrigger value="financial" className="flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
-              <span className="hidden sm:inline">POS & Billing</span>
-            </TabsTrigger>
-            <TabsTrigger value="orders" className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4" />
-              <span className="hidden sm:inline">Orders</span>
-            </TabsTrigger>
-            <TabsTrigger value="prescriptions" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Prescriptions</span>
-            </TabsTrigger>
-            <TabsTrigger value="dispensing" className="flex items-center gap-2">
-              <Scan className="h-4 w-4" />
-              <span className="hidden sm:inline">Dispensing</span>
-            </TabsTrigger>
-            <TabsTrigger value="delivery" className="flex items-center gap-2">
-              <Truck className="h-4 w-4" />
-              <span className="hidden sm:inline">Delivery</span>
-            </TabsTrigger>
-            <TabsTrigger value="claims" className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              <span className="hidden sm:inline">Medical Aid</span>
+              <span className="hidden sm:inline">Financial</span>
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <PieChart className="h-4 w-4" />
@@ -114,8 +89,16 @@ const PharmacyPortalPage = () => {
             <PharmacyDashboard />
           </TabsContent>
 
+          <TabsContent value="operations">
+            <PharmacyOperations />
+          </TabsContent>
+
           <TabsContent value="inventory">
-            <InventoryManagement />
+            <PharmacyInventory />
+          </TabsContent>
+
+          <TabsContent value="financial">
+            <PharmacyFinancial />
           </TabsContent>
 
           <TabsContent value="stock">
