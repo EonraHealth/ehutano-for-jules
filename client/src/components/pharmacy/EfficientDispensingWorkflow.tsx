@@ -347,7 +347,7 @@ const EfficientDispensingWorkflow = () => {
         prescriptionId: currentPrescription.id
       });
 
-      if (result.verified) {
+      if (result.success) {
         // Mark item as verified
         setCurrentPrescription(prev => {
           if (!prev) return null;
@@ -364,7 +364,7 @@ const EfficientDispensingWorkflow = () => {
         
         toast({
           title: 'Item Verified',
-          description: `${result.medicineName} verified successfully`,
+          description: `${result.medicineName || nextItem.medicineName} verified successfully`,
         });
       } else {
         toast({
