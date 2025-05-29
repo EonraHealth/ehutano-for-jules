@@ -1729,6 +1729,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Customer management endpoints for walk-in dispensing
+  app.post("/api/v1/pharmacy/customers", async (req: Request, res: Response) => {
+    try {
+      const customerData = req.body;
+      
+      // Generate customer ID
+      const customerId = Date.now();
+      
+      // Save customer data (in a real app, this would go to database)
+      const savedCustomer = {
+        id: customerId,
+        ...customerData,
+        registeredAt: new Date().toISOString(),
+        pharmacyId: 1 // Current pharmacy
+      };
+      
+      res.status(201).json(savedCustomer);
+    } catch (error) {
+      console.error('Error saving customer:', error);
+      res.status(500).json({ message: 'Failed to save customer' });
+    }
+  });
+
+  app.get("/api/v1/pharmacy/customers/search", async (req: Request, res: Response) => {
+    try {
+      const { q } = req.query;
+      
+      // Mock customer search results
+      const customers = [
+        {
+          id: 1,
+          name: "John Mukamuri",
+          phone: "+263777123456",
+          email: "john.m@email.com",
+          medicalAidProvider: "CIMAS",
+          medicalAidNumber: "CIM123456"
+        },
+        {
+          id: 2,
+          name: "Grace Mutasa",
+          phone: "+263712987654",
+          email: "grace.m@email.com",
+          medicalAidProvider: "Premier",
+          medicalAidNumber: "PRM789012"
+        }
+      ];
+      
+      const searchResults = customers.filter(customer => 
+        customer.name.toLowerCase().includes((q as string)?.toLowerCase() || '') ||
+        customer.phone.includes((q as string) || '') ||
+        customer.medicalAidNumber?.includes((q as string) || '')
+      );
+      
+      res.json(searchResults);
+    } catch (error) {
+      console.error('Error searching customers:', error);
+      res.status(500).json({ message: 'Failed to search customers' });
+    }
+  });
+
   // Get inventory batches with FEFO tracking
   app.get("/api/v1/pharmacy/inventory/batches", async (req: Request, res: Response) => {
     try {

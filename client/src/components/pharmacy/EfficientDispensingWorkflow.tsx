@@ -210,6 +210,46 @@ const EfficientDispensingWorkflow = () => {
     setDispensingProgress((verifiedItems / totalItems) * 100);
   };
 
+  // Customer save mutation
+  const saveCustomerMutation = useMutation({
+    mutationFn: async (customerData: WalkInCustomer) => {
+      return apiRequest('POST', '/api/v1/pharmacy/customers', customerData);
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Customer Saved',
+        description: 'Customer information has been saved successfully',
+        variant: 'default',
+      });
+    },
+    onError: () => {
+      toast({
+        title: 'Save Failed',
+        description: 'Failed to save customer information',
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Add medicine to prescription mutation
+  const addMedicineMutation = useMutation({
+    mutationFn: async (medicineData: Omit<ManualPrescriptionItem, 'id'>) => {
+      const newItem: ManualPrescriptionItem = {
+        ...medicineData,
+        id: Date.now() // Simple ID generation
+      };
+      setManualPrescription(prev => [...prev, newItem]);
+      return newItem;
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Medicine Added',
+        description: 'Medicine has been added to prescription',
+        variant: 'default',
+      });
+    }
+  });
+
   const handleBatchSelection = (itemId: number, batchNumber: string, expiryDate: string) => {
     setCurrentPrescription(prev => {
       if (!prev) return null;
@@ -492,9 +532,13 @@ const EfficientDispensingWorkflow = () => {
                     <FileText className="h-4 w-4 mr-2" />
                     Continue to Prescription
                   </Button>
-                  <Button variant="outline">
+                  <Button 
+                    variant="outline"
+                    onClick={() => saveCustomerMutation.mutate(walkInCustomer)}
+                    disabled={!walkInCustomer.name || !walkInCustomer.phone || saveCustomerMutation.isPending}
+                  >
                     <Download className="h-4 w-4 mr-2" />
-                    Save Customer
+                    {saveCustomerMutation.isPending ? 'Saving...' : 'Save Customer'}
                   </Button>
                 </div>
               </div>
