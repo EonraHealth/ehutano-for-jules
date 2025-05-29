@@ -23,7 +23,9 @@ import {
   Pill,
   FileText,
   Eye,
-  Download
+  Download,
+  CreditCard,
+  ExternalLink
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -451,13 +453,13 @@ const EfficientDispensingWorkflow = () => {
             <Package className="h-4 w-4" />
             Batch Select
           </TabsTrigger>
-          <TabsTrigger value="payment" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Payment
+          <TabsTrigger value="medical-aid" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            Medical Aid
           </TabsTrigger>
           <TabsTrigger value="labels" className="flex items-center gap-2">
             <Printer className="h-4 w-4" />
-            Complete
+            Complete & Send to POS
           </TabsTrigger>
         </TabsList>
 
@@ -1068,8 +1070,8 @@ const EfficientDispensingWorkflow = () => {
           </Card>
         </TabsContent>
 
-        {/* Payment Processing Tab */}
-        <TabsContent value="payment">
+        {/* Medical Aid Processing Tab */}
+        <TabsContent value="medical-aid">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
