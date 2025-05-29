@@ -100,6 +100,13 @@ const EfficientDispensingWorkflow = () => {
     medicalAidProvider: ''
   });
   const [manualPrescription, setManualPrescription] = useState<ManualPrescriptionItem[]>([]);
+  const [newMedicine, setNewMedicine] = useState({
+    medicineName: '',
+    dosage: '',
+    quantity: '',
+    instructions: '',
+    price: ''
+  });
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({
     method: 'CASH',
     amount: 0
