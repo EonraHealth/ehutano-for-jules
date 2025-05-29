@@ -61,14 +61,40 @@ const EfficientDispensingWorkflow = () => {
   const queryClient = useQueryClient();
 
   // Fetch pending prescriptions for dispensing
-  const { data: pendingPrescriptions, isLoading: prescriptionsLoading } = useQuery<PrescriptionForDispensing[]>({
+  const { data: pendingPrescriptions = [], isLoading: prescriptionsLoading } = useQuery<PrescriptionForDispensing[]>({
     queryKey: ['/api/v1/pharmacy/prescriptions/pending-dispensing'],
+    queryFn: async () => {
+      const response = await fetch('/api/v1/pharmacy/prescriptions/pending-dispensing', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch pending prescriptions');
+      }
+      return response.json();
+    },
     refetchInterval: 30000, // Refresh every 30 seconds
+    retry: false, // Don't retry on auth errors
   });
 
   // Fetch inventory with batch tracking
-  const { data: inventoryBatches, isLoading: inventoryLoading } = useQuery({
+  const { data: inventoryBatches = [], isLoading: inventoryLoading } = useQuery({
     queryKey: ['/api/v1/pharmacy/inventory/batches'],
+    queryFn: async () => {
+      const response = await fetch('/api/v1/pharmacy/inventory/batches', {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch inventory batches');
+      }
+      return response.json();
+    },
+    retry: false, // Don't retry on auth errors
   });
 
   // Barcode verification mutation
@@ -132,6 +158,48 @@ const EfficientDispensingWorkflow = () => {
     const totalItems = currentPrescription.items.length;
     const verifiedItems = currentPrescription.items.filter(item => item.verified).length;
     setDispensingProgress((verifiedItems / totalItems) * 100);
+  };
+
+  const handleBatchSelection = (itemId: number, batchNumber: string, expiryDate: string) => {
+    setCurrentPrescription(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        items: prev.items.map(item => 
+          item.id === itemId 
+            ? { ...item, batchNumber, expiryDate }
+            : item
+        )
+      };
+    });
+  };
+
+  const handleQuantityChange = (itemId: number, quantity: number) => {
+    setCurrentPrescription(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        items: prev.items.map(item => 
+          item.id === itemId 
+            ? { ...item, dispensedQuantity: quantity }
+            : item
+        )
+      };
+    });
+  };
+
+  const handleNotesChange = (itemId: number, notes: string) => {
+    setCurrentPrescription(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        items: prev.items.map(item => 
+          item.id === itemId 
+            ? { ...item, dispensingNotes: notes }
+            : item
+        )
+      };
+    });
   };
 
   const handleBarcodeVerification = async () => {
