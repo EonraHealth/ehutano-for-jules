@@ -1075,11 +1075,11 @@ const EfficientDispensingWorkflow = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Payment Processing
+                <CreditCard className="h-5 w-5" />
+                Medical Aid Processing
               </CardTitle>
               <CardDescription>
-                Process customer payment and finalize transaction
+                Process medical aid claims or mark as private payment
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -1257,10 +1257,10 @@ const EfficientDispensingWorkflow = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5" />
-                Transaction Complete
+                Complete Dispensing & Send to POS
               </CardTitle>
               <CardDescription>
-                Finalize dispensing, print receipt and medication labels
+                Print medication labels and send patient details to POS for payment processing
               </CardDescription>
             </CardHeader>
             <CardContent>
