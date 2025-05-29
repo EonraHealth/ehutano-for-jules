@@ -867,6 +867,9 @@ const EfficientDispensingWorkflow = () => {
                                   <span className="ml-2">Batch: {item.batchNumber}</span>
                                 )}
                               </div>
+                              <div className="text-xs text-blue-600 font-mono bg-blue-50 px-2 py-1 rounded mt-1 inline-block">
+                                Barcode: {item.medicineId}
+                              </div>
                             </div>
                             {item.verified ? (
                               <CheckCircle className="h-5 w-5 text-green-600" />
