@@ -20,7 +20,10 @@ import {
   BarChart3,
   Calendar,
   User,
-  Pill
+  Pill,
+  FileText,
+  Eye,
+  Download
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
