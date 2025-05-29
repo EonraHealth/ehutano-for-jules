@@ -204,12 +204,42 @@ export default function BillingFinancialIntegration() {
                     <div>
                       <Label htmlFor="medicine-search">Add Medicine</Label>
                       <div className="flex gap-2">
+                        <Select>
+                          <SelectTrigger className="flex-1">
+                            <SelectValue placeholder="Search medicine by name or scan barcode" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">Amoxicillin 500mg - $3.75</SelectItem>
+                            <SelectItem value="2">Paracetamol 500mg - $1.20</SelectItem>
+                            <SelectItem value="3">Vitamin D3 1000IU - $2.50</SelectItem>
+                            <SelectItem value="4">Ibuprofen 400mg - $2.80</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <Input 
-                          id="medicine-search" 
-                          placeholder="Search medicine by name or scan barcode" 
-                          className="flex-1"
+                          type="number" 
+                          placeholder="Qty" 
+                          className="w-20"
+                          min="1"
+                          defaultValue="1"
                         />
-                        <Button>Add Item</Button>
+                        <Button onClick={() => {
+                          setCurrentSale(prev => ({
+                            ...prev,
+                            items: [...prev.items, {
+                              id: Date.now(),
+                              medicineName: "Amoxicillin 500mg",
+                              quantity: 1,
+                              unitPrice: 3.75,
+                              total: 3.75
+                            }]
+                          }));
+                          toast({
+                            title: "Item Added",
+                            description: "Medicine added to sale"
+                          });
+                        }}>
+                          Add Item
+                        </Button>
                       </div>
                     </div>
 
@@ -230,7 +260,23 @@ export default function BillingFinancialIntegration() {
                               </div>
                               <div className="text-right">
                                 <div className="font-medium">${item.total.toFixed(2)}</div>
-                                <Button variant="ghost" size="sm" className="text-red-600">Remove</Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="text-red-600"
+                                  onClick={() => {
+                                    setCurrentSale(prev => ({
+                                      ...prev,
+                                      items: prev.items.filter((_, i) => i !== index)
+                                    }));
+                                    toast({
+                                      title: "Item Removed",
+                                      description: "Medicine removed from sale"
+                                    });
+                                  }}
+                                >
+                                  Remove
+                                </Button>
                               </div>
                             </div>
                           ))

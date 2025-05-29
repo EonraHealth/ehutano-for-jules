@@ -200,12 +200,127 @@ export default function StockInventoryManagement() {
                       Add Stock
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
                       <DialogTitle>Add New Stock</DialogTitle>
                       <DialogDescription>Add new inventory items to your pharmacy</DialogDescription>
                     </DialogHeader>
-                    {/* Add stock form would go here */}
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="medicine-name">Medicine Name</Label>
+                        <Input
+                          id="medicine-name"
+                          placeholder="Enter medicine name"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="batch-number">Batch Number</Label>
+                          <Input
+                            id="batch-number"
+                            placeholder="e.g. AMX-2024-001"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="expiry-date">Expiry Date</Label>
+                          <Input
+                            id="expiry-date"
+                            type="date"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <Label htmlFor="quantity">Quantity</Label>
+                          <Input
+                            id="quantity"
+                            type="number"
+                            placeholder="100"
+                            min="1"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="min-stock">Min Stock</Label>
+                          <Input
+                            id="min-stock"
+                            type="number"
+                            placeholder="50"
+                            min="1"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="max-stock">Max Stock</Label>
+                          <Input
+                            id="max-stock"
+                            type="number"
+                            placeholder="500"
+                            min="1"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="cost-price">Cost Price ($)</Label>
+                          <Input
+                            id="cost-price"
+                            type="number"
+                            placeholder="2.50"
+                            step="0.01"
+                            min="0"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="selling-price">Selling Price ($)</Label>
+                          <Input
+                            id="selling-price"
+                            type="number"
+                            placeholder="3.75"
+                            step="0.01"
+                            min="0"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="supplier">Supplier</Label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select supplier" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">PharmaCorp Ltd</SelectItem>
+                            <SelectItem value="2">MediSupply Zimbabwe</SelectItem>
+                            <SelectItem value="3">HealthDistributors Inc</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="location">Storage Location</Label>
+                        <Input
+                          id="location"
+                          placeholder="e.g. Shelf A-1"
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setIsAddDialogOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={() => {
+                            addStockMutation.mutate({
+                              medicineName: "New Medicine",
+                              quantity: 100,
+                              batchNumber: "BATCH-001"
+                            });
+                          }}
+                          disabled={addStockMutation.isPending}
+                        >
+                          {addStockMutation.isPending ? "Adding..." : "Add Stock"}
+                        </Button>
+                      </div>
+                    </div>
                   </DialogContent>
                 </Dialog>
               </div>
@@ -291,14 +406,83 @@ export default function StockInventoryManagement() {
                                   Adjust
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent>
+                              <DialogContent className="sm:max-w-md">
                                 <DialogHeader>
                                   <DialogTitle>Adjust Stock</DialogTitle>
                                   <DialogDescription>
                                     Adjust stock levels for {item.medicineName}
                                   </DialogDescription>
                                 </DialogHeader>
-                                {/* Stock adjustment form would go here */}
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label>Current Stock: {item.stockQuantity} units</Label>
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="movement-type">Movement Type</Label>
+                                    <Select>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select movement type" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="IN">Stock In</SelectItem>
+                                        <SelectItem value="OUT">Stock Out</SelectItem>
+                                        <SelectItem value="ADJUSTMENT">Manual Adjustment</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="quantity">Quantity</Label>
+                                    <Input
+                                      id="quantity"
+                                      type="number"
+                                      placeholder="Enter quantity"
+                                      min="1"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="reason">Reason</Label>
+                                    <Select>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select reason" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="stock_receipt">Stock Receipt</SelectItem>
+                                        <SelectItem value="dispensing">Dispensing</SelectItem>
+                                        <SelectItem value="damaged">Damaged Goods</SelectItem>
+                                        <SelectItem value="expired">Expired Stock</SelectItem>
+                                        <SelectItem value="correction">Stock Correction</SelectItem>
+                                        <SelectItem value="theft">Theft/Loss</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="notes">Additional Notes</Label>
+                                    <Input
+                                      id="notes"
+                                      placeholder="Optional notes"
+                                    />
+                                  </div>
+                                  <div className="flex justify-end gap-2">
+                                    <Button 
+                                      variant="outline" 
+                                      onClick={() => setIsAdjustDialogOpen(false)}
+                                    >
+                                      Cancel
+                                    </Button>
+                                    <Button 
+                                      onClick={() => {
+                                        handleStockAdjustment({
+                                          movementType: "ADJUSTMENT",
+                                          quantity: 10,
+                                          reason: "Manual adjustment"
+                                        });
+                                      }}
+                                      disabled={adjustStockMutation.isPending}
+                                    >
+                                      {adjustStockMutation.isPending ? "Processing..." : "Save Adjustment"}
+                                    </Button>
+                                  </div>
+                                </div>
                               </DialogContent>
                             </Dialog>
                           </td>

@@ -148,15 +148,45 @@ const EfficientDispensingWorkflow = () => {
       return;
     }
 
-    await verifyBarcodeMutation.mutateAsync({
-      barcode: scannedBarcode,
-      medicineId: nextItem.medicineId,
-      prescriptionId: currentPrescription.id,
-    });
+    try {
+      const result = await verifyBarcodeMutation.mutateAsync({
+        barcode: scannedBarcode,
+        medicineId: nextItem.medicineId,
+        prescriptionId: currentPrescription.id
+      });
 
-    setScannedBarcode('');
-    if (barcodeInputRef.current) {
-      barcodeInputRef.current.focus();
+      if (result.verified) {
+        // Mark item as verified
+        setCurrentPrescription(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            items: prev.items.map(item => 
+              item.id === nextItem.id ? { ...item, verified: true } : item
+            )
+          };
+        });
+        
+        setScannedBarcode('');
+        updateDispensingProgress();
+        
+        toast({
+          title: 'Item Verified',
+          description: `${result.medicineName} verified successfully`,
+        });
+      } else {
+        toast({
+          title: 'Verification Failed',
+          description: 'Barcode does not match expected medicine',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Verification Error',
+        description: 'Failed to verify barcode',
+        variant: 'destructive',
+      });
     }
   };
 
