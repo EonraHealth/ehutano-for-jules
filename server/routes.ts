@@ -23,6 +23,9 @@ import {
 import { authenticateUser, generateToken, hashPassword, verifyPassword } from "./auth";
 import { authenticateJWT, authorizeRoles } from "./middleware";
 
+// In-memory storage for manual prescriptions (in a real app, this would be in a database)
+const manualPrescriptions: any[] = [];
+
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
 
@@ -1722,7 +1725,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       ];
       
-      res.json(pendingPrescriptions);
+      // Combine default prescriptions with manual prescriptions
+      const allPrescriptions = [...pendingPrescriptions, ...manualPrescriptions];
+      
+      res.json(allPrescriptions);
     } catch (error) {
       console.error('Error fetching pending prescriptions:', error);
       res.status(500).json({ message: 'Failed to fetch pending prescriptions' });
@@ -1761,6 +1767,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           price: item.price
         }))
       };
+      
+      // Add to manual prescriptions storage
+      manualPrescriptions.push(newPrescription);
       
       res.status(201).json(newPrescription);
     } catch (error) {
