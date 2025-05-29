@@ -157,7 +157,8 @@ const EfficientDispensingWorkflow = () => {
   // Barcode verification mutation
   const verifyBarcodeMutation = useMutation({
     mutationFn: async (data: { barcode: string; medicineId: number; prescriptionId: number }) => {
-      return apiRequest('POST', '/api/v1/pharmacy/verify-barcode', data);
+      const response = await apiRequest('POST', '/api/v1/pharmacy/verify-barcode', data);
+      return response.json();
     },
     onSuccess: (data: any) => {
       toast({
