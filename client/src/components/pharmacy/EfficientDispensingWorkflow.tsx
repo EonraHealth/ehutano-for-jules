@@ -922,15 +922,197 @@ const EfficientDispensingWorkflow = () => {
           </Card>
         </TabsContent>
 
+        {/* Payment Processing Tab */}
+        <TabsContent value="payment">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Payment Processing
+              </CardTitle>
+              <CardDescription>
+                Process customer payment and finalize transaction
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Order Summary */}
+              <div className="border rounded-lg p-4 bg-gray-50">
+                <h3 className="font-semibold mb-3">Order Summary</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span>Customer:</span>
+                    <span className="font-medium">{walkInCustomer.name}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Phone:</span>
+                    <span>{walkInCustomer.phone}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Items:</span>
+                    <span>{manualPrescription.length} medicine(s)</span>
+                  </div>
+                  <hr className="my-2" />
+                  <div className="flex justify-between text-lg font-semibold">
+                    <span>Total Amount:</span>
+                    <span>${manualPrescription.reduce((sum, item) => sum + item.price, 0).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Method Selection */}
+              <div className="space-y-4">
+                <h3 className="font-semibold">Payment Method</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Button
+                    variant={paymentInfo.method === 'CASH' ? 'default' : 'outline'}
+                    onClick={() => setPaymentInfo(prev => ({ ...prev, method: 'CASH' }))}
+                    className="p-4 h-auto flex-col"
+                  >
+                    <BarChart3 className="h-6 w-6 mb-2" />
+                    Cash
+                  </Button>
+                  <Button
+                    variant={paymentInfo.method === 'CARD' ? 'default' : 'outline'}
+                    onClick={() => setPaymentInfo(prev => ({ ...prev, method: 'CARD' }))}
+                    className="p-4 h-auto flex-col"
+                  >
+                    <BarChart3 className="h-6 w-6 mb-2" />
+                    Card
+                  </Button>
+                  <Button
+                    variant={paymentInfo.method === 'MOBILE_MONEY' ? 'default' : 'outline'}
+                    onClick={() => setPaymentInfo(prev => ({ ...prev, method: 'MOBILE_MONEY' }))}
+                    className="p-4 h-auto flex-col"
+                  >
+                    <BarChart3 className="h-6 w-6 mb-2" />
+                    Mobile Money
+                  </Button>
+                  <Button
+                    variant={paymentInfo.method === 'MEDICAL_AID' ? 'default' : 'outline'}
+                    onClick={() => setPaymentInfo(prev => ({ ...prev, method: 'MEDICAL_AID' }))}
+                    className="p-4 h-auto flex-col"
+                  >
+                    <ShieldCheck className="h-6 w-6 mb-2" />
+                    Medical Aid
+                  </Button>
+                </div>
+              </div>
+
+              {/* Payment Details */}
+              {paymentInfo.method === 'CASH' && (
+                <div className="space-y-4 p-4 border rounded-lg">
+                  <h4 className="font-medium">Cash Payment</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Amount Received ($)</Label>
+                      <Input 
+                        type="number" 
+                        step="0.01"
+                        placeholder="Enter amount received"
+                        onChange={(e) => setPaymentInfo(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Change Due ($)</Label>
+                      <Input 
+                        value={(paymentInfo.amount - manualPrescription.reduce((sum, item) => sum + item.price, 0)).toFixed(2)}
+                        readOnly
+                        className="bg-gray-50"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {paymentInfo.method === 'CARD' && (
+                <div className="space-y-4 p-4 border rounded-lg">
+                  <h4 className="font-medium">Card Payment</h4>
+                  <div className="space-y-2">
+                    <Label>Transaction Reference</Label>
+                    <Input 
+                      placeholder="Enter card transaction reference"
+                      onChange={(e) => setPaymentInfo(prev => ({ ...prev, reference: e.target.value }))}
+                    />
+                  </div>
+                  <Button variant="outline" className="w-full">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Process Card Payment
+                  </Button>
+                </div>
+              )}
+
+              {paymentInfo.method === 'MOBILE_MONEY' && (
+                <div className="space-y-4 p-4 border rounded-lg">
+                  <h4 className="font-medium">Mobile Money Payment</h4>
+                  <div className="space-y-2">
+                    <Label>Transaction ID</Label>
+                    <Input 
+                      placeholder="Enter mobile money transaction ID"
+                      onChange={(e) => setPaymentInfo(prev => ({ ...prev, reference: e.target.value }))}
+                    />
+                  </div>
+                  <Button variant="outline" className="w-full">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Verify Mobile Payment
+                  </Button>
+                </div>
+              )}
+
+              {paymentInfo.method === 'MEDICAL_AID' && (
+                <div className="space-y-4 p-4 border rounded-lg">
+                  <h4 className="font-medium">Medical Aid Claim</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Medical Aid Provider</Label>
+                      <Input 
+                        value={walkInCustomer.medicalAidProvider}
+                        readOnly
+                        className="bg-gray-50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Membership Number</Label>
+                      <Input 
+                        value={walkInCustomer.medicalAidNumber}
+                        readOnly
+                        className="bg-gray-50"
+                      />
+                    </div>
+                  </div>
+                  <Button variant="outline" className="w-full">
+                    <ShieldCheck className="h-4 w-4 mr-2" />
+                    Submit Medical Aid Claim
+                  </Button>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-4 border-t">
+                <Button variant="outline" onClick={() => setActiveTab('batch')} className="flex-1">
+                  <Package className="h-4 w-4 mr-2" />
+                  Back to Batch Selection
+                </Button>
+                <Button 
+                  onClick={() => setActiveTab('labels')}
+                  className="flex-1"
+                  disabled={paymentInfo.method === 'CASH' && paymentInfo.amount < manualPrescription.reduce((sum, item) => sum + item.price, 0)}
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Complete Transaction
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="labels">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Printer className="h-5 w-5" />
-                Medication Label Printing
+                <CheckCircle className="h-5 w-5" />
+                Transaction Complete
               </CardTitle>
               <CardDescription>
-                Generate regulatory-compliant medication labels
+                Finalize dispensing, print receipt and medication labels
               </CardDescription>
             </CardHeader>
             <CardContent>
