@@ -577,29 +577,82 @@ const EfficientDispensingWorkflow = () => {
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 border rounded-lg mb-4">
                   <div className="space-y-2">
                     <Label>Medicine Name</Label>
-                    <Input placeholder="Enter medicine name" />
+                    <Input 
+                      placeholder="Enter medicine name"
+                      value={newMedicine.medicineName}
+                      onChange={(e) => setNewMedicine(prev => ({ ...prev, medicineName: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Dosage</Label>
-                    <Input placeholder="e.g., 500mg" />
+                    <Input 
+                      placeholder="e.g., 500mg"
+                      value={newMedicine.dosage}
+                      onChange={(e) => setNewMedicine(prev => ({ ...prev, dosage: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Quantity</Label>
-                    <Input type="number" placeholder="30" />
+                    <Input 
+                      type="number" 
+                      placeholder="30"
+                      value={newMedicine.quantity}
+                      onChange={(e) => setNewMedicine(prev => ({ ...prev, quantity: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Instructions</Label>
-                    <Input placeholder="Take with meals" />
+                    <Input 
+                      placeholder="Take with meals"
+                      value={newMedicine.instructions}
+                      onChange={(e) => setNewMedicine(prev => ({ ...prev, instructions: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Price ($)</Label>
-                    <Input type="number" step="0.01" placeholder="25.50" />
+                    <Input 
+                      type="number" 
+                      step="0.01" 
+                      placeholder="25.50"
+                      value={newMedicine.price}
+                      onChange={(e) => setNewMedicine(prev => ({ ...prev, price: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>&nbsp;</Label>
-                    <Button className="w-full">
+                    <Button 
+                      className="w-full"
+                      onClick={() => {
+                        if (!newMedicine.medicineName || !newMedicine.quantity || !newMedicine.price) {
+                          toast({
+                            title: 'Missing Information',
+                            description: 'Please fill in medicine name, quantity, and price',
+                            variant: 'destructive',
+                          });
+                          return;
+                        }
+                        
+                        addMedicineMutation.mutate({
+                          medicineName: newMedicine.medicineName,
+                          dosage: newMedicine.dosage,
+                          quantity: Number(newMedicine.quantity),
+                          instructions: newMedicine.instructions,
+                          price: Number(newMedicine.price)
+                        });
+                        
+                        // Reset form
+                        setNewMedicine({
+                          medicineName: '',
+                          dosage: '',
+                          quantity: '',
+                          instructions: '',
+                          price: ''
+                        });
+                      }}
+                      disabled={addMedicineMutation.isPending}
+                    >
                       <Eye className="h-4 w-4 mr-2" />
-                      Add
+                      {addMedicineMutation.isPending ? 'Adding...' : 'Add'}
                     </Button>
                   </div>
                 </div>
