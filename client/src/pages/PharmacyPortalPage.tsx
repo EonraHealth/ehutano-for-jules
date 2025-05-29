@@ -101,33 +101,7 @@ const PharmacyPortalPage = () => {
             <PharmacyFinancial />
           </TabsContent>
 
-          <TabsContent value="stock">
-            <StockInventoryManagement />
-          </TabsContent>
 
-          <TabsContent value="billing">
-            <BillingFinancialIntegration />
-          </TabsContent>
-
-          <TabsContent value="orders">
-            <OrderProcessing />
-          </TabsContent>
-
-          <TabsContent value="prescriptions">
-            <PrescriptionManagement />
-          </TabsContent>
-
-          <TabsContent value="dispensing">
-            <EfficientDispensingWorkflow />
-          </TabsContent>
-
-          <TabsContent value="delivery">
-            <DeliveryManagement />
-          </TabsContent>
-
-          <TabsContent value="claims">
-            <MedicalAidClaimsManager />
-          </TabsContent>
 
           <TabsContent value="analytics">
             <Card>
