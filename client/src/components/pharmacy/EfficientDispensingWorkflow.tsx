@@ -50,13 +50,60 @@ interface PrescriptionForDispensing {
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 }
 
+interface WalkInCustomer {
+  id?: number;
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  dateOfBirth?: string;
+  medicalAidNumber?: string;
+  medicalAidProvider?: string;
+}
+
+interface ManualPrescriptionItem {
+  id: number;
+  medicineName: string;
+  dosage: string;
+  quantity: number;
+  instructions: string;
+  price: number;
+  medicineId?: number;
+}
+
+interface PaymentInfo {
+  method: 'CASH' | 'CARD' | 'MOBILE_MONEY' | 'MEDICAL_AID';
+  amount: number;
+  reference?: string;
+  medicalAidClaim?: boolean;
+}
+
 const EfficientDispensingWorkflow = () => {
-  const [activeTab, setActiveTab] = useState('scan');
+  const [activeTab, setActiveTab] = useState('customer');
   const [currentPrescription, setCurrentPrescription] = useState<PrescriptionForDispensing | null>(null);
   const [scannedBarcode, setScannedBarcode] = useState('');
   const [dispensingProgress, setDispensingProgress] = useState(0);
   const [batchFilter, setBatchFilter] = useState('FEFO'); // First-Expiry, First-Out
   const barcodeInputRef = useRef<HTMLInputElement>(null);
+  
+  // Walk-in customer workflow states
+  const [walkInCustomer, setWalkInCustomer] = useState<WalkInCustomer>({
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+    dateOfBirth: '',
+    medicalAidNumber: '',
+    medicalAidProvider: ''
+  });
+  const [manualPrescription, setManualPrescription] = useState<ManualPrescriptionItem[]>([]);
+  const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({
+    method: 'CASH',
+    amount: 0
+  });
+  const [orderTotal, setOrderTotal] = useState(0);
+  const [customerSearchTerm, setCustomerSearchTerm] = useState('');
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -309,24 +356,253 @@ const EfficientDispensingWorkflow = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="customer" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            Customer
+          </TabsTrigger>
+          <TabsTrigger value="prescription" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Prescription
+          </TabsTrigger>
           <TabsTrigger value="scan" className="flex items-center gap-2">
             <Scan className="h-4 w-4" />
-            Barcode Scan
+            Scan & Verify
           </TabsTrigger>
           <TabsTrigger value="batch" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
-            Batch Tracking
+            Batch Select
           </TabsTrigger>
-          <TabsTrigger value="dispensing" className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4" />
-            Dispensing
+          <TabsTrigger value="payment" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Payment
           </TabsTrigger>
           <TabsTrigger value="labels" className="flex items-center gap-2">
             <Printer className="h-4 w-4" />
-            Label Printing
+            Complete
           </TabsTrigger>
         </TabsList>
+
+        {/* Customer Registration & Lookup Tab */}
+        <TabsContent value="customer">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="h-5 w-5" />
+                Customer Information
+              </CardTitle>
+              <CardDescription>
+                Register new customer or search existing customer records
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Customer Search */}
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Search by name, phone, or medical aid number..."
+                    value={customerSearchTerm}
+                    onChange={(e) => setCustomerSearchTerm(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button variant="outline">
+                    <Eye className="h-4 w-4 mr-2" />
+                    Search
+                  </Button>
+                </div>
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold mb-4">Customer Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="customerName">Full Name *</Label>
+                    <Input
+                      id="customerName"
+                      value={walkInCustomer.name}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Enter customer full name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customerPhone">Phone Number *</Label>
+                    <Input
+                      id="customerPhone"
+                      value={walkInCustomer.phone}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="+263 77 123 4567"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customerEmail">Email Address</Label>
+                    <Input
+                      id="customerEmail"
+                      type="email"
+                      value={walkInCustomer.email}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="customer@email.com"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customerDOB">Date of Birth</Label>
+                    <Input
+                      id="customerDOB"
+                      type="date"
+                      value={walkInCustomer.dateOfBirth}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="customerAddress">Address</Label>
+                    <Input
+                      id="customerAddress"
+                      value={walkInCustomer.address}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, address: e.target.value }))}
+                      placeholder="Enter full address"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="medicalAidProvider">Medical Aid Provider</Label>
+                    <Input
+                      id="medicalAidProvider"
+                      value={walkInCustomer.medicalAidProvider}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, medicalAidProvider: e.target.value }))}
+                      placeholder="e.g., CIMAS, Premier"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="medicalAidNumber">Medical Aid Number</Label>
+                    <Input
+                      id="medicalAidNumber"
+                      value={walkInCustomer.medicalAidNumber}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, medicalAidNumber: e.target.value }))}
+                      placeholder="Medical aid membership number"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-6">
+                  <Button 
+                    onClick={() => setActiveTab('prescription')}
+                    disabled={!walkInCustomer.name || !walkInCustomer.phone}
+                    className="flex-1"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Continue to Prescription
+                  </Button>
+                  <Button variant="outline">
+                    <Download className="h-4 w-4 mr-2" />
+                    Save Customer
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Manual Prescription Entry Tab */}
+        <TabsContent value="prescription">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Prescription Entry
+              </CardTitle>
+              <CardDescription>
+                Manually enter prescription details or scan existing prescription
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex gap-2 mb-4">
+                <Button variant="outline" className="flex-1">
+                  <Scan className="h-4 w-4 mr-2" />
+                  Scan Prescription
+                </Button>
+                <Button variant="outline" className="flex-1">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Upload Image
+                </Button>
+              </div>
+
+              <div className="border-t pt-6">
+                <h3 className="text-lg font-semibold mb-4">Prescription Items</h3>
+                
+                {/* Add Medicine Form */}
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 border rounded-lg mb-4">
+                  <div className="space-y-2">
+                    <Label>Medicine Name</Label>
+                    <Input placeholder="Enter medicine name" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Dosage</Label>
+                    <Input placeholder="e.g., 500mg" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Quantity</Label>
+                    <Input type="number" placeholder="30" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Instructions</Label>
+                    <Input placeholder="Take with meals" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Price ($)</Label>
+                    <Input type="number" step="0.01" placeholder="25.50" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>&nbsp;</Label>
+                    <Button className="w-full">
+                      <Eye className="h-4 w-4 mr-2" />
+                      Add
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Prescription Items List */}
+                <div className="space-y-3">
+                  {manualPrescription.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500 border-2 border-dashed rounded-lg">
+                      No prescription items added yet. Add medicines using the form above.
+                    </div>
+                  ) : (
+                    manualPrescription.map((item, index) => (
+                      <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex-1">
+                          <div className="font-medium">{item.medicineName}</div>
+                          <div className="text-sm text-gray-600">
+                            {item.dosage} • Qty: {item.quantity} • {item.instructions}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium">${item.price.toFixed(2)}</div>
+                          <Button variant="outline" size="sm">Remove</Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="flex justify-between items-center pt-4 border-t">
+                  <div className="text-lg font-semibold">
+                    Total: ${manualPrescription.reduce((sum, item) => sum + item.price, 0).toFixed(2)}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => setActiveTab('customer')}>
+                      <User className="h-4 w-4 mr-2" />
+                      Back to Customer
+                    </Button>
+                    <Button 
+                      onClick={() => setActiveTab('scan')}
+                      disabled={manualPrescription.length === 0}
+                    >
+                      <Scan className="h-4 w-4 mr-2" />
+                      Continue to Verification
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="scan">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
