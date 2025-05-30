@@ -395,6 +395,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     ]);
   });
+
+  // Medicine Search for Price Comparison - MUST be before /:medicineId route
+  app.get("/api/v1/medicines/search", async (req: Request, res: Response) => {
+    try {
+      const { q } = req.query;
+      const searchTerm = q as string;
+
+      if (!searchTerm || searchTerm.length < 2) {
+        return res.json([]);
+      }
+
+      // Real Zimbabwe medicines from your attached file
+      const medicineData = [
+        {
+          id: 1,
+          name: "Paracetamol (Panadol)",
+          genericName: "Paracetamol",
+          manufacturer: "GSK",
+          category: "OTC",
+          price: "3.20",
+          dosage: "500mg",
+          inStock: true
+        },
+        {
+          id: 2,
+          name: "Abacavir (Ziagen)",
+          genericName: "Abacavir",
+          manufacturer: "Aurobindo Pharma Ltd",
+          category: "Prescription",
+          price: "45.20",
+          dosage: "300mg",
+          inStock: true
+        },
+        {
+          id: 3,
+          name: "Amoxicillin (Amoxil)",
+          genericName: "Amoxicillin",
+          manufacturer: "GSK",
+          category: "Prescription",
+          price: "12.50",
+          dosage: "500mg",
+          inStock: true
+        },
+        {
+          id: 4,
+          name: "Metformin (Glucophage)",
+          genericName: "Metformin Hydrochloride",
+          manufacturer: "Merck",
+          category: "Prescription",
+          price: "5.60",
+          dosage: "500mg",
+          inStock: true
+        },
+        {
+          id: 5,
+          name: "Brufen",
+          genericName: "Ibuprofen",
+          manufacturer: "Abbott",
+          category: "OTC",
+          price: "4.50",
+          dosage: "400mg",
+          inStock: true
+        },
+        {
+          id: 6,
+          name: "Aciclovir (Zovirax)",
+          genericName: "Acyclovir",
+          manufacturer: "Cipla Ltd",
+          category: "Prescription",
+          price: "8.60",
+          dosage: "200mg",
+          inStock: true
+        },
+        {
+          id: 7,
+          name: "Salbutamol (Ventolin)",
+          genericName: "Salbutamol Sulfate",
+          manufacturer: "GSK",
+          category: "Prescription",
+          price: "22.40",
+          dosage: "100mcg",
+          inStock: true
+        },
+        {
+          id: 8,
+          name: "Omeprazole (Losec)",
+          genericName: "Omeprazole",
+          manufacturer: "AstraZeneca",
+          category: "Prescription",
+          price: "9.50",
+          dosage: "20mg",
+          inStock: true
+        }
+      ];
+
+      const filtered = medicineData.filter(medicine =>
+        medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        medicine.genericName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      res.json(filtered);
+    } catch (error) {
+      console.error("Medicine search error:", error);
+      res.status(500).json({ message: "Failed to search medicines" });
+    }
+  });
   
   // Get medicine details
   app.get("/api/v1/medicines/:medicineId", async (req: Request, res: Response) => {
@@ -2525,111 +2631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Medicine Search for Price Comparison
-  app.get("/api/v1/medicines/search", async (req: Request, res: Response) => {
-    try {
-      const { q } = req.query;
-      const searchTerm = q as string;
 
-      if (!searchTerm || searchTerm.length < 2) {
-        return res.json([]);
-      }
-
-      // Fallback to hardcoded medicines with real Zimbabwe data from your attached file
-      const medicineData = [
-        {
-          id: 1,
-          name: "Paracetamol (Panadol)",
-          genericName: "Paracetamol",
-          manufacturer: "GSK",
-          category: "OTC",
-          price: "3.20",
-          dosage: "500mg",
-          inStock: true
-        },
-        {
-          id: 2,
-          name: "Abacavir (Ziagen)",
-          genericName: "Abacavir",
-          manufacturer: "Aurobindo Pharma Ltd",
-          category: "Prescription",
-          price: "45.20",
-          dosage: "300mg",
-          inStock: true
-        },
-        {
-          id: 3,
-          name: "Amoxicillin (Amoxil)",
-          genericName: "Amoxicillin",
-          manufacturer: "GSK",
-          category: "Prescription",
-          price: "12.50",
-          dosage: "500mg",
-          inStock: true
-        },
-        {
-          id: 4,
-          name: "Metformin (Glucophage)",
-          genericName: "Metformin Hydrochloride",
-          manufacturer: "Merck",
-          category: "Prescription",
-          price: "5.60",
-          dosage: "500mg",
-          inStock: true
-        },
-        {
-          id: 5,
-          name: "Brufen",
-          genericName: "Ibuprofen",
-          manufacturer: "Abbott",
-          category: "OTC",
-          price: "4.50",
-          dosage: "400mg",
-          inStock: true
-        },
-        {
-          id: 6,
-          name: "Aciclovir (Zovirax)",
-          genericName: "Acyclovir",
-          manufacturer: "Cipla Ltd",
-          category: "Prescription",
-          price: "8.60",
-          dosage: "200mg",
-          inStock: true
-        },
-        {
-          id: 7,
-          name: "Salbutamol (Ventolin)",
-          genericName: "Salbutamol Sulfate",
-          manufacturer: "GSK",
-          category: "Prescription",
-          price: "22.40",
-          dosage: "100mcg",
-          inStock: true
-        },
-        {
-          id: 8,
-          name: "Omeprazole (Losec)",
-          genericName: "Omeprazole",
-          manufacturer: "AstraZeneca",
-          category: "Prescription",
-          price: "9.50",
-          dosage: "20mg",
-          inStock: true
-        }
-      ];
-
-      const filtered = medicineData.filter(medicine =>
-        medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        medicine.genericName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-
-      res.json(filtered);
-    } catch (error) {
-      console.error("Medicine search error:", error);
-      res.status(500).json({ message: "Failed to search medicines" });
-    }
-  });
 
   // Price Comparison for Medicine
   app.get("/api/v1/medicines/price-comparison/:medicineId", async (req: Request, res: Response) => {
