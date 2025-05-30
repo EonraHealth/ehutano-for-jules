@@ -44,8 +44,11 @@ async function populateZimbabweMedicines() {
     else if (strength.includes("100")) packSize = 100;
     else if (strength.includes("50")) packSize = 50;
     
+    // Create unique name with registration number to avoid duplicates
+    const uniqueName = `${tradeName} (${genericName}) - ${regNo}`;
+    
     medicineData.push({
-      name: `${tradeName} (${genericName})`,
+      name: uniqueName,
       genericName: genericName.trim(),
       manufacturer: manufacturerName || "Unknown",
       category: medicineCategory,
