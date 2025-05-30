@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ClipboardList, FileText, Scan, Truck, Shield } from "lucide-react";
+import { ClipboardList, FileText, Scan, Truck, Shield, Languages } from "lucide-react";
 import OrderProcessing from "./OrderProcessing";
 import PrescriptionManagement from "./PrescriptionManagement";
 import EfficientDispensingWorkflow from "./EfficientDispensingWorkflow";
-
+import MedicationInstructionTranslator from "./MedicationInstructionTranslator";
 import MedicalAidClaimsManager from "./MedicalAidClaimsManager";
 
 export default function PharmacyOperations() {
@@ -22,7 +22,7 @@ export default function PharmacyOperations() {
         </CardHeader>
         <CardContent>
           <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
-            <TabsList className="grid grid-cols-4 w-full mb-6">
+            <TabsList className="grid grid-cols-5 w-full mb-6">
               <TabsTrigger value="orders" className="flex items-center gap-2">
                 <ClipboardList className="h-4 w-4" />
                 <span className="hidden sm:inline">Orders</span>
@@ -34,6 +34,10 @@ export default function PharmacyOperations() {
               <TabsTrigger value="dispensing" className="flex items-center gap-2">
                 <Scan className="h-4 w-4" />
                 <span className="hidden sm:inline">Dispensing</span>
+              </TabsTrigger>
+              <TabsTrigger value="translator" className="flex items-center gap-2">
+                <Languages className="h-4 w-4" />
+                <span className="hidden sm:inline">Translator</span>
               </TabsTrigger>
               <TabsTrigger value="claims" className="flex items-center gap-2">
                 <Shield className="h-4 w-4" />
@@ -51,6 +55,10 @@ export default function PharmacyOperations() {
 
             <TabsContent value="dispensing">
               <EfficientDispensingWorkflow />
+            </TabsContent>
+
+            <TabsContent value="translator">
+              <MedicationInstructionTranslator />
             </TabsContent>
 
             <TabsContent value="claims">
