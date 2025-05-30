@@ -129,6 +129,23 @@ const EfficientDispensingWorkflow = () => {
   const [dispensingFee, setDispensingFee] = useState(1.00);
   const [isSearchPopupOpen, setIsSearchPopupOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const handleMedicineSelect = (medicine: any) => {
+    setNewMedicine(prev => ({
+      ...prev,
+      medicineName: medicine.name.replace(/ - \d+\/[\d\.\/]+/g, '').trim(),
+      dosage: medicine.genericName || '',
+      medicineId: medicine.id,
+      packSize: medicine.packSize,
+      unitPrice: medicine.unitPrice,
+      fullPackPrice: medicine.fullPackPrice,
+      price: medicine.fullPackPrice.toString()
+    }));
+    toast({
+      title: "Medicine Selected",
+      description: `${medicine.name.replace(/ - \d+\/[\d\.\/]+/g, '').trim()} selected from search`,
+    });
+  };
   const [medicineSearchResults, setMedicineSearchResults] = useState<any[]>([]);
   const [showMedicineSuggestions, setShowMedicineSuggestions] = useState(false);
   const [instructionSuggestions] = useState([
@@ -1680,6 +1697,14 @@ const EfficientDispensingWorkflow = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Medicine Search Popup */}
+      <MedicineSearchPopup
+        isOpen={isSearchPopupOpen}
+        onClose={() => setIsSearchPopupOpen(false)}
+        onSelectMedicine={handleMedicineSelect}
+        initialSearchTerm={searchTerm}
+      />
     </div>
   );
 };
