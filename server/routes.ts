@@ -2521,5 +2521,230 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Medicine Search for Price Comparison
+  app.get("/api/v1/medicines/search", async (req: Request, res: Response) => {
+    try {
+      const { q } = req.query;
+      const searchTerm = q as string;
+
+      if (!searchTerm || searchTerm.length < 3) {
+        return res.json([]);
+      }
+
+      const medicines = [
+        {
+          id: 1,
+          name: "Amoxicillin 500mg Capsules",
+          genericName: "Amoxicillin",
+          dosage: "500mg",
+          category: "Antibiotics"
+        },
+        {
+          id: 2,
+          name: "Metformin 850mg Tablets",
+          genericName: "Metformin Hydrochloride",
+          dosage: "850mg",
+          category: "Diabetes"
+        },
+        {
+          id: 3,
+          name: "Lisinopril 10mg Tablets",
+          genericName: "Lisinopril",
+          dosage: "10mg",
+          category: "Cardiovascular"
+        },
+        {
+          id: 4,
+          name: "Simvastatin 20mg Tablets",
+          genericName: "Simvastatin",
+          dosage: "20mg",
+          category: "Cholesterol"
+        },
+        {
+          id: 5,
+          name: "Ibuprofen 400mg Tablets",
+          genericName: "Ibuprofen",
+          dosage: "400mg",
+          category: "Pain Relief"
+        },
+        {
+          id: 6,
+          name: "Paracetamol 500mg Tablets",
+          genericName: "Paracetamol",
+          dosage: "500mg",
+          category: "Pain Relief"
+        },
+        {
+          id: 7,
+          name: "Omeprazole 20mg Capsules",
+          genericName: "Omeprazole",
+          dosage: "20mg",
+          category: "Gastrointestinal"
+        }
+      ];
+
+      const filtered = medicines.filter(medicine =>
+        medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        medicine.genericName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      res.json(filtered);
+    } catch (error) {
+      console.error("Medicine search error:", error);
+      res.status(500).json({ message: "Failed to search medicines" });
+    }
+  });
+
+  // Price Comparison for Medicine
+  app.get("/api/v1/medicines/price-comparison/:medicineId", async (req: Request, res: Response) => {
+    try {
+      const { medicineId } = req.params;
+      const { radius = '5' } = req.query;
+
+      const medicine = {
+        id: parseInt(medicineId),
+        name: "Amoxicillin 500mg Capsules",
+        genericName: "Amoxicillin",
+        dosage: "500mg",
+        category: "Antibiotics"
+      };
+
+      const pharmacyPrices = [
+        {
+          pharmacyId: 1,
+          pharmacyName: "MedPlus Pharmacy",
+          address: "123 Samora Machel Avenue, Harare CBD",
+          distance: 2.3,
+          phone: "+263242123456",
+          rating: 4.5,
+          totalReviews: 127,
+          price: 12.50,
+          inStock: true,
+          lastUpdated: new Date().toISOString(),
+          deliveryAvailable: true,
+          deliveryFee: 5.00,
+          estimatedDeliveryTime: "2-4 hours",
+          openingHours: {
+            weekday: "8:00 AM - 8:00 PM",
+            saturday: "8:00 AM - 6:00 PM",
+            sunday: "9:00 AM - 5:00 PM"
+          },
+          isOpen: true,
+          specialOffers: "10% off for medical aid members"
+        },
+        {
+          pharmacyId: 2,
+          pharmacyName: "HealthCare Pharmacy",
+          address: "45 Borrowdale Road, Borrowdale",
+          distance: 8.1,
+          phone: "+263242234567",
+          rating: 4.2,
+          totalReviews: 89,
+          price: 15.75,
+          inStock: true,
+          lastUpdated: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+          deliveryAvailable: true,
+          deliveryFee: 8.00,
+          estimatedDeliveryTime: "3-5 hours",
+          openingHours: {
+            weekday: "7:30 AM - 9:00 PM",
+            saturday: "8:00 AM - 7:00 PM",
+            sunday: "10:00 AM - 4:00 PM"
+          },
+          isOpen: true
+        },
+        {
+          pharmacyId: 3,
+          pharmacyName: "City Pharmacy",
+          address: "78 Robert Mugabe Road, Harare CBD",
+          distance: 1.8,
+          phone: "+263242345678",
+          rating: 3.9,
+          totalReviews: 203,
+          price: 18.20,
+          inStock: false,
+          lastUpdated: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+          deliveryAvailable: false,
+          deliveryFee: 0,
+          estimatedDeliveryTime: "N/A",
+          openingHours: {
+            weekday: "8:00 AM - 6:00 PM",
+            saturday: "8:00 AM - 4:00 PM",
+            sunday: "Closed"
+          },
+          isOpen: false
+        },
+        {
+          pharmacyId: 4,
+          pharmacyName: "Wellness Pharmacy",
+          address: "156 Avondale Shopping Center, Avondale",
+          distance: 5.7,
+          phone: "+263242456789",
+          rating: 4.7,
+          totalReviews: 156,
+          price: 11.80,
+          inStock: true,
+          lastUpdated: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+          deliveryAvailable: true,
+          deliveryFee: 6.50,
+          estimatedDeliveryTime: "1-3 hours",
+          openingHours: {
+            weekday: "8:00 AM - 8:30 PM",
+            saturday: "8:00 AM - 6:30 PM",
+            sunday: "9:00 AM - 5:00 PM"
+          },
+          isOpen: true,
+          specialOffers: "Free delivery on orders over $50"
+        },
+        {
+          pharmacyId: 5,
+          pharmacyName: "Community Health Pharmacy",
+          address: "89 Glen View Shopping Complex, Glen View",
+          distance: 12.4,
+          phone: "+263242567890",
+          rating: 4.1,
+          totalReviews: 67,
+          price: 14.30,
+          inStock: true,
+          lastUpdated: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+          deliveryAvailable: true,
+          deliveryFee: 12.00,
+          estimatedDeliveryTime: "4-6 hours",
+          openingHours: {
+            weekday: "8:00 AM - 7:00 PM",
+            saturday: "8:00 AM - 5:00 PM",
+            sunday: "10:00 AM - 3:00 PM"
+          },
+          isOpen: true
+        }
+      ];
+
+      // Filter by radius
+      const radiusKm = parseInt(radius);
+      const filteredPrices = pharmacyPrices.filter(p => p.distance <= radiusKm);
+
+      // Calculate statistics
+      const prices = filteredPrices.map(p => p.price);
+      const averagePrice = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+      const lowestPrice = Math.min(...prices);
+      const highestPrice = Math.max(...prices);
+      const priceRange = highestPrice - lowestPrice;
+
+      const priceComparison = {
+        medicine,
+        prices: filteredPrices,
+        averagePrice: Math.round(averagePrice * 100) / 100,
+        lowestPrice,
+        highestPrice,
+        priceRange: Math.round(priceRange * 100) / 100
+      };
+
+      res.json(priceComparison);
+    } catch (error) {
+      console.error("Price comparison error:", error);
+      res.status(500).json({ message: "Failed to get price comparison" });
+    }
+  });
+
   return httpServer;
 }

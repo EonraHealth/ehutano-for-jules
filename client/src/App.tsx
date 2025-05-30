@@ -24,6 +24,7 @@ import MedicalAidClaimsPage from "./pages/MedicalAidClaimsPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import GenericPage from "./pages/GenericPage";
+import PriceComparisonPage from "./pages/PriceComparisonPage";
 import Sidebar from "./components/layout/Sidebar";
 import PharmacyAnalytics from "./components/pharmacy/PharmacyAnalytics";
 import PrescriptionManagement from "@/components/pharmacy/PrescriptionManagement";
@@ -119,6 +120,11 @@ function Router() {
           <Route path="/patient-portal/cart">
             {isAuthenticated && user?.role === "PATIENT" ? 
              <GenericPage title="Shopping Cart" description="Review and checkout your selected medicines" /> : 
+             isAuthenticated ? <AccessDenied role="Patient" /> : <LoginPage />}
+          </Route>
+          <Route path="/patient-portal/price-comparison">
+            {isAuthenticated && user?.role === "PATIENT" ? 
+             <PriceComparisonPage /> : 
              isAuthenticated ? <AccessDenied role="Patient" /> : <LoginPage />}
           </Route>
           

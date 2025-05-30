@@ -78,6 +78,12 @@ const Sidebar = ({ className }: SidebarProps) => {
       roles: ['PATIENT']
     },
     {
+      title: 'Price Comparison',
+      href: '/patient-portal/price-comparison',
+      icon: <DollarSign className="h-5 w-5" />,
+      roles: ['PATIENT']
+    },
+    {
       title: 'Wellness Activities',
       href: '/wellness-hub/activities',
       icon: <Activity className="h-5 w-5" />,
