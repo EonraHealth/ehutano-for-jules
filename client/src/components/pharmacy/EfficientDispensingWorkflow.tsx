@@ -25,7 +25,8 @@ import {
   Eye,
   Download,
   CreditCard,
-  ExternalLink
+  ExternalLink,
+  Languages
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -904,7 +905,7 @@ const EfficientDispensingWorkflow = () => {
                             });
                           }}
                         >
-                          <Languages className="h-4 w-4" />
+                          <FileText className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
