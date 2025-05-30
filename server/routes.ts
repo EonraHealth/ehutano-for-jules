@@ -407,27 +407,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
 
-      // Query the authentic Zimbabwe medicine database
-      const medicineResults = await db.select({
-        id: medicines.id,
-        name: medicines.name,
-        genericName: medicines.genericName,
-        manufacturer: medicines.manufacturer,
-        category: medicines.category,
-        description: medicines.description,
-        requiresPrescription: medicines.requiresPrescription
-      })
-      .from(medicines)
-      .where(
-        or(
-          ilike(medicines.name, `%${searchTerm}%`),
-          ilike(medicines.genericName, `%${searchTerm}%`)
-        )
-      )
-      .limit(20);
+      // Query the authentic Zimbabwe medicine database using raw SQL
+      const result = await db.execute(`
+        SELECT id, name, generic_name, manufacturer, category, description, requires_prescription 
+        FROM medicines 
+        WHERE LOWER(name) LIKE LOWER('%${searchTerm}%') 
+           OR LOWER(generic_name) LIKE LOWER('%${searchTerm}%')
+        LIMIT 20
+      `);
 
       // Format for frontend with pricing calculations
-      const formattedMedicines = medicineResults.map(medicine => {
+      const formattedMedicines = result.rows.map((medicine: any) => {
         // Extract pack size from description or use defaults based on form
         let packSize = 30; // Default
         let unitPrice = 0.05; // Base price
@@ -446,7 +436,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return {
           id: medicine.id,
           name: medicine.name,
-          genericName: medicine.genericName || "",
+          genericName: medicine.generic_name || "",
           manufacturer: medicine.manufacturer || "Unknown",
           category: medicine.category || "General",
           dosage: medicine.description || "",
@@ -462,123 +452,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Medicine search error:", error);
       
-      // Emergency fallback only if database fails
-      const medicineData = [
-        {
-          id: 1,
-          name: "Paracetamol (Panadol)",
-          genericName: "Paracetamol",
-          manufacturer: "GSK",
-          category: "OTC",
-          dosage: "500mg",
-          packSize: 100,
-          unitPrice: 0.032,
-          fullPackPrice: 3.20,
-          nappiCode: "702123",
-          inStock: true
-        },
-        {
-          id: 2,
-          name: "Abacavir (Ziagen)",
-          genericName: "Abacavir",
-          manufacturer: "Aurobindo Pharma Ltd",
-          category: "Prescription",
-          dosage: "300mg",
-          packSize: 60,
-          unitPrice: 0.753,
-          fullPackPrice: 45.20,
-          nappiCode: "705678",
-          inStock: true
-        },
-        {
-          id: 3,
-          name: "Amoxicillin (Amoxil)",
-          genericName: "Amoxicillin",
-          manufacturer: "GSK",
-          category: "Prescription",
-          dosage: "500mg",
-          packSize: 21,
-          unitPrice: 0.595,
-          fullPackPrice: 12.50,
-          nappiCode: "701234",
-          inStock: true
-        },
-        {
-          id: 4,
-          name: "Metformin (Glucophage)",
-          genericName: "Metformin Hydrochloride",
-          manufacturer: "Merck",
-          category: "Prescription",
-          dosage: "500mg",
-          packSize: 100,
-          unitPrice: 0.056,
-          fullPackPrice: 5.60,
-          nappiCode: "703456",
-          inStock: true
-        },
-        {
-          id: 5,
-          name: "Brufen",
-          genericName: "Ibuprofen",
-          manufacturer: "Abbott",
-          category: "OTC",
-          dosage: "400mg",
-          packSize: 30,
-          unitPrice: 0.15,
-          fullPackPrice: 4.50,
-          nappiCode: "704567",
-          inStock: true
-        },
-        {
-          id: 6,
-          name: "Aciclovir (Zovirax)",
-          genericName: "Acyclovir",
-          manufacturer: "Cipla Ltd",
-          category: "Prescription",
-          dosage: "200mg",
-          packSize: 25,
-          unitPrice: 0.344,
-          fullPackPrice: 8.60,
-          nappiCode: "706789",
-          inStock: true
-        },
-        {
-          id: 7,
-          name: "Salbutamol (Ventolin)",
-          genericName: "Salbutamol Sulfate",
-          manufacturer: "GSK",
-          category: "Prescription",
-          dosage: "100mcg",
-          packSize: 200,
-          unitPrice: 0.112,
-          fullPackPrice: 22.40,
-          nappiCode: "707890",
-          inStock: true
-        },
-        {
-          id: 8,
-          name: "Omeprazole (Losec)",
-          genericName: "Omeprazole",
-          manufacturer: "AstraZeneca",
-          category: "Prescription",
-          dosage: "20mg",
-          packSize: 28,
-          unitPrice: 0.339,
-          fullPackPrice: 9.50,
-          nappiCode: "708901",
-          inStock: true
-        }
-      ];
-
-      const filtered = medicineData.filter(medicine =>
-        medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        medicine.genericName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-
-      res.json(filtered);
-    } catch (error) {
-      console.error("Medicine search error:", error);
-      res.status(500).json({ message: "Failed to search medicines" });
+      // Return empty array if database fails
+      res.json([]);
     }
   });
   
