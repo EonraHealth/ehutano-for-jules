@@ -636,7 +636,7 @@ const EfficientDispensingWorkflow = () => {
                   <Button 
                     variant="outline"
                     onClick={() => saveCustomerMutation.mutate(walkInCustomer)}
-                    disabled={!walkInCustomer.name || !walkInCustomer.phone || saveCustomerMutation.isPending}
+                    disabled={!walkInCustomer.firstName || !walkInCustomer.lastName || !walkInCustomer.phone || !walkInCustomer.idNumber || saveCustomerMutation.isPending}
                   >
                     <Download className="h-4 w-4 mr-2" />
                     {saveCustomerMutation.isPending ? 'Saving...' : 'Save Customer'}
@@ -794,7 +794,7 @@ const EfficientDispensingWorkflow = () => {
                     <Button 
                       variant="outline"
                       onClick={() => savePrescriptionMutation.mutate()}
-                      disabled={manualPrescription.length === 0 || !walkInCustomer.name || savePrescriptionMutation.isPending}
+                      disabled={manualPrescription.length === 0 || !walkInCustomer.firstName || !walkInCustomer.lastName || savePrescriptionMutation.isPending}
                     >
                       <FileText className="h-4 w-4 mr-2" />
                       {savePrescriptionMutation.isPending ? 'Saving...' : 'Save Prescription'}
@@ -1153,7 +1153,7 @@ const EfficientDispensingWorkflow = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Customer:</span>
-                    <span className="font-medium">{walkInCustomer.name}</span>
+                    <span className="font-medium">{`${walkInCustomer.salutation} ${walkInCustomer.firstName} ${walkInCustomer.middleName || ''} ${walkInCustomer.lastName}`.replace(/\s+/g, ' ').trim()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Phone:</span>
