@@ -87,57 +87,9 @@ const Sidebar = ({ className }: SidebarProps) => {
 
   const pharmacyItems: SidebarItem[] = [
     {
-      title: 'Dashboard',
+      title: 'Pharmacy Portal',
       href: '/pharmacy-portal',
       icon: <Home className="h-5 w-5" />,
-      roles: ['PHARMACY_STAFF']
-    },
-    {
-      title: 'Orders',
-      href: '/pharmacy-portal/orders',
-      icon: <ShoppingBag className="h-5 w-5" />,
-      roles: ['PHARMACY_STAFF'],
-      submenu: [
-        { title: 'New Orders', href: '/pharmacy-portal/orders/new' },
-        { title: 'Processing', href: '/pharmacy-portal/orders/processing' },
-        { title: 'Ready for Pickup', href: '/pharmacy-portal/orders/ready' },
-        { title: 'Completed', href: '/pharmacy-portal/orders/completed' }
-      ]
-    },
-    {
-      title: 'Inventory',
-      href: '/pharmacy-portal/inventory',
-      icon: <Package className="h-5 w-5" />,
-      roles: ['PHARMACY_STAFF'],
-      submenu: [
-        { title: 'Manage Inventory', href: '/pharmacy-portal/inventory' },
-        { title: 'Add Medicine', href: '/pharmacy-portal/inventory/add' },
-        { title: 'Low Stock Alert', href: '/pharmacy-portal/inventory/low-stock' },
-        { title: 'Stock Reports', href: '/pharmacy-portal/inventory/reports' }
-      ]
-    },
-    {
-      title: 'Prescriptions',
-      href: '/pharmacy-portal/prescriptions',
-      icon: <FileText className="h-5 w-5" />,
-      roles: ['PHARMACY_STAFF']
-    },
-    {
-      title: 'Medical Aid Claims',
-      href: '/pharmacy-portal/claims',
-      icon: <Shield className="h-5 w-5" />,
-      roles: ['PHARMACY_STAFF'],
-      submenu: [
-        { title: 'Direct Claims Processing', href: '/medical-aid-claims' },
-        { title: 'Claims Dashboard', href: '/pharmacy-portal/claims' },
-        { title: 'Provider Network', href: '/medical-aid-claims?tab=providers' },
-        { title: 'Claims Analytics', href: '/medical-aid-claims?tab=analytics' }
-      ]
-    },
-    {
-      title: 'Analytics',
-      href: '/pharmacy-portal/analytics',
-      icon: <BarChart2 className="h-5 w-5" />,
       roles: ['PHARMACY_STAFF']
     }
   ];

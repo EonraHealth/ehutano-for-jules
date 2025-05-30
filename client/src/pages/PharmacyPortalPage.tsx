@@ -110,26 +110,8 @@ const PharmacyPortalPage = () => {
             <PharmacyFinancial />
           </TabsContent>
 
-
-
           <TabsContent value="analytics">
-            <Card>
-              <CardHeader>
-                <CardTitle>Analytics Dashboard</CardTitle>
-                <CardDescription>
-                  View and analyze your pharmacy performance metrics
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="min-h-[400px] flex items-center justify-center">
-                <div className="text-center p-6">
-                  <PieChart className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-medium">Analytics Coming Soon</h3>
-                  <p className="text-gray-500 mt-2">
-                    Detailed analytics and reporting features are under development
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <PharmacyAnalytics />
           </TabsContent>
         </Tabs>
       </div>
