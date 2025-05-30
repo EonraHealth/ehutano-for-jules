@@ -783,11 +783,38 @@ const EfficientDispensingWorkflow = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex gap-2 mb-4">
-                <Button variant="outline" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => {
+                    toast({
+                      title: "Scan Prescription",
+                      description: "Camera scanning feature coming soon. Use manual entry for now.",
+                    });
+                  }}
+                >
                   <Scan className="h-4 w-4 mr-2" />
                   Scan Prescription
                 </Button>
-                <Button variant="outline" className="flex-1">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) {
+                        toast({
+                          title: "Image Upload",
+                          description: `Image "${file.name}" selected. OCR processing coming soon.`,
+                        });
+                      }
+                    };
+                    input.click();
+                  }}
+                >
                   <Eye className="h-4 w-4 mr-2" />
                   Upload Image
                 </Button>
@@ -934,6 +961,24 @@ const EfficientDispensingWorkflow = () => {
                     </Button>
                   </div>
                 </div>
+
+                {/* Medical Abbreviation Interpretation Box */}
+                {interpretedInstructions && interpretedInstructions !== newMedicine.instructions && (
+                  <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <FileText className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div className="flex-1">
+                        <h4 className="font-medium text-blue-900 mb-1">Label Instructions Preview</h4>
+                        <p className="text-sm text-blue-800 mb-2">
+                          <span className="font-medium">Original:</span> {newMedicine.instructions}
+                        </p>
+                        <p className="text-sm text-blue-900 font-medium">
+                          <span className="font-medium">On Label:</span> {interpretedInstructions}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Prescription Items List */}
                 <div className="space-y-3">
