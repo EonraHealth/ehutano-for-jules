@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { MedicineSearchPopup } from './MedicineSearchPopup';
 import { 
   Scan, 
   Package, 
@@ -126,6 +127,8 @@ const EfficientDispensingWorkflow = () => {
     nappiCode: ''
   });
   const [dispensingFee, setDispensingFee] = useState(1.00);
+  const [isSearchPopupOpen, setIsSearchPopupOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [medicineSearchResults, setMedicineSearchResults] = useState<any[]>([]);
   const [showMedicineSuggestions, setShowMedicineSuggestions] = useState(false);
   const [instructionSuggestions] = useState([
@@ -872,37 +875,21 @@ const EfficientDispensingWorkflow = () => {
                 
                 {/* Add Medicine Form */}
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 border rounded-lg mb-4">
-                  <div className="space-y-2 relative">
+                  <div className="space-y-2">
                     <Label>Medicine Name</Label>
                     <Input 
-                      placeholder="Start typing medicine name..."
+                      placeholder="Type medicine name and press Enter to search..."
                       value={newMedicine.medicineName}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setNewMedicine(prev => ({ ...prev, medicineName: value }));
-                        searchMedicines(value);
-                      }}
-                      onFocus={() => {
-                        if (medicineSearchResults.length > 0) {
-                          setShowMedicineSuggestions(true);
+                      onChange={(e) => setNewMedicine(prev => ({ ...prev, medicineName: e.target.value }))}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          setSearchTerm(newMedicine.medicineName);
+                          setIsSearchPopupOpen(true);
                         }
                       }}
+                      className="border-blue-200"
                     />
-                    {showMedicineSuggestions && medicineSearchResults.length > 0 && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                        {medicineSearchResults.map((medicine) => (
-                          <div
-                            key={medicine.id}
-                            className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                            onClick={() => selectMedicine(medicine)}
-                          >
-                            <div className="font-medium text-sm">{medicine.name}</div>
-                            <div className="text-xs text-gray-500">{medicine.dosage} - Pack of {medicine.packSize || 30} - $${medicine.unitPrice ? (medicine.unitPrice * (medicine.packSize || 30)).toFixed(2) : medicine.fullPackPrice}</div>
-                            <div className="text-xs text-gray-400">{medicine.manufacturer}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <div className="text-xs text-gray-500">Press Enter to open medicine search</div>
                   </div>
                   <div className="space-y-2">
                     <Label>Dosage</Label>
