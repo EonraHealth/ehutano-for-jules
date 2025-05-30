@@ -57,7 +57,12 @@ interface PrescriptionForDispensing {
 
 interface WalkInCustomer {
   id?: number;
-  name: string;
+  salutation: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  initial?: string;
+  idNumber: string;
   phone: string;
   email?: string;
   address?: string;
@@ -93,7 +98,12 @@ const EfficientDispensingWorkflow = () => {
   
   // Walk-in customer workflow states
   const [walkInCustomer, setWalkInCustomer] = useState<WalkInCustomer>({
-    name: '',
+    salutation: '',
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    initial: '',
+    idNumber: '',
     phone: '',
     email: '',
     address: '',
@@ -265,7 +275,7 @@ const EfficientDispensingWorkflow = () => {
     mutationFn: async () => {
       return apiRequest('POST', '/api/v1/pharmacy/prescriptions/manual', {
         customerId: walkInCustomer.id || Date.now(),
-        customerName: walkInCustomer.name,
+        customerName: `${walkInCustomer.salutation} ${walkInCustomer.firstName} ${walkInCustomer.middleName || ''} ${walkInCustomer.lastName}`.replace(/\s+/g, ' ').trim(),
         items: manualPrescription
       });
     },
@@ -494,14 +504,68 @@ const EfficientDispensingWorkflow = () => {
 
               <div className="border-t pt-6">
                 <h3 className="text-lg font-semibold mb-4">Customer Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="customerName">Full Name *</Label>
+                    <Label htmlFor="customerSalutation">Salutation</Label>
+                    <select
+                      id="customerSalutation"
+                      value={walkInCustomer.salutation}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, salutation: e.target.value }))}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">Select...</option>
+                      <option value="Mr">Mr</option>
+                      <option value="Mrs">Mrs</option>
+                      <option value="Ms">Ms</option>
+                      <option value="Dr">Dr</option>
+                      <option value="Prof">Prof</option>
+                      <option value="Rev">Rev</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customerFirstName">First Name *</Label>
                     <Input
-                      id="customerName"
-                      value={walkInCustomer.name}
-                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="Enter customer full name"
+                      id="customerFirstName"
+                      value={walkInCustomer.firstName}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, firstName: e.target.value }))}
+                      placeholder="Enter first name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customerMiddleName">Middle Name</Label>
+                    <Input
+                      id="customerMiddleName"
+                      value={walkInCustomer.middleName}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, middleName: e.target.value }))}
+                      placeholder="Enter middle name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customerLastName">Last Name *</Label>
+                    <Input
+                      id="customerLastName"
+                      value={walkInCustomer.lastName}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, lastName: e.target.value }))}
+                      placeholder="Enter last name"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customerInitial">Initial</Label>
+                    <Input
+                      id="customerInitial"
+                      value={walkInCustomer.initial}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, initial: e.target.value }))}
+                      placeholder="e.g., J"
+                      maxLength={1}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customerIdNumber">ID Number *</Label>
+                    <Input
+                      id="customerIdNumber"
+                      value={walkInCustomer.idNumber}
+                      onChange={(e) => setWalkInCustomer(prev => ({ ...prev, idNumber: e.target.value }))}
+                      placeholder="National ID Number"
                     />
                   </div>
                   <div className="space-y-2">
@@ -563,7 +627,7 @@ const EfficientDispensingWorkflow = () => {
                 <div className="flex gap-2 mt-6">
                   <Button 
                     onClick={() => setActiveTab('prescription')}
-                    disabled={!walkInCustomer.name || !walkInCustomer.phone}
+                    disabled={!walkInCustomer.firstName || !walkInCustomer.lastName || !walkInCustomer.phone || !walkInCustomer.idNumber}
                     className="flex-1"
                   >
                     <FileText className="h-4 w-4 mr-2" />
