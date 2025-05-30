@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { MedicineSearchPopup } from './MedicineSearchPopup';
+import { WorkflowHelpSystem } from './WorkflowHelpSystem';
 import { 
   Scan, 
   Package, 
@@ -27,7 +28,8 @@ import {
   Download,
   CreditCard,
   ExternalLink,
-  Languages
+  Languages,
+  HelpCircle
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -129,6 +131,8 @@ const EfficientDispensingWorkflow = () => {
   const [dispensingFee, setDispensingFee] = useState(1.00);
   const [isSearchPopupOpen, setIsSearchPopupOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [currentHelpWorkflow, setCurrentHelpWorkflow] = useState('walk-in-customer');
 
   const handleMedicineSelect = (medicine: any) => {
     setNewMedicine(prev => ({
@@ -599,15 +603,38 @@ const EfficientDispensingWorkflow = () => {
             Streamlined medicine dispensing with barcode verification and batch tracking
           </p>
         </div>
-        {currentPrescription && (
-          <div className="text-right">
-            <div className="text-sm text-muted-foreground">Dispensing Progress</div>
-            <Progress value={dispensingProgress} className="w-32 mt-1" />
-            <div className="text-xs text-muted-foreground mt-1">
-              {Math.round(dispensingProgress)}% Complete
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              // Set help context based on current tab
+              const workflowMap = {
+                'customer': 'walk-in-customer',
+                'prescription': 'walk-in-customer',
+                'scan': 'prescription-dispensing',
+                'batch': 'inventory-management',
+                'medical-aid': 'medical-aid-claims',
+                'labels': 'prescription-dispensing'
+              };
+              setCurrentHelpWorkflow(workflowMap[activeTab as keyof typeof workflowMap] || 'walk-in-customer');
+              setIsHelpOpen(true);
+            }}
+            className="border-blue-200 text-blue-700 hover:bg-blue-50"
+          >
+            <HelpCircle className="h-4 w-4 mr-2" />
+            Workflow Help
+          </Button>
+          {currentPrescription && (
+            <div className="text-right">
+              <div className="text-sm text-muted-foreground">Dispensing Progress</div>
+              <Progress value={dispensingProgress} className="w-32 mt-1" />
+              <div className="text-xs text-muted-foreground mt-1">
+                {Math.round(dispensingProgress)}% Complete
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -1704,6 +1731,13 @@ const EfficientDispensingWorkflow = () => {
         onClose={() => setIsSearchPopupOpen(false)}
         onSelectMedicine={handleMedicineSelect}
         initialSearchTerm={searchTerm}
+      />
+
+      {/* Contextual Help System */}
+      <WorkflowHelpSystem
+        isOpen={isHelpOpen}
+        onClose={() => setIsHelpOpen(false)}
+        currentWorkflow={currentHelpWorkflow}
       />
     </div>
   );
