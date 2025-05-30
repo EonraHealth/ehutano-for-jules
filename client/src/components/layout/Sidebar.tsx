@@ -15,7 +15,8 @@ import {
   LogOut,
   ChevronDown,
   Shield,
-  Activity
+  Activity,
+  DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
