@@ -117,8 +117,84 @@ const EfficientDispensingWorkflow = () => {
     dosage: '',
     quantity: '',
     instructions: '',
-    price: ''
+    price: '',
+    medicineId: null as number | null
   });
+  const [medicineSearchResults, setMedicineSearchResults] = useState<any[]>([]);
+  const [showMedicineSuggestions, setShowMedicineSuggestions] = useState(false);
+  const [instructionSuggestions] = useState([
+    'Take with meals',
+    'Take on empty stomach',
+    'Take before bedtime',
+    'Take as needed for pain',
+    'Apply to affected area',
+    'Take with plenty of water',
+    'Do not crush or chew'
+  ]);
+  const [showInstructionSuggestions, setShowInstructionSuggestions] = useState(false);
+  const [interpretedInstructions, setInterpretedInstructions] = useState('');
+  
+  // Medical abbreviation interpreter
+  const interpretMedicalAbbreviations = (input: string): string => {
+    let interpreted = input.toLowerCase();
+    
+    // Common medical abbreviations
+    const abbreviations: { [key: string]: string } = {
+      // Frequency
+      'od': 'once daily',
+      'bd': 'twice daily', 
+      'tds': 'three times daily',
+      'qds': 'four times daily',
+      'qid': 'four times daily',
+      'bid': 'twice daily',
+      'tid': 'three times daily',
+      'prn': 'when necessary',
+      'stat': 'immediately',
+      'sos': 'if required',
+      
+      // Timing
+      'ac': 'before food',
+      'pc': 'after food',
+      'hs': 'at bedtime',
+      'am': 'in the morning',
+      'pm': 'in the evening',
+      'nocte': 'at night',
+      
+      // Dosage forms
+      't1': 'take one tablet',
+      't2': 'take two tablets',
+      'c1': 'take one capsule',
+      'c2': 'take two capsules',
+      'tab': 'tablet',
+      'caps': 'capsule',
+      'ml': 'milliliters',
+      'mg': 'milligrams',
+      
+      // Conditions
+      'pdi': 'for pain and inflammation',
+      'uti': 'for urinary tract infection',
+      'htn': 'for high blood pressure',
+      'dm': 'for diabetes',
+      'pain': 'for pain relief',
+      'fever': 'for fever',
+      'cough': 'for cough',
+      
+      // Routes
+      'po': 'by mouth',
+      'topical': 'apply to skin',
+      'iv': 'intravenously',
+      'im': 'intramuscularly'
+    };
+    
+    // Replace abbreviations
+    Object.entries(abbreviations).forEach(([abbrev, meaning]) => {
+      const regex = new RegExp(`\\b${abbrev}\\b`, 'gi');
+      interpreted = interpreted.replace(regex, meaning);
+    });
+    
+    // Capitalize first letter
+    return interpreted.charAt(0).toUpperCase() + interpreted.slice(1);
+  };
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({
     method: 'CASH',
     amount: 0
@@ -128,6 +204,52 @@ const EfficientDispensingWorkflow = () => {
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Medicine search functionality
+  const searchMedicines = async (searchTerm: string) => {
+    if (searchTerm.length < 2) {
+      setMedicineSearchResults([]);
+      setShowMedicineSuggestions(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/v1/medicines/search?q=${encodeURIComponent(searchTerm)}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        const results = await response.json();
+        setMedicineSearchResults(results);
+        setShowMedicineSuggestions(true);
+      }
+    } catch (error) {
+      console.error('Medicine search error:', error);
+    }
+  };
+
+  // Handle medicine selection
+  const selectMedicine = (medicine: any) => {
+    setNewMedicine(prev => ({
+      ...prev,
+      medicineName: medicine.name,
+      dosage: medicine.dosage || '',
+      price: medicine.price?.toString() || '',
+      medicineId: medicine.id
+    }));
+    setShowMedicineSuggestions(false);
+    setMedicineSearchResults([]);
+  };
+
+  // Handle instruction changes and interpretation
+  const handleInstructionChange = (value: string) => {
+    setNewMedicine(prev => ({ ...prev, instructions: value }));
+    const interpreted = interpretMedicalAbbreviations(value);
+    setInterpretedInstructions(interpreted);
+  };
 
   // Fetch pending prescriptions for dispensing
   const { data: pendingPrescriptions = [], isLoading: prescriptionsLoading } = useQuery<PrescriptionForDispensing[]>({
@@ -676,13 +798,37 @@ const EfficientDispensingWorkflow = () => {
                 
                 {/* Add Medicine Form */}
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 border rounded-lg mb-4">
-                  <div className="space-y-2">
+                  <div className="space-y-2 relative">
                     <Label>Medicine Name</Label>
                     <Input 
-                      placeholder="Enter medicine name"
+                      placeholder="Start typing medicine name..."
                       value={newMedicine.medicineName}
-                      onChange={(e) => setNewMedicine(prev => ({ ...prev, medicineName: e.target.value }))}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setNewMedicine(prev => ({ ...prev, medicineName: value }));
+                        searchMedicines(value);
+                      }}
+                      onFocus={() => {
+                        if (medicineSearchResults.length > 0) {
+                          setShowMedicineSuggestions(true);
+                        }
+                      }}
                     />
+                    {showMedicineSuggestions && medicineSearchResults.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                        {medicineSearchResults.map((medicine) => (
+                          <div
+                            key={medicine.id}
+                            className="p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                            onClick={() => selectMedicine(medicine)}
+                          >
+                            <div className="font-medium text-sm">{medicine.name}</div>
+                            <div className="text-xs text-gray-500">{medicine.dosage} - ${medicine.price}</div>
+                            <div className="text-xs text-gray-400">{medicine.manufacturer}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label>Dosage</Label>
@@ -690,7 +836,12 @@ const EfficientDispensingWorkflow = () => {
                       placeholder="e.g., 500mg"
                       value={newMedicine.dosage}
                       onChange={(e) => setNewMedicine(prev => ({ ...prev, dosage: e.target.value }))}
+                      readOnly={!!newMedicine.medicineId}
+                      className={newMedicine.medicineId ? "bg-gray-50" : ""}
                     />
+                    {newMedicine.medicineId && (
+                      <div className="text-xs text-green-600">Auto-filled from selected medicine</div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label>Quantity</Label>
@@ -701,13 +852,32 @@ const EfficientDispensingWorkflow = () => {
                       onChange={(e) => setNewMedicine(prev => ({ ...prev, quantity: e.target.value }))}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 relative">
                     <Label>Instructions</Label>
                     <Input 
-                      placeholder="Take with meals"
+                      placeholder="e.g., t1 tds pc prn pdi"
                       value={newMedicine.instructions}
-                      onChange={(e) => setNewMedicine(prev => ({ ...prev, instructions: e.target.value }))}
+                      onChange={(e) => handleInstructionChange(e.target.value)}
+                      onFocus={() => setShowInstructionSuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowInstructionSuggestions(false), 200)}
                     />
+                    {showInstructionSuggestions && (
+                      <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                        {instructionSuggestions.map((instruction, index) => (
+                          <div
+                            key={index}
+                            className="p-2 hover:bg-gray-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0"
+                            onClick={() => {
+                              setNewMedicine(prev => ({ ...prev, instructions: instruction }));
+                              setInterpretedInstructions(instruction);
+                              setShowInstructionSuggestions(false);
+                            }}
+                          >
+                            {instruction}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label>Price ($)</Label>
@@ -717,7 +887,12 @@ const EfficientDispensingWorkflow = () => {
                       placeholder="25.50"
                       value={newMedicine.price}
                       onChange={(e) => setNewMedicine(prev => ({ ...prev, price: e.target.value }))}
+                      readOnly={!!newMedicine.medicineId}
+                      className={newMedicine.medicineId ? "bg-gray-50" : ""}
                     />
+                    {newMedicine.medicineId && (
+                      <div className="text-xs text-green-600">Auto-filled from selected medicine</div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label>&nbsp;</Label>
@@ -747,8 +922,10 @@ const EfficientDispensingWorkflow = () => {
                           dosage: '',
                           quantity: '',
                           instructions: '',
-                          price: ''
+                          price: '',
+                          medicineId: null
                         });
+                        setInterpretedInstructions('');
                       }}
                       disabled={addMedicineMutation.isPending}
                     >
