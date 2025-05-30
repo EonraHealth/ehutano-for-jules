@@ -844,6 +844,30 @@ const EfficientDispensingWorkflow = () => {
               </div>
 
               <div className="border-t pt-6">
+                {/* Dispensing Fee Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg mb-4">
+                  <div className="space-y-2">
+                    <Label>Dispensing Fee ($)</Label>
+                    <Input 
+                      type="number"
+                      step="0.01"
+                      placeholder="1.00"
+                      value={dispensingFee}
+                      onChange={(e) => setDispensingFee(parseFloat(e.target.value) || 1.00)}
+                    />
+                    <div className="text-xs text-gray-600">Default professional dispensing fee</div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Total with Fee</Label>
+                    <div className="p-2 bg-white rounded border text-lg font-semibold text-blue-700">
+                      ${(manualPrescription.reduce((sum, item) => sum + item.price, 0) + dispensingFee).toFixed(2)}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      Medicines: ${manualPrescription.reduce((sum, item) => sum + item.price, 0).toFixed(2)} + Fee: ${dispensingFee.toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+
                 <h3 className="text-lg font-semibold mb-4">Prescription Items</h3>
                 
                 {/* Add Medicine Form */}
@@ -873,7 +897,7 @@ const EfficientDispensingWorkflow = () => {
                             onClick={() => selectMedicine(medicine)}
                           >
                             <div className="font-medium text-sm">{medicine.name}</div>
-                            <div className="text-xs text-gray-500">{medicine.dosage} - ${medicine.price}</div>
+                            <div className="text-xs text-gray-500">{medicine.dosage} - Pack of {medicine.packSize || 30} - $${medicine.unitPrice ? (medicine.unitPrice * (medicine.packSize || 30)).toFixed(2) : medicine.fullPackPrice}</div>
                             <div className="text-xs text-gray-400">{medicine.manufacturer}</div>
                           </div>
                         ))}
@@ -899,8 +923,19 @@ const EfficientDispensingWorkflow = () => {
                       type="number" 
                       placeholder="30"
                       value={newMedicine.quantity}
-                      onChange={(e) => setNewMedicine(prev => ({ ...prev, quantity: e.target.value }))}
+                      onChange={(e) => {
+                        const qty = parseInt(e.target.value) || 0;
+                        const newPrice = newMedicine.unitPrice ? (newMedicine.unitPrice * qty).toFixed(2) : newMedicine.price;
+                        setNewMedicine(prev => ({ 
+                          ...prev, 
+                          quantity: e.target.value,
+                          price: newPrice
+                        }));
+                      }}
                     />
+                    {newMedicine.packSize && (
+                      <div className="text-xs text-blue-600">Pack size: {newMedicine.packSize} units</div>
+                    )}
                   </div>
                   <div className="space-y-2 relative">
                     <Label>Instructions</Label>
@@ -956,13 +991,15 @@ const EfficientDispensingWorkflow = () => {
                       step="0.01" 
                       placeholder="25.50"
                       value={newMedicine.price}
-                      onChange={(e) => setNewMedicine(prev => ({ ...prev, price: e.target.value }))}
-                      readOnly={!!newMedicine.medicineId}
-                      className={newMedicine.medicineId ? "bg-gray-50" : ""}
+                      onChange={(e) => handlePriceChange(e.target.value)}
+                      className="border-blue-200"
                     />
-                    {newMedicine.medicineId && (
-                      <div className="text-xs text-green-600">Auto-filled from selected medicine</div>
+                    {newMedicine.unitPrice && newMedicine.quantity && (
+                      <div className="text-xs text-blue-600">
+                        Unit price: ${newMedicine.unitPrice.toFixed(3)} × {newMedicine.quantity} = ${(newMedicine.unitPrice * parseInt(newMedicine.quantity || '0')).toFixed(2)}
+                      </div>
                     )}
+                    <div className="text-xs text-gray-500">Price is adjustable</div>
                   </div>
                   <div className="space-y-2">
                     <Label>&nbsp;</Label>
