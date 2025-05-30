@@ -7,7 +7,9 @@ import {
   insertUserSchema, 
   insertPatientProfileSchema, 
   insertMedicineSchema, 
-  insertPrescriptionSchema, 
+  insertPrescriptionSchema,
+  medicines,
+  inventoryItems,
   insertOrderSchema, 
   insertReminderSchema, 
   insertWellnessActivitySchema, 
@@ -22,6 +24,8 @@ import {
 } from "@shared/schema";
 import { authenticateUser, generateToken, hashPassword, verifyPassword } from "./auth";
 import { authenticateJWT, authorizeRoles } from "./middleware";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 // In-memory storage for manual prescriptions (in a real app, this would be in a database)
 const manualPrescriptions: any[] = [];
@@ -2527,68 +2531,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { q } = req.query;
       const searchTerm = q as string;
 
-      if (!searchTerm || searchTerm.length < 3) {
+      if (!searchTerm || searchTerm.length < 2) {
         return res.json([]);
       }
 
-      const medicines = [
-        {
-          id: 1,
-          name: "Amoxicillin 500mg Capsules",
-          genericName: "Amoxicillin",
-          dosage: "500mg",
-          category: "Antibiotics"
-        },
-        {
-          id: 2,
-          name: "Metformin 850mg Tablets",
-          genericName: "Metformin Hydrochloride",
-          dosage: "850mg",
-          category: "Diabetes"
-        },
-        {
-          id: 3,
-          name: "Lisinopril 10mg Tablets",
-          genericName: "Lisinopril",
-          dosage: "10mg",
-          category: "Cardiovascular"
-        },
-        {
-          id: 4,
-          name: "Simvastatin 20mg Tablets",
-          genericName: "Simvastatin",
-          dosage: "20mg",
-          category: "Cholesterol"
-        },
-        {
-          id: 5,
-          name: "Ibuprofen 400mg Tablets",
-          genericName: "Ibuprofen",
-          dosage: "400mg",
-          category: "Pain Relief"
-        },
-        {
-          id: 6,
-          name: "Paracetamol 500mg Tablets",
-          genericName: "Paracetamol",
-          dosage: "500mg",
-          category: "Pain Relief"
-        },
-        {
-          id: 7,
-          name: "Omeprazole 20mg Capsules",
-          genericName: "Omeprazole",
-          dosage: "20mg",
-          category: "Gastrointestinal"
-        }
-      ];
-
-      const filtered = medicines.filter(medicine =>
+      // Query actual medicines from database
+      const medicineResults = await db.select().from(medicines).limit(10);
+      
+      const filtered = medicineResults.filter(medicine =>
         medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        medicine.genericName.toLowerCase().includes(searchTerm.toLowerCase())
+        (medicine.genericName && medicine.genericName.toLowerCase().includes(searchTerm.toLowerCase()))
       );
 
-      res.json(filtered);
+      // Add inventory pricing information for each medicine
+      const enrichedResults = await Promise.all(
+        filtered.map(async (medicine) => {
+          const inventoryItems = await db.select()
+            .from(inventoryItems)
+            .where(eq(inventoryItems.medicineId, medicine.id))
+            .limit(1);
+          
+          const inventory = inventoryItems[0];
+          
+          return {
+            id: medicine.id,
+            name: medicine.name,
+            genericName: medicine.genericName,
+            manufacturer: medicine.manufacturer,
+            category: medicine.category,
+            price: inventory?.price || "0.00",
+            dosage: inventory ? "Available" : "Contact pharmacy",
+            inStock: inventory?.stockQuantity > 0
+          };
+        })
+      );
+
+      res.json(enrichedResults);
     } catch (error) {
       console.error("Medicine search error:", error);
       res.status(500).json({ message: "Failed to search medicines" });

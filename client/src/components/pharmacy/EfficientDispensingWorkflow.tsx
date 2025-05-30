@@ -881,13 +881,33 @@ const EfficientDispensingWorkflow = () => {
                   </div>
                   <div className="space-y-2 relative">
                     <Label>Instructions</Label>
-                    <Input 
-                      placeholder="e.g., t1 tds pc prn pdi"
-                      value={newMedicine.instructions}
-                      onChange={(e) => handleInstructionChange(e.target.value)}
-                      onFocus={() => setShowInstructionSuggestions(true)}
-                      onBlur={() => setTimeout(() => setShowInstructionSuggestions(false), 200)}
-                    />
+                    <div className="relative">
+                      <Input 
+                        placeholder="e.g., t1 tds pc prn pdi"
+                        value={newMedicine.instructions}
+                        onChange={(e) => handleInstructionChange(e.target.value)}
+                        onFocus={() => setShowInstructionSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowInstructionSuggestions(false), 200)}
+                      />
+                      {newMedicine.instructions && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-1 top-1 h-8 w-8 p-0"
+                          onClick={() => {
+                            const interpreted = interpretMedicalAbbreviations(newMedicine.instructions);
+                            setInterpretedInstructions(interpreted);
+                            toast({
+                              title: "Instructions Translated",
+                              description: interpreted,
+                            });
+                          }}
+                        >
+                          <Languages className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                     {showInstructionSuggestions && (
                       <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
                         {instructionSuggestions.map((instruction, index) => (
