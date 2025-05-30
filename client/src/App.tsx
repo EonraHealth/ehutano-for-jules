@@ -28,6 +28,7 @@ import PriceComparisonPage from "./pages/PriceComparisonPage";
 import Sidebar from "./components/layout/Sidebar";
 import PharmacyAnalytics from "./components/pharmacy/PharmacyAnalytics";
 import PrescriptionManagement from "@/components/pharmacy/PrescriptionManagement";
+import EfficientDispensingWorkflow from "./components/pharmacy/EfficientDispensingWorkflow";
 import WholesalerCatalog from "./components/wholesaler/WholesalerCatalog";
 import WholesalerOrders from "./components/wholesaler/WholesalerOrders";
 import PharmacyClients from "./components/wholesaler/PharmacyClients";
@@ -191,6 +192,16 @@ function Router() {
           <Route path="/pharmacy-portal/claims">
             {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
              <GenericPage title="Medical Aid Claims" description="Process and manage medical aid claims" /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/dispensing">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <div className="flex">
+               <Sidebar className="hidden md:block" />
+               <div className="flex-1 p-6">
+                 <EfficientDispensingWorkflow />
+               </div>
+             </div> : 
              isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
           </Route>
           <Route path="/pharmacy-portal/analytics">

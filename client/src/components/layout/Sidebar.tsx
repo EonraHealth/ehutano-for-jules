@@ -94,9 +94,39 @@ const Sidebar = ({ className }: SidebarProps) => {
 
   const pharmacyItems: SidebarItem[] = [
     {
-      title: 'Pharmacy Portal',
+      title: 'Dashboard',
       href: '/pharmacy-portal',
       icon: <Home className="h-5 w-5" />,
+      roles: ['PHARMACY_STAFF']
+    },
+    {
+      title: 'Dispensing Workflow',
+      href: '/pharmacy-portal/dispensing',
+      icon: <Pill className="h-5 w-5" />,
+      roles: ['PHARMACY_STAFF']
+    },
+    {
+      title: 'Inventory Management',
+      href: '/pharmacy-portal/inventory',
+      icon: <Package className="h-5 w-5" />,
+      roles: ['PHARMACY_STAFF']
+    },
+    {
+      title: 'Sales & Billing',
+      href: '/pharmacy-portal/billing',
+      icon: <DollarSign className="h-5 w-5" />,
+      roles: ['PHARMACY_STAFF']
+    },
+    {
+      title: 'Analytics',
+      href: '/pharmacy-portal/analytics',
+      icon: <BarChart2 className="h-5 w-5" />,
+      roles: ['PHARMACY_STAFF']
+    },
+    {
+      title: 'Medical Aid Claims',
+      href: '/pharmacy-portal/medical-aid',
+      icon: <Shield className="h-5 w-5" />,
       roles: ['PHARMACY_STAFF']
     }
   ];
