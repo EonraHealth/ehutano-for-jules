@@ -3,6 +3,7 @@ import { createServer, Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import { medicalAidIntegration } from "./medicalAidIntegration";
+import { or, ilike } from "drizzle-orm";
 import { 
   insertUserSchema, 
   insertPatientProfileSchema, 
@@ -406,9 +407,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
 
-      // Use fallback data with Zimbabwe medicines (database integration will be restored once schema is updated)
+      // Query the authentic Zimbabwe medicine database
+      const medicineResults = await db.select({
+        id: medicines.id,
+        name: medicines.name,
+        genericName: medicines.genericName,
+        manufacturer: medicines.manufacturer,
+        category: medicines.category,
+        description: medicines.description,
+        requiresPrescription: medicines.requiresPrescription
+      })
+      .from(medicines)
+      .where(
+        or(
+          ilike(medicines.name, `%${searchTerm}%`),
+          ilike(medicines.genericName, `%${searchTerm}%`)
+        )
+      )
+      .limit(20);
 
-      // Fallback to hardcoded medicines with pack size information
+      // Format for frontend with pricing calculations
+      const formattedMedicines = medicineResults.map(medicine => {
+        // Extract pack size from description or use defaults based on form
+        let packSize = 30; // Default
+        let unitPrice = 0.05; // Base price
+        
+        if (medicine.description?.includes("INJECTION")) {
+          packSize = 10;
+          unitPrice = 0.25;
+        } else if (medicine.description?.includes("SYRUP") || medicine.description?.includes("SUSPENSION")) {
+          packSize = 1;
+          unitPrice = 0.08;
+        } else if (medicine.description?.includes("CREAM") || medicine.description?.includes("OINTMENT")) {
+          packSize = 1;
+          unitPrice = 0.15;
+        }
+        
+        return {
+          id: medicine.id,
+          name: medicine.name,
+          genericName: medicine.genericName || "",
+          manufacturer: medicine.manufacturer || "Unknown",
+          category: medicine.category || "General",
+          dosage: medicine.description || "",
+          packSize: packSize,
+          unitPrice: unitPrice,
+          fullPackPrice: parseFloat((unitPrice * packSize).toFixed(2)),
+          nappiCode: "",
+          inStock: true
+        };
+      });
+
+      res.json(formattedMedicines);
+    } catch (error) {
+      console.error("Medicine search error:", error);
+      
+      // Emergency fallback only if database fails
       const medicineData = [
         {
           id: 1,
