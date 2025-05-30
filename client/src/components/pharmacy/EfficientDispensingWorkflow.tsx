@@ -119,8 +119,13 @@ const EfficientDispensingWorkflow = () => {
     quantity: '',
     instructions: '',
     price: '',
-    medicineId: null as number | null
+    medicineId: null as number | null,
+    packSize: 30,
+    unitPrice: 0,
+    fullPackPrice: 0,
+    nappiCode: ''
   });
+  const [dispensingFee, setDispensingFee] = useState(1.00);
   const [medicineSearchResults, setMedicineSearchResults] = useState<any[]>([]);
   const [showMedicineSuggestions, setShowMedicineSuggestions] = useState(false);
   const [instructionSuggestions] = useState([
@@ -238,11 +243,28 @@ const EfficientDispensingWorkflow = () => {
       ...prev,
       medicineName: medicine.name,
       dosage: medicine.dosage || '',
-      price: medicine.price?.toString() || '',
-      medicineId: medicine.id
+      price: calculatePrice(medicine.unitPrice || 0, parseInt(prev.quantity) || 1).toFixed(2),
+      medicineId: medicine.id,
+      packSize: medicine.packSize || 30,
+      unitPrice: medicine.unitPrice || 0,
+      fullPackPrice: medicine.fullPackPrice || 0,
+      nappiCode: medicine.nappiCode || ''
     }));
     setShowMedicineSuggestions(false);
     setMedicineSearchResults([]);
+  };
+
+  // Calculate price based on quantity and unit price
+  const calculatePrice = (unitPrice: number, quantity: number) => {
+    return unitPrice * quantity;
+  };
+
+  // Handle manual price adjustment
+  const handlePriceChange = (price: string) => {
+    setNewMedicine(prev => ({
+      ...prev,
+      price
+    }));
   };
 
   // Handle instruction changes and interpretation
@@ -434,7 +456,7 @@ const EfficientDispensingWorkflow = () => {
     });
   };
 
-  const handleQuantityChange = (itemId: number, quantity: number) => {
+  const handlePrescriptionQuantityChange = (itemId: number, quantity: number) => {
     setCurrentPrescription(prev => {
       if (!prev) return null;
       return {
@@ -971,7 +993,11 @@ const EfficientDispensingWorkflow = () => {
                           quantity: '',
                           instructions: '',
                           price: '',
-                          medicineId: null
+                          medicineId: null,
+                          packSize: 30,
+                          unitPrice: 0,
+                          fullPackPrice: 0,
+                          nappiCode: ''
                         });
                         setInterpretedInstructions('');
                       }}

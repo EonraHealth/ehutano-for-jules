@@ -406,7 +406,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
 
-      // Real Zimbabwe medicines from your attached file
+      // Use fallback data with Zimbabwe medicines (database integration will be restored once schema is updated)
+
+      // Fallback to hardcoded medicines with pack size information
       const medicineData = [
         {
           id: 1,
@@ -414,8 +416,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           genericName: "Paracetamol",
           manufacturer: "GSK",
           category: "OTC",
-          price: "3.20",
           dosage: "500mg",
+          packSize: 100,
+          unitPrice: 0.032,
+          fullPackPrice: 3.20,
+          nappiCode: "702123",
           inStock: true
         },
         {
@@ -424,8 +429,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           genericName: "Abacavir",
           manufacturer: "Aurobindo Pharma Ltd",
           category: "Prescription",
-          price: "45.20",
           dosage: "300mg",
+          packSize: 60,
+          unitPrice: 0.753,
+          fullPackPrice: 45.20,
+          nappiCode: "705678",
           inStock: true
         },
         {
@@ -434,8 +442,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           genericName: "Amoxicillin",
           manufacturer: "GSK",
           category: "Prescription",
-          price: "12.50",
           dosage: "500mg",
+          packSize: 21,
+          unitPrice: 0.595,
+          fullPackPrice: 12.50,
+          nappiCode: "701234",
           inStock: true
         },
         {
@@ -444,8 +455,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           genericName: "Metformin Hydrochloride",
           manufacturer: "Merck",
           category: "Prescription",
-          price: "5.60",
           dosage: "500mg",
+          packSize: 100,
+          unitPrice: 0.056,
+          fullPackPrice: 5.60,
+          nappiCode: "703456",
           inStock: true
         },
         {
@@ -454,8 +468,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           genericName: "Ibuprofen",
           manufacturer: "Abbott",
           category: "OTC",
-          price: "4.50",
           dosage: "400mg",
+          packSize: 30,
+          unitPrice: 0.15,
+          fullPackPrice: 4.50,
+          nappiCode: "704567",
           inStock: true
         },
         {
@@ -464,8 +481,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           genericName: "Acyclovir",
           manufacturer: "Cipla Ltd",
           category: "Prescription",
-          price: "8.60",
           dosage: "200mg",
+          packSize: 25,
+          unitPrice: 0.344,
+          fullPackPrice: 8.60,
+          nappiCode: "706789",
           inStock: true
         },
         {
@@ -474,8 +494,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           genericName: "Salbutamol Sulfate",
           manufacturer: "GSK",
           category: "Prescription",
-          price: "22.40",
           dosage: "100mcg",
+          packSize: 200,
+          unitPrice: 0.112,
+          fullPackPrice: 22.40,
+          nappiCode: "707890",
           inStock: true
         },
         {
@@ -484,8 +507,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           genericName: "Omeprazole",
           manufacturer: "AstraZeneca",
           category: "Prescription",
-          price: "9.50",
           dosage: "20mg",
+          packSize: 28,
+          unitPrice: 0.339,
+          fullPackPrice: 9.50,
+          nappiCode: "708901",
           inStock: true
         }
       ];
