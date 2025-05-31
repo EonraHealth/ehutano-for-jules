@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { useAuth } from '@/hooks/useAuth';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import PharmacyDashboard from '@/components/pharmacy/PharmacyDashboard';
 import PharmacyOperations from '@/components/pharmacy/PharmacyOperations';
 import PharmacyInventory from '@/components/pharmacy/PharmacyInventory';
@@ -8,9 +9,11 @@ import PharmacyFinancial from '@/components/pharmacy/PharmacyFinancial';
 import PharmacyAnalytics from '@/components/pharmacy/PharmacyAnalytics';
 import DeliveryManagement from '@/components/pharmacy/DeliveryManagement';
 import PharmacyAssistantChat from '@/components/pharmacy/PharmacyAssistantChat';
+import OnboardingTour from '@/components/common/OnboardingTour';
 import Sidebar from '@/components/layout/Sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { 
   LayoutDashboard, 
   PackageSearch, 
@@ -21,7 +24,8 @@ import {
   Shield,
   Scan,
   Package,
-  DollarSign
+  DollarSign,
+  Sparkles
 } from 'lucide-react';
 
 type TabValue = 'dashboard' | 'operations' | 'inventory' | 'financial' | 'analytics' | 'delivery';
@@ -30,6 +34,7 @@ const PharmacyPortalPage = () => {
   const { isAuthenticated, user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<TabValue>('dashboard');
+  const { showOnboarding, completeOnboarding, closeOnboarding, restartOnboarding } = useOnboarding();
 
   // Redirect non-pharmacy staff to login
   useEffect(() => {
@@ -56,11 +61,21 @@ const PharmacyPortalPage = () => {
     <div className="flex">
       <Sidebar className="hidden md:block" />
       <div className="flex-1 p-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold">Pharmacy Management Portal</h1>
-          <p className="text-gray-500">
-            Welcome back, {user?.username || 'Pharmacy Staff'}. Manage your pharmacy operations.
-          </p>
+        <div className="mb-6 flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold">Pharmacy Management Portal</h1>
+            <p className="text-gray-500">
+              Welcome back, {user?.username || 'Pharmacy Staff'}. Manage your pharmacy operations.
+            </p>
+          </div>
+          <Button
+            onClick={restartOnboarding}
+            variant="outline"
+            className="flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 border-blue-200"
+          >
+            <Sparkles className="h-4 w-4 text-blue-600" />
+            <span>Take Tour</span>
+          </Button>
         </div>
 
         <Tabs defaultValue="dashboard" value={activeTab} onValueChange={(value) => setActiveTab(value as TabValue)}>
@@ -119,6 +134,13 @@ const PharmacyPortalPage = () => {
       
       {/* AI Assistant Chat - Floating */}
       <PharmacyAssistantChat />
+      
+      {/* Onboarding Tour */}
+      <OnboardingTour 
+        isOpen={showOnboarding}
+        onClose={closeOnboarding}
+        onComplete={completeOnboarding}
+      />
     </div>
   );
 };
