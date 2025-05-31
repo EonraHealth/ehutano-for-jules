@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { CreditCard, Smartphone, DollarSign, Receipt, FileText, Users, Calendar, TrendingUp } from "lucide-react";
+import { CreditCard, Smartphone, DollarSign, Receipt, FileText, Users, Calendar, TrendingUp, Search, Plus, Minus, Trash2, Printer } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -66,8 +66,13 @@ export default function BillingFinancialIntegration() {
     subtotal: 0,
     discount: 0,
     tax: 0,
-    total: 0
+    total: 0,
+    customerName: "",
+    customerPhone: ""
   });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [lastReceipt, setLastReceipt] = useState<any>(null);
+  const [showReceiptDialog, setShowReceiptDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

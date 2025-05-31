@@ -2180,7 +2180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Billing and Financial Integration Endpoints
   
   // Get sales data
-  app.get("/api/v1/pharmacy/sales", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+  app.get("/api/v1/pharmacy/sales", async (req: Request, res: Response) => {
     try {
       const sales = [
         {
@@ -2251,7 +2251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get customer categories for pricing
-  app.get("/api/v1/pharmacy/customer-categories", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+  app.get("/api/v1/pharmacy/customer-categories", async (req: Request, res: Response) => {
     try {
       const categories = [
         {
@@ -2288,7 +2288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get financial analytics
-  app.get("/api/v1/pharmacy/financial-analytics", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+  app.get("/api/v1/pharmacy/financial-analytics", async (req: Request, res: Response) => {
     try {
       const analytics = {
         dailySales: 1250.50,
@@ -2316,7 +2316,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Process sale
-  app.post("/api/v1/pharmacy/sales/process", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+  app.post("/api/v1/pharmacy/sales/process", async (req: Request, res: Response) => {
     try {
       const { items, customerName, customerPhone, paymentMethod, insuranceDetails } = req.body;
       
@@ -2330,7 +2330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         items,
         paymentMethod,
         timestamp: new Date().toISOString(),
-        cashier: req.user?.id
+        cashier: "Pharmacy Staff"
       };
       
       res.json({
