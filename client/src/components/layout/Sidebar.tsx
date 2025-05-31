@@ -16,7 +16,8 @@ import {
   ChevronDown,
   Shield,
   Activity,
-  DollarSign
+  DollarSign,
+  MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
