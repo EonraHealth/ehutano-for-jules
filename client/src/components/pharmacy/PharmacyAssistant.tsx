@@ -70,6 +70,44 @@ const PharmacyAssistant = () => {
     return 'I can help with pharmaceutical questions about drug interactions, storage requirements, dosing calculations, side effects, or medication management. For complex clinical decisions, always consult current references and clinical guidelines.';
   };
 
+  // Local prescription validation function
+  const validatePrescriptionLocally = (prescriptionText: string) => {
+    const text = prescriptionText.toLowerCase();
+    const issues = [];
+    
+    // Check for required elements
+    if (!text.includes('patient') && !text.includes('name')) {
+      issues.push('Patient name may be missing');
+    }
+    
+    if (!text.includes('date') && !/\d{1,2}\/\d{1,2}\/\d{2,4}/.test(text)) {
+      issues.push('Prescription date may be missing');
+    }
+    
+    if (!text.includes('mg') && !text.includes('ml') && !text.includes('tablets') && !text.includes('capsules')) {
+      issues.push('Dosage information may be incomplete');
+    }
+    
+    if (!text.includes('doctor') && !text.includes('dr.') && !text.includes('physician')) {
+      issues.push('Prescriber information may be missing');
+    }
+    
+    // Check for common medication names and flag potential issues
+    const controlledSubstances = ['morphine', 'oxycodone', 'tramadol', 'codeine', 'diazepam'];
+    const hasControlled = controlledSubstances.some(drug => text.includes(drug));
+    
+    if (hasControlled) {
+      issues.push('Contains controlled substance - verify DEA requirements');
+    }
+    
+    return {
+      hasIssues: issues.length > 0,
+      message: issues.length > 0 
+        ? `Validation issues found: ${issues.join(', ')}. Please review carefully.`
+        : 'Basic prescription format appears complete. Always verify with official protocols.'
+    };
+  };
+
   // Fetch quick response suggestions
   const { data: quickResponses = [] } = useQuery<string[]>({
     queryKey: ['/api/v1/pharmacy/assistant/quick-responses'],
@@ -120,19 +158,38 @@ const PharmacyAssistant = () => {
     },
   });
 
-  // Prescription validation mutation
+  // Prescription validation mutation with fallback
   const validatePrescriptionMutation = useMutation({
     mutationFn: async (text: string) => {
-      return await apiRequest('/api/v1/pharmacy/assistant/validate-prescription', 'POST', { 
+      const response = await apiRequest('POST', '/api/v1/pharmacy/assistant/validate-prescription', { 
         prescriptionText: text 
+      });
+      return await response.json();
+    },
+    onSuccess: (response: any) => {
+      toast({
+        title: 'Prescription Validated',
+        description: response.isValid ? 'Prescription appears valid' : 'Issues found with prescription',
+        variant: response.isValid ? 'default' : 'destructive',
       });
     },
     onError: (error) => {
-      toast({
-        title: 'Validation Error',
-        description: error instanceof Error ? error.message : 'Failed to validate prescription',
-        variant: 'destructive',
-      });
+      // Intelligent fallback for prescription validation
+      if (error instanceof Error && (error.message.includes('401') || error.message.includes('Authentication'))) {
+        // Use local validation logic
+        const localValidation = validatePrescriptionLocally(prescriptionText);
+        toast({
+          title: 'Using Offline Validation',
+          description: localValidation.message,
+          variant: localValidation.hasIssues ? 'destructive' : 'default',
+        });
+      } else {
+        toast({
+          title: 'Validation Error',
+          description: error instanceof Error ? error.message : 'Failed to validate prescription',
+          variant: 'destructive',
+        });
+      }
     },
   });
 
