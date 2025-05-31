@@ -201,9 +201,9 @@ const PharmacyDashboard = () => {
             <div className="text-2xl font-bold">
               {inventoryLoading ? <Skeleton className="h-8 w-16" /> : inventorySummary?.total || '0'}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground">
               {inventoryLoading ? <Skeleton className="h-3 w-32" /> : `${inventorySummary?.lowStock || '0'} items low in stock`}
-            </p>
+            </div>
           </CardContent>
         </Card>
         
