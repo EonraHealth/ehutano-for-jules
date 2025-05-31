@@ -194,6 +194,11 @@ function Router() {
              <GenericPage title="Medical Aid Claims" description="Process and manage medical aid claims" /> : 
              isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
           </Route>
+          <Route path="/pharmacy-portal/medical-aid">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <MedicalAidClaimsPage /> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
           <Route path="/pharmacy-portal/dispensing">
             {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
              <div className="flex">
