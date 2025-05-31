@@ -46,53 +46,39 @@ const tourSteps: TourStep[] = [
     position: 'center'
   },
   {
-    id: 'orders',
-    title: 'Managing Orders Made Easy',
-    description: 'Here\'s where all customer orders flow in. You can track progress, update statuses, and ensure every customer gets their medicine on time. You\'re making a real difference!',
+    id: 'navigation',
+    title: 'Easy Navigation',
+    description: 'Use the tabs above to switch between different sections like Operations, Inventory, Financial, and Analytics. Each section helps you manage different aspects of your pharmacy.',
     route: '/pharmacy-portal',
-    element: '[data-tour="orders-section"]',
-    position: 'bottom'
+    position: 'center'
   },
   {
-    id: 'prescriptions',
-    title: 'Digital Prescription Hub',
-    description: 'Navigate to prescription management where you can process e-prescriptions, validate medications, and ensure patient safety. Your expertise shines here!',
-    route: '/pharmacy-portal/prescriptions',
-    position: 'center',
-    action: 'Navigate to Prescriptions'
-  },
-  {
-    id: 'ai-assistant',
-    title: 'Meet Your AI Assistant! 🤖',
-    description: 'This friendly blue chat button is your 24/7 helper! Ask questions about medications, get dosage information, or validate prescriptions. It\'s like having a knowledgeable colleague always ready to help.',
-    route: '/pharmacy-portal/assistant',
-    element: '[data-tour="ai-chat"]',
-    position: 'left',
-    action: 'Try the AI Assistant'
-  },
-  {
-    id: 'inventory',
-    title: 'Smart Inventory Control',
-    description: 'Keep track of your medicine stock, get low-stock alerts, and manage batches efficiently. Never run out of what your patients need!',
+    id: 'sidebar',
+    title: 'Quick Access Menu',
+    description: 'The sidebar on the left gives you quick access to key features like prescription management, AI assistant, and specialized tools. Everything you need is just a click away!',
     route: '/pharmacy-portal',
-    element: '[data-tour="inventory-section"]',
-    position: 'top'
+    position: 'center'
   },
   {
-    id: 'sales-billing',
-    title: 'Point of Sale & Billing',
-    description: 'Process sales, handle payments, and manage financial operations seamlessly. Everything you need for smooth transactions!',
-    route: '/pharmacy-portal/sales-billing',
-    position: 'center',
-    action: 'Explore Sales & Billing'
+    id: 'ai-helper',
+    title: 'Your AI Assistant 🤖',
+    description: 'Look for the blue chat button - it\'s your 24/7 helper! Ask questions about medications, get dosage information, or validate prescriptions. Like having a knowledgeable colleague always ready to help.',
+    route: '/pharmacy-portal',
+    position: 'center'
   },
   {
-    id: 'analytics',
-    title: 'Insights & Analytics',
-    description: 'Discover trends, track performance, and make data-driven decisions. Knowledge is power in pharmacy management!',
-    route: '/pharmacy-portal/analytics',
-    position: 'center',
-    action: 'View Analytics'
+    id: 'data-insights',
+    title: 'Real-Time Insights',
+    description: 'Your dashboard shows live data about orders, inventory levels, and sales trends. This helps you make informed decisions and stay on top of your pharmacy operations.',
+    route: '/pharmacy-portal',
+    position: 'center'
+  },
+  {
+    id: 'help-available',
+    title: 'Help When You Need It',
+    description: 'Notice the help features throughout the system. Whether it\'s contextual tips, error recovery, or the AI assistant - support is always available when you need it.',
+    route: '/pharmacy-portal',
+    position: 'center'
   },
   {
     id: 'completion',
