@@ -152,10 +152,10 @@ export default function BillingFinancialIntegration() {
   });
 
   const paymentMethods = [
-    { id: "cash", name: "Cash", icon: DollarSign },
-    { id: "card", name: "Credit/Debit Card", icon: CreditCard },
-    { id: "mobile_money", name: "Mobile Money", icon: Smartphone },
-    { id: "insurance", name: "Insurance Claim", icon: FileText },
+    { id: "cash", name: "Cash Payment", icon: DollarSign, color: "bg-green-50 border-green-200 hover:bg-green-100" },
+    { id: "card", name: "Card Payment", icon: CreditCard, color: "bg-blue-50 border-blue-200 hover:bg-blue-100" },
+    { id: "mobile_money", name: "EcoCash/OneMoney", icon: Smartphone, color: "bg-orange-50 border-orange-200 hover:bg-orange-100" },
+    { id: "insurance", name: "Medical Aid", icon: FileText, color: "bg-purple-50 border-purple-200 hover:bg-purple-100" },
   ];
 
   const getPaymentStatusColor = (status: string) => {
@@ -224,10 +224,10 @@ export default function BillingFinancialIntegration() {
     }));
   };
 
-  const filteredMedicines = medicines?.filter((medicine: any) =>
+  const filteredMedicines = (medicines || []).filter((medicine: any) =>
     medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     medicine.activeIngredient?.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  );
 
   const handleProcessSale = () => {
     if (currentSale.items.length === 0) {
