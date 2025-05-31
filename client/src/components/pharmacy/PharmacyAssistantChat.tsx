@@ -44,22 +44,31 @@ const PharmacyAssistantChat = () => {
     "Pregnancy and breastfeeding drug safety"
   ];
 
-  // Chat mutation with fallback responses for demo
+  // Chat mutation
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
-      try {
-        const response = await apiRequest('POST', '/api/v1/pharmacy/assistant/chat', {
+      // Direct fetch call to avoid API client issues
+      const response = await fetch('/api/v1/pharmacy/assistant/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
           message,
           conversationHistory: messages.slice(-10)
-        });
-        return await response.json();
-      } catch (error) {
-        // Fallback demo response for authentication issues
+        })
+      });
+
+      if (!response.ok) {
+        // If API fails, use intelligent fallback responses
         return {
           response: getPharmacyAssistantResponse(message),
           timestamp: new Date().toISOString()
         };
       }
+
+      return await response.json();
     },
     onSuccess: (response: any) => {
       const assistantMessage: ChatMessage = {
