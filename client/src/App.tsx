@@ -33,6 +33,7 @@ import PharmacyAnalytics from "./components/pharmacy/PharmacyAnalytics";
 import PrescriptionManagement from "@/components/pharmacy/PrescriptionManagement";
 import PharmacyAssistant from "./components/pharmacy/PharmacyAssistant";
 import EfficientDispensingWorkflow from "./components/pharmacy/EfficientDispensingWorkflow";
+import BillingFinancialIntegration from "./components/pharmacy/BillingFinancialIntegration";
 import WholesalerCatalog from "./components/wholesaler/WholesalerCatalog";
 import WholesalerOrders from "./components/wholesaler/WholesalerOrders";
 import PharmacyClients from "./components/wholesaler/PharmacyClients";
@@ -234,6 +235,16 @@ function Router() {
                <Sidebar className="hidden md:block" />
                <div className="flex-1 p-6">
                  <PharmacyAnalytics />
+               </div>
+             </div> : 
+             isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
+          </Route>
+          <Route path="/pharmacy-portal/sales-billing">
+            {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
+             <div className="flex">
+               <Sidebar className="hidden md:block" />
+               <div className="flex-1 p-6">
+                 <BillingFinancialIntegration />
                </div>
              </div> : 
              isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
