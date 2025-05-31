@@ -196,7 +196,12 @@ function Router() {
           </Route>
           <Route path="/pharmacy-portal/medical-aid">
             {isAuthenticated && user?.role === "PHARMACY_STAFF" ? 
-             <MedicalAidClaimsPage /> : 
+             <div className="flex">
+               <Sidebar className="hidden md:block" />
+               <div className="flex-1 p-6">
+                 <MedicalAidClaimsPage />
+               </div>
+             </div> : 
              isAuthenticated ? <AccessDenied role="Pharmacy" /> : <LoginPage />}
           </Route>
           <Route path="/pharmacy-portal/dispensing">
