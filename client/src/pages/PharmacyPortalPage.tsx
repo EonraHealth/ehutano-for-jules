@@ -7,6 +7,7 @@ import PharmacyInventory from '@/components/pharmacy/PharmacyInventory';
 import PharmacyFinancial from '@/components/pharmacy/PharmacyFinancial';
 import PharmacyAnalytics from '@/components/pharmacy/PharmacyAnalytics';
 import DeliveryManagement from '@/components/pharmacy/DeliveryManagement';
+import PharmacyAssistantChat from '@/components/pharmacy/PharmacyAssistantChat';
 import Sidebar from '@/components/layout/Sidebar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -115,6 +116,9 @@ const PharmacyPortalPage = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* AI Assistant Chat - Floating */}
+      <PharmacyAssistantChat />
     </div>
   );
 };

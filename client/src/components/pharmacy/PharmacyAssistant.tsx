@@ -44,22 +44,19 @@ const PharmacyAssistant = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch quick response suggestions
-  const { data: quickResponses = [] } = useQuery({
+  const { data: quickResponses = [] } = useQuery<string[]>({
     queryKey: ['/api/v1/pharmacy/assistant/quick-responses'],
   });
 
   // Chat mutation
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
-      return await apiRequest('/api/v1/pharmacy/assistant/chat', {
-        method: 'POST',
-        body: JSON.stringify({
-          message,
-          conversationHistory: messages.slice(-10) // Send last 10 messages for context
-        }),
+      return await apiRequest('/api/v1/pharmacy/assistant/chat', 'POST', {
+        message,
+        conversationHistory: messages.slice(-10) // Send last 10 messages for context
       });
     },
-    onSuccess: (response) => {
+    onSuccess: (response: any) => {
       const assistantMessage: ChatMessage = {
         role: 'assistant',
         content: response.response,
@@ -79,9 +76,8 @@ const PharmacyAssistant = () => {
   // Prescription validation mutation
   const validatePrescriptionMutation = useMutation({
     mutationFn: async (text: string) => {
-      return await apiRequest('/api/v1/pharmacy/assistant/validate-prescription', {
-        method: 'POST',
-        body: JSON.stringify({ prescriptionText: text }),
+      return await apiRequest('/api/v1/pharmacy/assistant/validate-prescription', 'POST', { 
+        prescriptionText: text 
       });
     },
     onError: (error) => {
