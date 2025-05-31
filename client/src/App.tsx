@@ -9,6 +9,9 @@ import Footer from "./components/layout/Footer";
 import MobileNavbar from "./components/layout/MobileNavbar";
 import { useAuth } from "./hooks/useAuth";
 import { AuthProvider } from "./components/auth/AuthContext";
+import ErrorBoundary from "./components/common/ErrorBoundary";
+import NetworkErrorHandler from "./components/common/NetworkErrorHandler";
+import ContextualHelp from "./components/common/ContextualHelp";
 
 // Main Pages
 import HomePage from "./pages/HomePage";
