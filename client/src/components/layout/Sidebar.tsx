@@ -128,6 +128,12 @@ const Sidebar = ({ className }: SidebarProps) => {
       href: '/pharmacy-portal/medical-aid',
       icon: <Shield className="h-5 w-5" />,
       roles: ['PHARMACY_STAFF']
+    },
+    {
+      title: 'AI Assistant',
+      href: '/pharmacy-portal/assistant',
+      icon: <MessageSquare className="h-5 w-5" />,
+      roles: ['PHARMACY_STAFF']
     }
   ];
 

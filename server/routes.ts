@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { z } from "zod";
 import { medicalAidIntegration } from "./medicalAidIntegration";
 import { searchMedicines } from "./medicine-search";
+import { pharmacyAssistant } from "./pharmacy-assistant";
 import { or, ilike } from "drizzle-orm";
 import { 
   insertUserSchema, 
@@ -2731,6 +2732,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Price comparison error:", error);
       res.status(500).json({ message: "Failed to get price comparison" });
+    }
+  });
+
+  // Pharmacy Assistant AI Chatbot
+  app.post("/api/v1/pharmacy/assistant/chat", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const { message, conversationHistory } = req.body;
+
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ message: "Message is required" });
+      }
+
+      const response = await pharmacyAssistant.processQuery({
+        message,
+        conversationHistory: conversationHistory || []
+      });
+
+      res.json(response);
+    } catch (error) {
+      console.error("Pharmacy assistant error:", error);
+      res.status(500).json({ message: "Failed to process pharmacy assistant query" });
+    }
+  });
+
+  // Get quick response suggestions
+  app.get("/api/v1/pharmacy/assistant/quick-responses", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const quickResponses = await pharmacyAssistant.getQuickResponses();
+      res.json(quickResponses);
+    } catch (error) {
+      console.error("Quick responses error:", error);
+      res.status(500).json({ message: "Failed to get quick responses" });
+    }
+  });
+
+  // Prescription validation
+  app.post("/api/v1/pharmacy/assistant/validate-prescription", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const { prescriptionText } = req.body;
+
+      if (!prescriptionText || typeof prescriptionText !== 'string') {
+        return res.status(400).json({ message: "Prescription text is required" });
+      }
+
+      const validation = await pharmacyAssistant.validatePrescription(prescriptionText);
+      res.json(validation);
+    } catch (error) {
+      console.error("Prescription validation error:", error);
+      res.status(500).json({ message: "Failed to validate prescription" });
     }
   });
 
