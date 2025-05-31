@@ -102,10 +102,10 @@ const ContextualHelp = () => {
       setSelectedHelp(urgentHelp[0]);
       setIsOpen(true);
     }
-  }, [location, urgentHelp]);
+  }, [location, urgentHelp, hasSeenHelp]);
 
   const markAsRead = (helpId: string) => {
-    setHasSeenHelp(prev => new Set([...prev, helpId]));
+    setHasSeenHelp(prev => new Set([...Array.from(prev), helpId]));
   };
 
   const getUrgencyColor = (urgency: string) => {
