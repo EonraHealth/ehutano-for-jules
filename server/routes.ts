@@ -2315,20 +2315,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Process sale
+  // Process sale with proper receipt data
   app.post("/api/v1/pharmacy/sales/process", async (req: Request, res: Response) => {
     try {
-      const { items, customerName, customerPhone, paymentMethod, insuranceDetails } = req.body;
+      const { items, customerName, customerPhone, paymentMethod, subtotal, discount, tax, total } = req.body;
       
-      const receiptNumber = `RCP-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      // Create incremental receipt number
+      const today = new Date();
+      const dateStr = today.toISOString().split('T')[0].replace(/-/g, '');
+      const timeComponent = String(Date.now()).slice(-4);
+      const receiptNumber = `RCP-${dateStr}-${timeComponent}`;
       
       const sale = {
         id: Date.now(),
         receiptNumber,
-        customerName,
-        customerPhone,
-        items,
-        paymentMethod,
+        customerName: customerName || null,
+        customerPhone: customerPhone || null,
+        items: items,
+        subtotal: subtotal,
+        discount: discount,
+        tax: tax,
+        total: total,
+        paymentMethod: paymentMethod,
+        paymentStatus: "completed",
         timestamp: new Date().toISOString(),
         cashier: "Pharmacy Staff"
       };
