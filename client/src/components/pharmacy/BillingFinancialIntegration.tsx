@@ -94,10 +94,10 @@ export default function BillingFinancialIntegration() {
     enabled: true,
   });
 
-  // Fetch medicines for product selection
+  // Fetch medicines for product selection - always fetch when component loads
   const { data: medicines, isLoading: medicinesLoading } = useQuery({
     queryKey: ["/api/v1/medicines"],
-    enabled: isNewSaleDialogOpen,
+    enabled: true, // Always fetch medicines
   });
 
   // Process sale mutation
@@ -224,10 +224,11 @@ export default function BillingFinancialIntegration() {
     }));
   };
 
-  const filteredMedicines = (medicines || []).filter((medicine: any) =>
-    medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    medicine.activeIngredient?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredMedicines = Array.isArray(medicines) ? medicines.filter((medicine: any) =>
+    medicine.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    medicine.activeIngredient?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    medicine.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  ) : [];
 
   const handleProcessSale = () => {
     if (currentSale.items.length === 0) {
