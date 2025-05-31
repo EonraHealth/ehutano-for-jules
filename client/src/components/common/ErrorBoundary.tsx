@@ -44,6 +44,15 @@ class ErrorBoundary extends Component<Props, State> {
 
     console.error('ErrorBoundary caught an error:', error, errorInfo);
     
+    // Handle specific frame-related errors
+    if (error.message.includes('frame') || error.message.includes('Cannot read properties of undefined')) {
+      console.warn('Frame-related error detected, attempting recovery...');
+      // Auto-retry for frame errors after a short delay
+      setTimeout(() => {
+        this.handleRetry();
+      }, 1000);
+    }
+    
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
