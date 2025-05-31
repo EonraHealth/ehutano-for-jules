@@ -345,46 +345,53 @@ export default function BillingFinancialIntegration() {
                       </div>
                     </div>
 
-                    {/* Medicine Search and Add */}
+                    {/* Medicine Search and Add - Using Zimbabwe Database */}
                     <div>
                       <Label htmlFor="medicine-search">Add Medicine</Label>
-                      <div className="flex gap-2">
-                        <Select>
-                          <SelectTrigger className="flex-1">
-                            <SelectValue placeholder="Search medicine by name or scan barcode" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1">Amoxicillin 500mg - $3.75</SelectItem>
-                            <SelectItem value="2">Paracetamol 500mg - $1.20</SelectItem>
-                            <SelectItem value="3">Vitamin D3 1000IU - $2.50</SelectItem>
-                            <SelectItem value="4">Ibuprofen 400mg - $2.80</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <Input 
-                          type="number" 
-                          placeholder="Qty" 
-                          className="w-20"
-                          min="1"
-                          defaultValue="1"
-                        />
-                        <Button onClick={() => {
-                          setCurrentSale(prev => ({
-                            ...prev,
-                            items: [...prev.items, {
-                              id: Date.now(),
-                              medicineName: "Amoxicillin 500mg",
-                              quantity: 1,
-                              unitPrice: 3.75,
-                              total: 3.75
-                            }]
-                          }));
-                          toast({
-                            title: "Item Added",
-                            description: "Medicine added to sale"
-                          });
-                        }}>
-                          Add Item
-                        </Button>
+                      <div className="space-y-3">
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Search Zimbabwe medicines by name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="flex-1"
+                          />
+                          <Button 
+                            onClick={() => setIsNewSaleDialogOpen(true)}
+                            variant="outline"
+                          >
+                            Browse All
+                          </Button>
+                        </div>
+                        
+                        {/* Quick Medicine Results */}
+                        {searchTerm && (
+                          <div className="border rounded-lg max-h-32 overflow-y-auto">
+                            {medicinesLoading ? (
+                              <div className="p-3 text-center text-sm text-gray-500">Loading...</div>
+                            ) : filteredMedicines.length === 0 ? (
+                              <div className="p-3 text-center text-sm text-gray-500">No medicines found</div>
+                            ) : (
+                              filteredMedicines.slice(0, 5).map((medicine: any) => (
+                                <div
+                                  key={medicine.id}
+                                  className="p-2 hover:bg-gray-50 cursor-pointer border-b last:border-b-0"
+                                  onClick={() => {
+                                    addItemToSale(medicine);
+                                    setSearchTerm("");
+                                    toast({
+                                      title: "Medicine Added",
+                                      description: `${medicine.name} added to sale`
+                                    });
+                                  }}
+                                >
+                                  <div className="font-medium text-sm">{medicine.name}</div>
+                                  <div className="text-xs text-gray-600">${medicine.price} - {medicine.category}</div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
 
