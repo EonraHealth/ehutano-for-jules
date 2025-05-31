@@ -94,18 +94,34 @@ export default function BillingFinancialIntegration() {
     enabled: true,
   });
 
+  // Fetch medicines for product selection
+  const { data: medicines, isLoading: medicinesLoading } = useQuery({
+    queryKey: ["/api/v1/medicines"],
+    enabled: isNewSaleDialogOpen,
+  });
+
   // Process sale mutation
   const processSaleMutation = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/v1/pharmacy/sales/process", data),
-    onSuccess: (response) => {
+    onSuccess: (response: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/v1/pharmacy/sales"] });
       queryClient.invalidateQueries({ queryKey: ["/api/v1/pharmacy/financial-analytics"] });
+      setLastReceipt(response.sale);
+      setShowReceiptDialog(true);
       toast({
         title: "Sale Processed",
         description: `Receipt #${response.receiptNumber} generated successfully`,
       });
       setIsNewSaleDialogOpen(false);
-      setCurrentSale({ items: [], subtotal: 0, discount: 0, tax: 0, total: 0 });
+      setCurrentSale({ 
+        items: [], 
+        subtotal: 0, 
+        discount: 0, 
+        tax: 0, 
+        total: 0,
+        customerName: "",
+        customerPhone: ""
+      });
     },
     onError: () => {
       toast({
@@ -162,6 +178,129 @@ export default function BillingFinancialIntegration() {
       taxAmount,
       total: taxableAmount + taxAmount
     };
+  };
+
+  const addItemToSale = (medicine: any) => {
+    const existingIndex = currentSale.items.findIndex((item: any) => item.medicineId === medicine.id);
+    
+    if (existingIndex >= 0) {
+      updateItemQuantity(existingIndex, currentSale.items[existingIndex].quantity + 1);
+    } else {
+      const newItem = {
+        medicineId: medicine.id,
+        medicineName: medicine.name,
+        quantity: 1,
+        unitPrice: medicine.price,
+        discount: 0,
+        total: medicine.price,
+        batchNumber: medicine.batchNumber || "AUTO"
+      };
+      
+      setCurrentSale(prev => ({
+        ...prev,
+        items: [...prev.items, newItem]
+      }));
+    }
+  };
+
+  const updateItemQuantity = (index: number, quantity: number) => {
+    if (quantity <= 0) {
+      removeItemFromSale(index);
+      return;
+    }
+    
+    setCurrentSale(prev => ({
+      ...prev,
+      items: prev.items.map((item: any, i: number) => 
+        i === index ? { ...item, quantity, total: item.unitPrice * quantity } : item
+      )
+    }));
+  };
+
+  const removeItemFromSale = (index: number) => {
+    setCurrentSale(prev => ({
+      ...prev,
+      items: prev.items.filter((_: any, i: number) => i !== index)
+    }));
+  };
+
+  const filteredMedicines = medicines?.filter((medicine: any) =>
+    medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    medicine.activeIngredient?.toLowerCase().includes(searchTerm.toLowerCase())
+  ) || [];
+
+  const handleProcessSale = () => {
+    if (currentSale.items.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please add items to the sale",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const totals = calculateSaleTotal();
+    const saleData = {
+      items: currentSale.items,
+      customerName: currentSale.customerName,
+      customerPhone: currentSale.customerPhone,
+      paymentMethod: selectedPaymentMethod,
+      subtotal: totals.subtotal,
+      discount: totals.discountAmount,
+      tax: totals.taxAmount,
+      total: totals.total
+    };
+
+    processSaleMutation.mutate(saleData);
+  };
+
+  const printReceipt = () => {
+    if (!lastReceipt) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Receipt - ${lastReceipt.receiptNumber}</title>
+          <style>
+            body { font-family: Arial, sans-serif; max-width: 300px; margin: 0 auto; padding: 20px; }
+            .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
+            .item { display: flex; justify-content: space-between; margin: 5px 0; }
+            .total { border-top: 1px solid #000; margin-top: 10px; padding-top: 10px; font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h2>Ehutano Pharmacy</h2>
+            <p>Receipt #${lastReceipt.receiptNumber}</p>
+            <p>${new Date(lastReceipt.timestamp).toLocaleString()}</p>
+          </div>
+          ${lastReceipt.customerName ? `<p><strong>Customer:</strong> ${lastReceipt.customerName}</p>` : ''}
+          ${lastReceipt.customerPhone ? `<p><strong>Phone:</strong> ${lastReceipt.customerPhone}</p>` : ''}
+          <div class="items">
+            ${lastReceipt.items.map((item: any) => `
+              <div class="item">
+                <span>${item.medicineName} x${item.quantity}</span>
+                <span>$${item.total.toFixed(2)}</span>
+              </div>
+            `).join('')}
+          </div>
+          <div class="total">
+            <div class="item"><span>Subtotal:</span><span>$${lastReceipt.subtotal.toFixed(2)}</span></div>
+            <div class="item"><span>Tax (15%):</span><span>$${lastReceipt.tax.toFixed(2)}</span></div>
+            <div class="item"><span><strong>Total:</strong></span><span><strong>$${lastReceipt.total.toFixed(2)}</strong></span></div>
+          </div>
+          <p style="text-align: center; margin-top: 20px;">Thank you for your business!</p>
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
   };
 
   if (salesLoading || categoriesLoading) {
