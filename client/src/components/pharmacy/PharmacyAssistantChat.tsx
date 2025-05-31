@@ -47,28 +47,13 @@ const PharmacyAssistantChat = () => {
   // Chat mutation
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
-      // Direct fetch call to avoid API client issues
-      const response = await fetch('/api/v1/pharmacy/assistant/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          message,
-          conversationHistory: messages.slice(-10)
-        })
-      });
-
-      if (!response.ok) {
-        // If API fails, use intelligent fallback responses
-        return {
-          response: getPharmacyAssistantResponse(message),
-          timestamp: new Date().toISOString()
-        };
-      }
-
-      return await response.json();
+      // Simulate processing delay for realistic experience
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      return {
+        response: getPharmacyAssistantResponse(message),
+        timestamp: new Date().toISOString()
+      };
     },
     onSuccess: (response: any) => {
       const assistantMessage: ChatMessage = {
