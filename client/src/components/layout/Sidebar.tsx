@@ -114,7 +114,7 @@ const Sidebar = ({ className }: SidebarProps) => {
     },
     {
       title: 'Sales & Billing',
-      href: '/pharmacy-portal/billing',
+      href: '/pharmacy-portal/sales-billing',
       icon: <DollarSign className="h-5 w-5" />,
       roles: ['PHARMACY_STAFF']
     },
