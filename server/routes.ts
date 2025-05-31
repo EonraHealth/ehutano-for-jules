@@ -3,6 +3,7 @@ import { createServer, Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import { medicalAidIntegration } from "./medicalAidIntegration";
+import { searchMedicines } from "./medicine-search";
 import { or, ilike } from "drizzle-orm";
 import { 
   insertUserSchema, 
@@ -407,17 +408,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
 
-      // Query the authentic Zimbabwe medicine database using raw SQL
-      const result = await db.execute(`
-        SELECT id, name, generic_name, manufacturer, category, description, requires_prescription 
-        FROM medicines 
-        WHERE LOWER(name) LIKE LOWER('%${searchTerm}%') 
-           OR LOWER(generic_name) LIKE LOWER('%${searchTerm}%')
-        LIMIT 20
-      `);
+      // Use secure parameterized query to prevent SQL injection
+      const medicines = await searchMedicines(searchTerm);
 
       // Format for frontend with pricing calculations
-      const formattedMedicines = result.rows.map((medicine: any) => {
+      const formattedMedicines = medicines.map((medicine: any) => {
         // Extract pack size from description or use defaults based on form
         let packSize = 30; // Default
         let unitPrice = 0.05; // Base price
