@@ -1974,21 +1974,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { barcode, medicineId, prescriptionId } = req.body;
       
-      // Enhanced barcode verification with multiple valid formats
-      const validBarcodes = [
-        "123456789012",
-        "987654321098", 
-        "456789123456",
-        "789123456789",
-        "321654987321",
-        "654987321654",
-        barcode // Always accept the scanned barcode as valid for demo
-      ];
-      
-      if (!barcode || barcode.length < 3) {
+      // Accept any barcode that's not empty (for demonstration purposes)
+      if (!barcode || barcode.trim().length === 0) {
         return res.json({
           success: false,
-          message: "Invalid barcode format. Please scan a valid medicine barcode.",
+          message: "Please enter a barcode to verify",
           verified: false
         });
       }
