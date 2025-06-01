@@ -986,8 +986,9 @@ const EfficientDispensingWorkflow = () => {
                 <h3 className="text-lg font-semibold mb-4">Prescription Items</h3>
                 
                 {/* Add Medicine Form */}
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border rounded-lg mb-4">
-                  <div className="md:col-span-4 space-y-2">
+                <div className="p-4 border rounded-lg mb-4 space-y-4">
+                  {/* Product Name Section */}
+                  <div className="space-y-2">
                     <Label>Product Name</Label>
                     <Input 
                       placeholder="Type product name and press Enter to search..."
@@ -1029,112 +1030,121 @@ const EfficientDispensingWorkflow = () => {
                     
                     <div className="text-xs text-gray-500">Press Enter to search or click "Add Product" to register new product</div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Dosage</Label>
-                    <Input 
-                      placeholder="e.g., 500mg"
-                      value={newMedicine.dosage}
-                      onChange={(e) => setNewMedicine(prev => ({ ...prev, dosage: e.target.value }))}
-                      readOnly={!!newMedicine.medicineId}
-                      className={newMedicine.medicineId ? "bg-gray-50" : ""}
-                    />
-                    {newMedicine.medicineId && (
-                      <div className="text-xs text-green-600">Auto-filled from selected medicine</div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Quantity</Label>
-                    <Input 
-                      type="number" 
-                      placeholder="30"
-                      value={newMedicine.quantity}
-                      onChange={(e) => {
-                        const qty = parseInt(e.target.value) || 0;
-                        const newPrice = newMedicine.unitPrice ? (newMedicine.unitPrice * qty).toFixed(2) : newMedicine.price;
-                        setNewMedicine(prev => ({ 
-                          ...prev, 
-                          quantity: e.target.value,
-                          price: newPrice
-                        }));
-                      }}
-                    />
-                    {newMedicine.packSize && (
-                      <div className="text-xs text-blue-600">Pack size: {newMedicine.packSize} units</div>
-                    )}
-                  </div>
-                  <div className="space-y-2 relative">
-                    <Label>Instructions</Label>
-                    <div className="relative">
+
+                  {/* Stacked Fields Row 1 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Dosage</Label>
                       <Input 
-                        placeholder="e.g., t1 tds pc prn pdi"
-                        value={newMedicine.instructions}
-                        onChange={(e) => handleInstructionChange(e.target.value)}
-                        onFocus={() => setShowInstructionSuggestions(true)}
-                        onBlur={() => setTimeout(() => setShowInstructionSuggestions(false), 200)}
+                        placeholder="e.g., 500mg"
+                        value={newMedicine.dosage}
+                        onChange={(e) => setNewMedicine(prev => ({ ...prev, dosage: e.target.value }))}
+                        readOnly={!!newMedicine.medicineId}
+                        className={newMedicine.medicineId ? "bg-gray-50" : ""}
                       />
-                      {newMedicine.instructions && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-1 top-1 h-8 w-8 p-0"
-                          onClick={() => {
-                            const interpreted = interpretMedicalAbbreviations(newMedicine.instructions);
-                            setInterpretedInstructions(interpreted);
-                            toast({
-                              title: "Instructions Translated",
-                              description: interpreted,
-                            });
-                          }}
-                        >
-                          <FileText className="h-4 w-4" />
-                        </Button>
+                      {newMedicine.medicineId && (
+                        <div className="text-xs text-green-600">Auto-filled from selected medicine</div>
                       )}
                     </div>
-                    {showInstructionSuggestions && (
-                      <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
-                        {instructionSuggestions.map((instruction, index) => (
-                          <div
-                            key={index}
-                            className="p-2 hover:bg-gray-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0"
+                    <div className="space-y-2">
+                      <Label>Quantity</Label>
+                      <Input 
+                        type="number" 
+                        placeholder="30"
+                        value={newMedicine.quantity}
+                        onChange={(e) => {
+                          const qty = parseInt(e.target.value) || 0;
+                          const newPrice = newMedicine.unitPrice ? (newMedicine.unitPrice * qty).toFixed(2) : newMedicine.price;
+                          setNewMedicine(prev => ({ 
+                            ...prev, 
+                            quantity: e.target.value,
+                            price: newPrice
+                          }));
+                        }}
+                      />
+                      {newMedicine.packSize && (
+                        <div className="text-xs text-blue-600">Pack size: {newMedicine.packSize} units</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Stacked Fields Row 2 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2 relative">
+                      <Label>Instructions</Label>
+                      <div className="relative">
+                        <Input 
+                          placeholder="e.g., t1 tds pc prn pdi"
+                          value={newMedicine.instructions}
+                          onChange={(e) => handleInstructionChange(e.target.value)}
+                          onFocus={() => setShowInstructionSuggestions(true)}
+                          onBlur={() => setTimeout(() => setShowInstructionSuggestions(false), 200)}
+                        />
+                        {newMedicine.instructions && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-1 top-1 h-8 w-8 p-0"
                             onClick={() => {
-                              setNewMedicine(prev => ({ ...prev, instructions: instruction }));
-                              setInterpretedInstructions(instruction);
-                              setShowInstructionSuggestions(false);
+                              const interpreted = interpretMedicalAbbreviations(newMedicine.instructions);
+                              setInterpretedInstructions(interpreted);
+                              toast({
+                                title: "Instructions Translated",
+                                description: interpreted,
+                              });
                             }}
                           >
-                            {instruction}
-                          </div>
-                        ))}
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
-                    )}
+                      {showInstructionSuggestions && (
+                        <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                          {instructionSuggestions.map((instruction, index) => (
+                            <div
+                              key={index}
+                              className="p-2 hover:bg-gray-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0"
+                              onClick={() => {
+                                setNewMedicine(prev => ({ ...prev, instructions: instruction }));
+                                setInterpretedInstructions(instruction);
+                                setShowInstructionSuggestions(false);
+                              }}
+                            >
+                              {instruction}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Price ($)</Label>
+                      <Input 
+                        type="number" 
+                        step="0.01" 
+                        placeholder="25.50"
+                        value={newMedicine.price}
+                        onChange={(e) => handlePriceChange(e.target.value)}
+                        className="border-blue-200"
+                      />
+                      {newMedicine.unitPrice && newMedicine.quantity && (
+                        <div className="text-xs text-blue-600">
+                          Unit price: ${newMedicine.unitPrice.toFixed(3)} × {newMedicine.quantity} = ${(newMedicine.unitPrice * parseInt(newMedicine.quantity || '0')).toFixed(2)}
+                        </div>
+                      )}
+                      <div className="text-xs text-gray-500">Price is adjustable</div>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Price ($)</Label>
-                    <Input 
-                      type="number" 
-                      step="0.01" 
-                      placeholder="25.50"
-                      value={newMedicine.price}
-                      onChange={(e) => handlePriceChange(e.target.value)}
-                      className="border-blue-200"
-                    />
-                    {newMedicine.unitPrice && newMedicine.quantity && (
-                      <div className="text-xs text-blue-600">
-                        Unit price: ${newMedicine.unitPrice.toFixed(3)} × {newMedicine.quantity} = ${(newMedicine.unitPrice * parseInt(newMedicine.quantity || '0')).toFixed(2)}
-                      </div>
-                    )}
-                    <div className="text-xs text-gray-500">Price is adjustable</div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>&nbsp;</Label>
+
+                  {/* Add Button */}
+                  <div className="flex justify-end">
                     <Button 
-                      className="w-full"
+                      className="px-8"
                       onClick={() => {
                         if (!newMedicine.medicineName || !newMedicine.quantity || !newMedicine.price) {
                           toast({
                             title: 'Missing Information',
-                            description: 'Please fill in medicine name, quantity, and price',
+                            description: 'Please fill in product name, quantity, and price',
                             variant: 'destructive',
                           });
                           return;
