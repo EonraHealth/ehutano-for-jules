@@ -2044,7 +2044,7 @@ const EfficientDispensingWorkflow = () => {
               className="bg-blue-600 hover:bg-blue-700"
             >
               <Save className="h-4 w-4 mr-2" />
-              {addCustomMedicineMutation.isPending ? 'Adding Medicine...' : 'Add Medicine'}
+              {addCustomMedicineMutation.isPending ? 'Adding Product...' : 'Add Product'}
             </Button>
           </div>
         </DialogContent>
