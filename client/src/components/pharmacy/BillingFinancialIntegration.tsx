@@ -60,7 +60,7 @@ interface CustomerCategory {
 export default function BillingFinancialIntegration() {
   const [activeTab, setActiveTab] = useState("pos");
   const [isNewSaleDialogOpen, setIsNewSaleDialogOpen] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("cash");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("usd_cash");
   const [currentSale, setCurrentSale] = useState<any>({
     items: [],
     subtotal: 0,
@@ -82,10 +82,11 @@ export default function BillingFinancialIntegration() {
   const [settings, setSettings] = useState({
     currencies: {
       USD: { rate: 1, symbol: "$" },
-      ZWG: { rate: 25000, symbol: "ZWG" }
+      ZWG: { rate: 26, symbol: "ZWG" }
     },
     receipt: {
       size: "standard", // standard, small, large
+      width: 80, // receipt width in mm
       pharmacyName: "Ehutano Pharmacy",
       address: "123 Health Street, Harare, Zimbabwe",
       phone: "+263 4 123 4567",
@@ -111,11 +112,23 @@ export default function BillingFinancialIntegration() {
   };
 
   const getPaymentCurrency = (paymentMethod: string) => {
-    // Card payments and mobile money use USD conversion
-    if (paymentMethod === 'card' || paymentMethod === 'ecocash' || paymentMethod === 'onemoney') {
+    // Determine currency based on payment method
+    if (paymentMethod.startsWith('usd_')) {
       return 'USD';
+    } else if (paymentMethod.startsWith('zwg_')) {
+      return 'ZWG';
+    } else if (paymentMethod === 'insurance') {
+      return selectedCurrency;
     }
     return selectedCurrency;
+  };
+
+  const getDisplayAmountForPayment = (amount: number, paymentMethod: string) => {
+    const paymentCurrency = getPaymentCurrency(paymentMethod);
+    if (selectedCurrency !== paymentCurrency) {
+      return convertCurrency(amount, selectedCurrency, paymentCurrency);
+    }
+    return amount;
   };
 
   // Print receipt function
@@ -357,9 +370,13 @@ export default function BillingFinancialIntegration() {
   });
 
   const paymentMethods = [
-    { id: "cash", name: "Cash Payment", icon: DollarSign, color: "bg-green-50 border-green-200 hover:bg-green-100" },
-    { id: "card", name: "Card Payment", icon: CreditCard, color: "bg-blue-50 border-blue-200 hover:bg-blue-100" },
-    { id: "mobile_money", name: "EcoCash/OneMoney", icon: Smartphone, color: "bg-orange-50 border-orange-200 hover:bg-orange-100" },
+    { id: "usd_cash", name: "USD Cash", icon: DollarSign, color: "bg-green-50 border-green-200 hover:bg-green-100" },
+    { id: "zwg_cash", name: "ZWG Cash", icon: DollarSign, color: "bg-green-50 border-green-200 hover:bg-green-100" },
+    { id: "zwg_swipe", name: "ZWG Swipe", icon: CreditCard, color: "bg-blue-50 border-blue-200 hover:bg-blue-100" },
+    { id: "zwg_ecocash", name: "ZWG EcoCash", icon: Smartphone, color: "bg-orange-50 border-orange-200 hover:bg-orange-100" },
+    { id: "usd_card", name: "USD Card", icon: CreditCard, color: "bg-blue-50 border-blue-200 hover:bg-blue-100" },
+    { id: "usd_ecocash", name: "USD EcoCash", icon: Smartphone, color: "bg-orange-50 border-orange-200 hover:bg-orange-100" },
+    { id: "usd_onemoney", name: "USD OneMoney", icon: Smartphone, color: "bg-orange-50 border-orange-200 hover:bg-orange-100" },
     { id: "insurance", name: "Medical Aid", icon: FileText, color: "bg-purple-50 border-purple-200 hover:bg-purple-100" },
   ];
 
@@ -446,6 +463,9 @@ export default function BillingFinancialIntegration() {
     }
 
     const totals = calculateSaleTotal();
+    const paymentCurrency = getPaymentCurrency(selectedPaymentMethod);
+    const finalAmount = getDisplayAmountForPayment(totals.total, selectedPaymentMethod);
+    
     const saleData = {
       items: currentSale.items,
       customerName: currentSale.customerName,
@@ -454,7 +474,10 @@ export default function BillingFinancialIntegration() {
       subtotal: totals.subtotal,
       discount: totals.discountAmount,
       tax: totals.taxAmount,
-      total: totals.total
+      total: totals.total,
+      currency: selectedCurrency,
+      paymentCurrency: paymentCurrency,
+      exchangeRate: selectedCurrency !== paymentCurrency ? settings.currencies[paymentCurrency as keyof typeof settings.currencies]?.rate / settings.currencies[selectedCurrency as keyof typeof settings.currencies]?.rate : 1
     };
 
     processSaleMutation.mutate(saleData);
