@@ -475,6 +475,34 @@ export default function BillingFinancialIntegration() {
 
   return (
     <div className="space-y-6">
+      {/* Action Buttons */}
+      <div className="flex gap-3 mb-4">
+        <Button 
+          variant="outline" 
+          onClick={() => setShowReceiptHistory(true)}
+          className="flex items-center gap-2"
+        >
+          <History className="w-4 h-4" />
+          Receipt History
+        </Button>
+        <Button 
+          variant="outline" 
+          onClick={() => setShowSalesReports(true)}
+          className="flex items-center gap-2"
+        >
+          <Download className="w-4 h-4" />
+          Sales Reports
+        </Button>
+        <Button 
+          variant="outline" 
+          onClick={() => setShowSettings(true)}
+          className="flex items-center gap-2"
+        >
+          <Settings className="w-4 h-4" />
+          POS Settings
+        </Button>
+      </div>
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pos">POS System</TabsTrigger>
@@ -648,25 +676,33 @@ export default function BillingFinancialIntegration() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {/* Sale Summary */}
+                    {/* Sale Summary with Currency Display */}
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span>Subtotal:</span>
-                        <span>${calculateSaleTotal().subtotal.toFixed(2)}</span>
+                        <span>{formatCurrency(calculateSaleTotal().subtotal, selectedCurrency)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Discount:</span>
-                        <span>-${calculateSaleTotal().discountAmount.toFixed(2)}</span>
+                        <span>-{formatCurrency(calculateSaleTotal().discountAmount, selectedCurrency)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>Tax (15%):</span>
-                        <span>${calculateSaleTotal().taxAmount.toFixed(2)}</span>
+                        <span>{formatCurrency(calculateSaleTotal().taxAmount, selectedCurrency)}</span>
                       </div>
                       <Separator />
                       <div className="flex justify-between font-bold text-lg">
                         <span>Total:</span>
-                        <span>${calculateSaleTotal().total.toFixed(2)}</span>
+                        <span>{formatCurrency(calculateSaleTotal().total, selectedCurrency)}</span>
                       </div>
+                      {selectedCurrency !== "USD" && (
+                        <div className="mt-2 text-xs text-gray-600 border-t pt-2">
+                          <div className="flex justify-between">
+                            <span>USD Equivalent:</span>
+                            <span>{formatCurrency(convertCurrency(calculateSaleTotal().total, selectedCurrency, "USD"), "USD")}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Customer Category */}
@@ -1093,6 +1129,270 @@ export default function BillingFinancialIntegration() {
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsNewSaleDialogOpen(false)}>
                 Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* POS Settings Dialog */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>POS Settings</DialogTitle>
+            <DialogDescription>Configure currency rates and receipt settings</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            {/* Currency Settings */}
+            <div>
+              <h3 className="text-lg font-medium mb-3">Currency Exchange Rates</h3>
+              <div className="space-y-3">
+                <div className="grid grid-cols-3 gap-3">
+                  <Label>Currency</Label>
+                  <Label>Exchange Rate</Label>
+                  <Label>Symbol</Label>
+                </div>
+                {Object.entries(settings.currencies).map(([code, info]) => (
+                  <div key={code} className="grid grid-cols-3 gap-3">
+                    <Input value={code} disabled />
+                    <Input 
+                      type="number"
+                      value={info.rate}
+                      onChange={(e) => {
+                        const newRate = parseFloat(e.target.value) || 1;
+                        setSettings(prev => ({
+                          ...prev,
+                          currencies: {
+                            ...prev.currencies,
+                            [code]: { ...info, rate: newRate }
+                          }
+                        }));
+                      }}
+                    />
+                    <Input 
+                      value={info.symbol}
+                      onChange={(e) => {
+                        setSettings(prev => ({
+                          ...prev,
+                          currencies: {
+                            ...prev.currencies,
+                            [code]: { ...info, symbol: e.target.value }
+                          }
+                        }));
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Receipt Settings */}
+            <div>
+              <h3 className="text-lg font-medium mb-3">Receipt Settings</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Receipt Size</Label>
+                  <Select 
+                    value={settings.receipt.size} 
+                    onValueChange={(value) => setSettings(prev => ({
+                      ...prev,
+                      receipt: { ...prev.receipt, size: value }
+                    }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small (58mm)</SelectItem>
+                      <SelectItem value="standard">Standard (80mm)</SelectItem>
+                      <SelectItem value="large">Large (A4)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Pharmacy Name</Label>
+                  <Input 
+                    value={settings.receipt.pharmacyName}
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev,
+                      receipt: { ...prev.receipt, pharmacyName: e.target.value }
+                    }))}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label>Address</Label>
+                  <Textarea 
+                    value={settings.receipt.address}
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev,
+                      receipt: { ...prev.receipt, address: e.target.value }
+                    }))}
+                  />
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <Input 
+                    value={settings.receipt.phone}
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev,
+                      receipt: { ...prev.receipt, phone: e.target.value }
+                    }))}
+                  />
+                </div>
+                <div>
+                  <Label>License Number</Label>
+                  <Input 
+                    value={settings.receipt.license}
+                    onChange={(e) => setSettings(prev => ({
+                      ...prev,
+                      receipt: { ...prev.receipt, license: e.target.value }
+                    }))}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowSettings(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                setShowSettings(false);
+                toast({
+                  title: "Settings Saved",
+                  description: "POS settings have been updated successfully."
+                });
+              }}>
+                Save Settings
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receipt History Dialog */}
+      <Dialog open={showReceiptHistory} onOpenChange={setShowReceiptHistory}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Receipt History</DialogTitle>
+            <DialogDescription>View and reprint previous receipts</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="max-h-96 overflow-y-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Receipt #</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Date</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Customer</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Total</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {Array.isArray(sales) && sales.map((sale: Sale) => (
+                    <tr key={sale.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 font-medium text-blue-600">{sale.receiptNumber}</td>
+                      <td className="px-4 py-3">{new Date(sale.timestamp).toLocaleDateString()}</td>
+                      <td className="px-4 py-3">{sale.customerName || "Walk-in Customer"}</td>
+                      <td className="px-4 py-3 font-medium">${sale.total.toFixed(2)}</td>
+                      <td className="px-4 py-3">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setLastReceipt(sale);
+                            setShowReceiptDialog(true);
+                            setShowReceiptHistory(false);
+                          }}
+                        >
+                          <Printer className="w-4 h-4 mr-1" />
+                          Reprint
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowReceiptHistory(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sales Reports Dialog */}
+      <Dialog open={showSalesReports} onOpenChange={setShowSalesReports}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Sales Reports</DialogTitle>
+            <DialogDescription>Generate and download sales reports</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Report Type</Label>
+                <Select defaultValue="daily">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily Sales</SelectItem>
+                    <SelectItem value="weekly">Weekly Sales</SelectItem>
+                    <SelectItem value="monthly">Monthly Sales</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Format</Label>
+                <Select defaultValue="pdf">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF Report</SelectItem>
+                    <SelectItem value="excel">Excel Spreadsheet</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Report Preview</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Total Sales Today:</span>
+                  <span className="font-medium">${analytics?.dailySales?.toFixed(2) || "0.00"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Number of Transactions:</span>
+                  <span className="font-medium">{Array.isArray(sales) ? sales.length : 0}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Average Transaction:</span>
+                  <span className="font-medium">${analytics?.avgTransaction?.toFixed(2) || "0.00"}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowSalesReports(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                // Generate PDF report
+                window.print();
+                toast({
+                  title: "Report Generated",
+                  description: "Sales report has been generated and is ready for printing."
+                });
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Generate Report
               </Button>
             </div>
           </div>
