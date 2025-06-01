@@ -133,6 +133,21 @@ const EfficientDispensingWorkflow = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [currentHelpWorkflow, setCurrentHelpWorkflow] = useState('walk-in-customer');
+  const [showAddMedicineForm, setShowAddMedicineForm] = useState(false);
+  const [customMedicine, setCustomMedicine] = useState({
+    genericName: '',
+    brandName: '',
+    dosageForm: '',
+    dose: '',
+    packSize: 1,
+    smallUnits: '',
+    supplier: '',
+    costPrice: '',
+    markupPercentage: '',
+    sellingPrice: '',
+    distributionCategory: 'DISPENSARY',
+    medicineType: 'DISPENSARY'
+  });
 
   const handleMedicineSelect = (medicine: any) => {
     setNewMedicine(prev => ({
@@ -234,6 +249,53 @@ const EfficientDispensingWorkflow = () => {
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Add custom medicine mutation
+  const addCustomMedicineMutation = useMutation({
+    mutationFn: (medicineData: any) => apiRequest("POST", "/api/v1/pharmacy/medicines/add", medicineData),
+    onSuccess: (data) => {
+      toast({
+        title: "Medicine Added Successfully",
+        description: `${data.medicine.name} has been added to the database`
+      });
+      setShowAddMedicineForm(false);
+      setCustomMedicine({
+        genericName: '',
+        brandName: '',
+        dosageForm: '',
+        dose: '',
+        packSize: 1,
+        smallUnits: '',
+        supplier: '',
+        costPrice: '',
+        markupPercentage: '',
+        sellingPrice: '',
+        distributionCategory: 'DISPENSARY',
+        medicineType: 'DISPENSARY'
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/v1/medicines"] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error Adding Medicine",
+        description: error.message || "Failed to add medicine",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleAddCustomMedicine = () => {
+    if (!customMedicine.genericName || !customMedicine.brandName || !customMedicine.sellingPrice) {
+      toast({
+        title: "Missing Required Fields",
+        description: "Please fill in generic name, brand name, and selling price",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    addCustomMedicineMutation.mutate(customMedicine);
+  };
 
   // Medicine search functionality
   const searchMedicines = async (searchTerm: string) => {
