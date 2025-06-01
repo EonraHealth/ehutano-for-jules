@@ -31,7 +31,9 @@ import {
   Languages,
   HelpCircle,
   X,
-  Save
+  Save,
+  Search,
+  Keyboard
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -986,31 +988,46 @@ const EfficientDispensingWorkflow = () => {
                 {/* Add Medicine Form */}
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border rounded-lg mb-4">
                   <div className="md:col-span-4 space-y-2">
-                    <Label>Medicine Name</Label>
+                    <Label>Product Name</Label>
+                    <Input 
+                      placeholder="Type product name and press Enter to search..."
+                      value={newMedicine.medicineName}
+                      onChange={(e) => setNewMedicine(prev => ({ ...prev, medicineName: e.target.value }))}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          setSearchTerm(newMedicine.medicineName);
+                          setIsSearchPopupOpen(true);
+                        }
+                      }}
+                      className="border-blue-200"
+                    />
+                    
+                    {/* Top Row Buttons */}
                     <div className="flex gap-2">
-                      <Input 
-                        placeholder="Type medicine name and press Enter to search..."
-                        value={newMedicine.medicineName}
-                        onChange={(e) => setNewMedicine(prev => ({ ...prev, medicineName: e.target.value }))}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            setSearchTerm(newMedicine.medicineName);
-                            setIsSearchPopupOpen(true);
-                          }
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => {
+                          setSearchTerm(newMedicine.medicineName);
+                          setIsSearchPopupOpen(true);
                         }}
-                        className="border-blue-200 flex-1"
-                      />
+                      >
+                        <Search className="h-4 w-4 mr-1" />
+                        Type Product
+                      </Button>
                       <Button
                         onClick={() => setShowAddMedicineForm(true)}
                         variant="outline"
                         size="sm"
-                        className="px-3"
+                        className="flex-1"
                       >
                         <Pill className="h-4 w-4 mr-1" />
-                        Add Medicine
+                        Add Product
                       </Button>
                     </div>
-                    <div className="text-xs text-gray-500">Press Enter to search or click "Add Medicine" to register new medicine</div>
+                    
+                    <div className="text-xs text-gray-500">Press Enter to search or click "Add Product" to register new product</div>
                   </div>
                   <div className="space-y-2">
                     <Label>Dosage</Label>
@@ -1196,11 +1213,15 @@ const EfficientDispensingWorkflow = () => {
                   )}
                 </div>
 
-                <div className="flex justify-between items-center pt-4 border-t">
-                  <div className="text-lg font-semibold">
-                    Total: ${manualPrescription.reduce((sum, item) => sum + item.price, 0).toFixed(2)}
+                <div className="pt-4 border-t space-y-3">
+                  <div className="flex justify-between items-center">
+                    <div className="text-lg font-semibold">
+                      Total: ${manualPrescription.reduce((sum, item) => sum + item.price, 0).toFixed(2)}
+                    </div>
                   </div>
-                  <div className="flex gap-2">
+                  
+                  {/* Bottom Row Buttons */}
+                  <div className="flex gap-2 justify-end">
                     <Button variant="outline" onClick={() => setActiveTab('customer')}>
                       <User className="h-4 w-4 mr-2" />
                       Back to Customer
@@ -1816,10 +1837,10 @@ const EfficientDispensingWorkflow = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Pill className="h-5 w-5 text-blue-600" />
-              Add Custom Medicine to Database
+              Add Custom Product to Database
             </DialogTitle>
             <DialogDescription>
-              Register a new medicine with complete details for dispensing and inventory management
+              Register a new product with complete details for dispensing and inventory management
             </DialogDescription>
           </DialogHeader>
 
