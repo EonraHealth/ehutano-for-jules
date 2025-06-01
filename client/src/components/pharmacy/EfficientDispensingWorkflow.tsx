@@ -103,6 +103,7 @@ const EfficientDispensingWorkflow = () => {
   const [activeTab, setActiveTab] = useState('customer');
   const [currentPrescription, setCurrentPrescription] = useState<PrescriptionForDispensing | null>(null);
   const [scannedBarcode, setScannedBarcode] = useState('');
+  const [scanningFor, setScanningFor] = useState<number | null>(null);
   const [dispensingProgress, setDispensingProgress] = useState(0);
   const [batchFilter, setBatchFilter] = useState('FEFO'); // First-Expiry, First-Out
   const barcodeInputRef = useRef<HTMLInputElement>(null);
