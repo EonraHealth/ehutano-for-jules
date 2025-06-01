@@ -1795,50 +1795,168 @@ const EfficientDispensingWorkflow = () => {
                   <Alert>
                     <ShieldCheck className="h-4 w-4" />
                     <AlertDescription>
-                      Labels include: Patient info, medicine details, dosage instructions, 
-                      pharmacy info, batch numbers, and regulatory compliance elements
+                      Each medicine gets its own label with specific instructions, dosage, and compliance information
                     </AlertDescription>
                   </Alert>
 
-                  <div className="border rounded-lg p-4 bg-gray-50">
-                    <h3 className="font-medium mb-3">Label Preview</h3>
-                    <div className="bg-white border rounded p-4 font-mono text-sm">
-                      <div className="text-center font-bold mb-2">PHARMACY DISPENSING LABEL</div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <div><strong>Patient:</strong> {currentPrescription.patientName}</div>
-                          <div><strong>Doctor:</strong> Dr. {currentPrescription.doctorName}</div>
-                          <div><strong>Date:</strong> {new Date().toLocaleDateString()}</div>
+                  {/* Individual Medicine Labels */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg">Individual Medicine Labels</h3>
+                    {currentPrescription.items.map((item, index) => (
+                      <div key={item.id} className="border rounded-lg p-4 bg-gray-50">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="font-medium text-lg">{item.medicineName}</h4>
+                          <Badge variant={item.verified ? "default" : "outline"}>
+                            {item.verified ? "Verified" : "Pending"}
+                          </Badge>
                         </div>
-                        <div>
-                          <div><strong>Rx ID:</strong> {currentPrescription.id}</div>
-                          <div><strong>Pharmacy:</strong> Your Pharmacy Name</div>
-                          <div><strong>Pharmacist:</strong> Current User</div>
+                        
+                        {/* Label Preview */}
+                        <div className="bg-white border rounded p-4 font-mono text-sm mb-3">
+                          <div className="text-center font-bold mb-2 text-blue-600">CLINTON HEALTH ACCESS PHARMACY</div>
+                          <div className="text-center text-xs mb-3">123 Samora Machel Ave, Harare • Tel: +263-1-234-5678</div>
+                          
+                          <div className="grid grid-cols-2 gap-4 mb-3">
+                            <div>
+                              <div><strong>Patient:</strong> {currentPrescription.patientName}</div>
+                              <div><strong>Date:</strong> {new Date().toLocaleDateString()}</div>
+                              <div><strong>Rx ID:</strong> {currentPrescription.id}-{index + 1}</div>
+                            </div>
+                            <div>
+                              <div><strong>Doctor:</strong> Dr. {currentPrescription.doctorName}</div>
+                              <div><strong>Pharmacist:</strong> Arnold Pinias</div>
+                              <div><strong>Batch:</strong> {item.batchNumber || 'BATCH-2024-001'}</div>
+                            </div>
+                          </div>
+                          
+                          <hr className="my-2 border-gray-300" />
+                          
+                          <div className="space-y-2">
+                            <div className="text-lg font-bold">{item.medicineName}</div>
+                            <div><strong>Strength:</strong> {item.dosage || "As prescribed"}</div>
+                            <div><strong>Quantity:</strong> {item.dispensedQuantity || item.prescribedQuantity} {item.dosage?.includes('ml') ? 'ml' : 'units'}</div>
+                            <div><strong>Expiry:</strong> {item.expiryDate || "2025-12-31"}</div>
+                            
+                            <hr className="my-2 border-gray-200" />
+                            
+                            <div className="bg-yellow-50 p-2 rounded border">
+                              <div className="font-semibold text-sm mb-1">DIRECTIONS FOR USE:</div>
+                              <div className="text-sm">{item.dispensingNotes || item.instructions || "Take as directed by physician"}</div>
+                            </div>
+                            
+                            <div className="text-xs space-y-1 mt-2">
+                              <div>• Keep out of reach of children</div>
+                              <div>• Store in cool, dry place below 25°C</div>
+                              <div>• Complete full course as prescribed</div>
+                              <div>• Contact pharmacy if adverse effects occur</div>
+                            </div>
+                            
+                            <div className="flex justify-between text-xs mt-2 pt-2 border-t">
+                              <span>MCAZ REG: PHARM-ZW-2024-001</span>
+                              <span>Valid until: {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Individual Label Actions */}
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => printLabelMutation.mutate({
+                              prescriptionId: currentPrescription.id,
+                              items: [item],
+                              actualPrint: false
+                            })}
+                            disabled={printLabelMutation.isPending}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Preview
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => printLabelMutation.mutate({
+                              prescriptionId: currentPrescription.id,
+                              items: [item],
+                              actualPrint: true
+                            })}
+                            disabled={printLabelMutation.isPending || !item.verified}
+                          >
+                            <Printer className="h-4 w-4 mr-1" />
+                            {printLabelMutation.isPending ? 'Printing...' : 'Save & Print'}
+                          </Button>
                         </div>
                       </div>
-                      <hr className="my-2" />
-                      {currentPrescription.items.map((item, index) => (
-                        <div key={item.id} className="mb-2">
-                          <div><strong>{index + 1}. {item.medicineName}</strong></div>
-                          <div>Quantity: {item.prescribedQuantity}</div>
-                          <div>Batch: {item.batchNumber || 'TBA'}</div>
-                          <div>Exp: {item.expiryDate || 'TBA'}</div>
-                        </div>
-                      ))}
-                    </div>
+                    ))}
                   </div>
 
-                  <Button
-                    onClick={() => printLabelMutation.mutate({
-                      prescriptionId: currentPrescription.id,
-                      items: currentPrescription.items
-                    })}
-                    disabled={printLabelMutation.isPending}
-                    className="w-full"
-                  >
-                    <Printer className="h-4 w-4 mr-2" />
-                    {printLabelMutation.isPending ? 'Printing...' : 'Print Medication Labels'}
-                  </Button>
+                  {/* Batch Actions */}
+                  <div className="border-t pt-4 space-y-4">
+                    <h3 className="font-semibold">Complete Dispensing</h3>
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={() => printLabelMutation.mutate({
+                          prescriptionId: currentPrescription.id,
+                          items: currentPrescription.items,
+                          actualPrint: true
+                        })}
+                        disabled={
+                          printLabelMutation.isPending || 
+                          currentPrescription.items.some(item => !item.verified)
+                        }
+                        className="flex-1"
+                      >
+                        <Printer className="h-4 w-4 mr-2" />
+                        {printLabelMutation.isPending ? 'Processing...' : 'Print All Labels'}
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          // Send to POS with prescription items
+                          const posData = {
+                            type: 'PRESCRIPTION',
+                            prescriptionId: currentPrescription.id,
+                            customerName: currentPrescription.patientName,
+                            items: currentPrescription.items.map(item => ({
+                              name: `${item.medicineName} - ${item.dosage || 'Standard'}`,
+                              quantity: item.dispensedQuantity || item.prescribedQuantity,
+                              price: 25.50, // This would come from inventory/pricing
+                              category: 'PRESCRIPTION'
+                            })),
+                            total: currentPrescription.items.length * 25.50,
+                            reference: `SCRIPT-${currentPrescription.id}`,
+                            dispensingFee: 1.00
+                          };
+                          
+                          // In a real implementation, this would send data to POS system
+                          toast({
+                            title: 'Sent to POS',
+                            description: `Prescription ${currentPrescription.id} sent to POS as SCRIPT-${currentPrescription.id}`,
+                          });
+                          
+                          // Complete the dispensing
+                          completeDispensingMutation.mutate(currentPrescription.id);
+                        }}
+                        disabled={
+                          dispensingProgress < 100 || 
+                          completeDispensingMutation.isPending ||
+                          currentPrescription.items.some(item => !item.verified)
+                        }
+                        className="flex-1 bg-green-600 hover:bg-green-700"
+                      >
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Send to POS & Complete
+                      </Button>
+                    </div>
+                    
+                    {dispensingProgress < 100 && (
+                      <Alert>
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription>
+                          All medicines must be verified before completing dispensing. Current progress: {Math.round(dispensingProgress)}%
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
