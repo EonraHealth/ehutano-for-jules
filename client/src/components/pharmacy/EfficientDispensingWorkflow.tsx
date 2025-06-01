@@ -984,8 +984,8 @@ const EfficientDispensingWorkflow = () => {
                 <h3 className="text-lg font-semibold mb-4">Prescription Items</h3>
                 
                 {/* Add Medicine Form */}
-                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 border rounded-lg mb-4">
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 border rounded-lg mb-4">
+                  <div className="md:col-span-4 space-y-2">
                     <Label>Medicine Name</Label>
                     <div className="flex gap-2">
                       <Input 
