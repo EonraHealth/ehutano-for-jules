@@ -250,17 +250,29 @@ export default function BillingFinancialIntegration() {
     mutationFn: (data: any) => apiRequest("POST", "/api/v1/pharmacy/sales/process", data),
     onSuccess: (response: any) => {
       console.log("Sale processed successfully:", response);
+      console.log("Response sale data:", response.sale);
+      console.log("Response keys:", Object.keys(response));
+      
       queryClient.invalidateQueries({ queryKey: ["/api/v1/pharmacy/sales"] });
       queryClient.invalidateQueries({ queryKey: ["/api/v1/pharmacy/financial-analytics"] });
       
       // Set receipt data and show dialog
-      setLastReceipt(response.sale);
-      setShowReceiptDialog(true);
-      
-      // Auto-print receipt after a short delay
-      setTimeout(() => {
-        printReceiptData(response.sale);
-      }, 500);
+      if (response && response.sale) {
+        setLastReceipt(response.sale);
+        setShowReceiptDialog(true);
+        
+        // Auto-print receipt after a short delay
+        setTimeout(() => {
+          printReceiptData(response.sale);
+        }, 500);
+      } else {
+        console.error("No sale data in response:", response);
+        toast({
+          title: "Warning",
+          description: "Sale processed but receipt data missing",
+          variant: "destructive",
+        });
+      }
       
       toast({
         title: "Sale Processed",
