@@ -18,6 +18,7 @@ import {
   CheckCircle, 
   Printer, 
   Clock,
+  ShoppingCart,
   ShieldCheck,
   BarChart3,
   Calendar,
@@ -1833,15 +1834,15 @@ const EfficientDispensingWorkflow = () => {
                           
                           <div className="space-y-2">
                             <div className="text-lg font-bold">{item.medicineName}</div>
-                            <div><strong>Strength:</strong> {item.dosage || "As prescribed"}</div>
-                            <div><strong>Quantity:</strong> {item.dispensedQuantity || item.prescribedQuantity} {item.dosage?.includes('ml') ? 'ml' : 'units'}</div>
+                            <div><strong>Strength:</strong> {"As prescribed"}</div>
+                            <div><strong>Quantity:</strong> {item.dispensedQuantity || item.prescribedQuantity} units</div>
                             <div><strong>Expiry:</strong> {item.expiryDate || "2025-12-31"}</div>
                             
                             <hr className="my-2 border-gray-200" />
                             
                             <div className="bg-yellow-50 p-2 rounded border">
                               <div className="font-semibold text-sm mb-1">DIRECTIONS FOR USE:</div>
-                              <div className="text-sm">{item.dispensingNotes || item.instructions || "Take as directed by physician"}</div>
+                              <div className="text-sm">{item.dispensingNotes || "Take as directed by physician"}</div>
                             </div>
                             
                             <div className="text-xs space-y-1 mt-2">
@@ -1865,8 +1866,7 @@ const EfficientDispensingWorkflow = () => {
                             size="sm"
                             onClick={() => printLabelMutation.mutate({
                               prescriptionId: currentPrescription.id,
-                              items: [item],
-                              actualPrint: false
+                              items: [item]
                             })}
                             disabled={printLabelMutation.isPending}
                           >
@@ -1877,8 +1877,7 @@ const EfficientDispensingWorkflow = () => {
                             size="sm"
                             onClick={() => printLabelMutation.mutate({
                               prescriptionId: currentPrescription.id,
-                              items: [item],
-                              actualPrint: true
+                              items: [item]
                             })}
                             disabled={printLabelMutation.isPending || !item.verified}
                           >
@@ -1897,8 +1896,7 @@ const EfficientDispensingWorkflow = () => {
                       <Button
                         onClick={() => printLabelMutation.mutate({
                           prescriptionId: currentPrescription.id,
-                          items: currentPrescription.items,
-                          actualPrint: true
+                          items: currentPrescription.items
                         })}
                         disabled={
                           printLabelMutation.isPending || 
@@ -1917,7 +1915,7 @@ const EfficientDispensingWorkflow = () => {
                             prescriptionId: currentPrescription.id,
                             customerName: currentPrescription.patientName,
                             items: currentPrescription.items.map(item => ({
-                              name: `${item.medicineName} - ${item.dosage || 'Standard'}`,
+                              name: `${item.medicineName} - Standard`,
                               quantity: item.dispensedQuantity || item.prescribedQuantity,
                               price: 25.50, // This would come from inventory/pricing
                               category: 'PRESCRIPTION'
