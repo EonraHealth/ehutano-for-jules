@@ -731,6 +731,175 @@ export default function BillingFinancialIntegration() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Receipt Preview Dialog */}
+      <Dialog open={showReceiptDialog} onOpenChange={setShowReceiptDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Sale Completed - Receipt Preview</DialogTitle>
+            <DialogDescription>Your sale has been processed successfully</DialogDescription>
+          </DialogHeader>
+          {lastReceipt && (
+            <div className="space-y-4">
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-lg font-semibold text-green-800">
+                  Receipt #{lastReceipt.receiptNumber}
+                </div>
+                <div className="text-sm text-green-600">
+                  Total: ${lastReceipt.total?.toFixed(2)}
+                </div>
+              </div>
+
+              {/* Receipt Preview */}
+              <div className="border-2 rounded-lg p-6 bg-white shadow-inner">
+                <div className="text-center border-b-2 pb-4 mb-4">
+                  <h3 className="font-bold text-xl">Ehutano Pharmacy</h3>
+                  <p className="text-sm text-gray-600">Complete Healthcare Solutions</p>
+                  <p className="text-sm mt-2">Receipt #{lastReceipt.receiptNumber}</p>
+                  <p className="text-xs text-gray-500">{new Date(lastReceipt.timestamp).toLocaleString()}</p>
+                </div>
+                
+                {(lastReceipt.customerName || lastReceipt.customerPhone) && (
+                  <div className="mb-4 p-3 bg-gray-50 rounded">
+                    <h4 className="font-semibold text-sm mb-1">Customer Information</h4>
+                    {lastReceipt.customerName && <p className="text-sm"><strong>Name:</strong> {lastReceipt.customerName}</p>}
+                    {lastReceipt.customerPhone && <p className="text-sm"><strong>Phone:</strong> {lastReceipt.customerPhone}</p>}
+                  </div>
+                )}
+
+                <div className="mb-4">
+                  <h4 className="font-semibold text-sm mb-2 border-b pb-1">Items Purchased</h4>
+                  <div className="space-y-2">
+                    {lastReceipt.items?.map((item: any, index: number) => (
+                      <div key={index} className="flex justify-between items-center text-sm">
+                        <div className="flex-1">
+                          <div className="font-medium">{item.medicineName}</div>
+                          <div className="text-xs text-gray-500">
+                            ${item.unitPrice.toFixed(2)} × {item.quantity} {item.batchNumber && `(Batch: ${item.batchNumber})`}
+                          </div>
+                        </div>
+                        <div className="font-semibold">${item.total.toFixed(2)}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t-2 pt-3 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Subtotal:</span>
+                    <span>${lastReceipt.subtotal?.toFixed(2)}</span>
+                  </div>
+                  {lastReceipt.discount > 0 && (
+                    <div className="flex justify-between text-sm text-red-600">
+                      <span>Discount:</span>
+                      <span>-${lastReceipt.discount?.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm">
+                    <span>Tax (15% VAT):</span>
+                    <span>${lastReceipt.tax?.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-lg border-t pt-2">
+                    <span>Total:</span>
+                    <span>${lastReceipt.total?.toFixed(2)}</span>
+                  </div>
+                </div>
+
+                <div className="text-center mt-6 pt-4 border-t text-sm text-gray-600">
+                  <p className="font-medium">Thank you for choosing Ehutano Pharmacy!</p>
+                  <p>Payment Method: {lastReceipt.paymentMethod?.toUpperCase()}</p>
+                  <p>Served by: {lastReceipt.cashier}</p>
+                  <p className="text-xs mt-2">For queries, please contact us with this receipt number</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  onClick={() => {
+                    window.print();
+                  }} 
+                  className="flex-1"
+                >
+                  <Printer className="w-4 h-4 mr-2" />
+                  Print Receipt
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowReceiptDialog(false)} 
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Browse All Medicines Dialog */}
+      <Dialog open={isNewSaleDialogOpen} onOpenChange={setIsNewSaleDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>Browse Zimbabwe Medicines Database</DialogTitle>
+            <DialogDescription>Select medicines to add to your sale</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Search authentic Zimbabwe medicines..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full"
+            />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto">
+              {medicinesLoading ? (
+                <div className="col-span-full text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                  <div className="mt-2 text-sm text-gray-500">Loading Zimbabwe medicines...</div>
+                </div>
+              ) : filteredMedicines.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-gray-500">
+                  {searchTerm ? `No medicines found for "${searchTerm}"` : "No medicines available"}
+                </div>
+              ) : (
+                filteredMedicines.map((medicine: any) => (
+                  <div
+                    key={medicine.id}
+                    className="p-4 border rounded-lg hover:bg-blue-50 hover:border-blue-200 cursor-pointer transition-all"
+                    onClick={() => {
+                      addItemToSale(medicine);
+                      toast({
+                        title: "Medicine Added",
+                        description: `${medicine.name} added to sale`
+                      });
+                    }}
+                  >
+                    <div className="font-medium text-sm text-gray-900 mb-1">{medicine.name}</div>
+                    <div className="text-xs text-gray-600 mb-2">{medicine.category}</div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-semibold text-green-600">${medicine.price}</span>
+                      {medicine.requiresPrescription && (
+                        <span className="text-xs text-red-500 font-medium">Rx Required</span>
+                      )}
+                    </div>
+                    {medicine.activeIngredient && (
+                      <div className="text-xs text-gray-500 mt-1 truncate">
+                        {medicine.activeIngredient}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+            
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsNewSaleDialogOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
