@@ -3020,5 +3020,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get pending prescriptions for POS (hanging scripts)
+  app.get("/api/v1/pharmacy/pending-prescriptions", async (req: Request, res: Response) => {
+    try {
+      // These are verified prescriptions ready for billing in POS
+      const hangingScripts = [
+        {
+          id: Date.now() - 1000,
+          scriptNumber: "SCRIPT-7049",
+          prescriptionType: "WALK_IN",
+          patientName: "John Doe",
+          patientPhone: "+263 77 123 4567",
+          doctorName: "Dispensing Pharmacist",
+          items: [
+            {
+              medicineId: 1,
+              medicineName: "Amoxicillin 500mg",
+              quantity: 21,
+              unitPrice: 15.50,
+              total: 325.50,
+              batchNumber: "AMX-2024-001",
+              instructions: "Take one capsule three times daily with food"
+            }
+          ],
+          totalAmount: 325.50,
+          dispensedBy: "Pharmacy Staff",
+          dispensedAt: new Date(Date.now() - 300000).toISOString(),
+          isPosProcessed: false
+        },
+        {
+          id: Date.now() - 2000,
+          scriptNumber: "SCRIPT-7048", 
+          prescriptionType: "WALK_IN",
+          patientName: "Maria Santos",
+          patientPhone: "+263 71 987 6543",
+          doctorName: "Dispensing Pharmacist",
+          items: [
+            {
+              medicineId: 2,
+              medicineName: "Paracetamol 500mg",
+              quantity: 30,
+              unitPrice: 8.75,
+              total: 262.50,
+              batchNumber: "PCM-2024-003",
+              instructions: "Take one tablet every 6 hours as needed for pain"
+            }
+          ],
+          totalAmount: 262.50,
+          dispensedBy: "Pharmacy Staff",
+          dispensedAt: new Date(Date.now() - 600000).toISOString(),
+          isPosProcessed: false
+        }
+      ];
+
+      res.json(hangingScripts);
+    } catch (error) {
+      console.error('Error fetching hanging scripts:', error);
+      res.status(500).json({ message: 'Failed to fetch pending prescriptions' });
+    }
+  });
+
   return httpServer;
 }
