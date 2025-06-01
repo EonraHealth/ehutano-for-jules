@@ -1380,16 +1380,21 @@ const EfficientDispensingWorkflow = () => {
                     </div>
 
                     <div className="space-y-3">
-                      <Label>Prescription Items</Label>
+                      <Label>Select Medicine to Verify</Label>
                       {currentPrescription.items.map((item, index) => (
                         <div
                           key={item.id}
-                          className={`p-3 border rounded-lg ${
-                            item.verified ? 'bg-green-50 border-green-200' : 'bg-gray-50'
+                          className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                            item.verified 
+                              ? 'bg-green-50 border-green-200' 
+                              : scanningFor === item.id
+                                ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200'
+                                : 'bg-gray-50 hover:bg-gray-100'
                           }`}
+                          onClick={() => !item.verified && setScanningFor(item.id)}
                         >
                           <div className="flex items-center justify-between">
-                            <div>
+                            <div className="flex-1">
                               <div className="font-medium">{item.medicineName}</div>
                               <div className="text-sm text-gray-600">
                                 Qty: {item.prescribedQuantity}
@@ -1398,14 +1403,34 @@ const EfficientDispensingWorkflow = () => {
                                 )}
                               </div>
                               <div className="text-xs text-blue-600 font-mono bg-blue-50 px-2 py-1 rounded mt-1 inline-block">
-                                Barcode: {item.medicineId}
+                                Medicine ID: {item.medicineId}
                               </div>
+                              {scanningFor === item.id && !item.verified && (
+                                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                                  <strong>Ready to scan:</strong> Now scan the barcode for this medicine
+                                </div>
+                              )}
                             </div>
-                            {item.verified ? (
-                              <CheckCircle className="h-5 w-5 text-green-600" />
-                            ) : (
-                              <Clock className="h-5 w-5 text-gray-400" />
-                            )}
+                            <div className="flex items-center gap-2">
+                              {!item.verified && (
+                                <Button
+                                  variant={scanningFor === item.id ? "default" : "outline"}
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setScanningFor(item.id);
+                                  }}
+                                >
+                                  <Scan className="h-4 w-4 mr-1" />
+                                  {scanningFor === item.id ? 'Selected' : 'Select'}
+                                </Button>
+                              )}
+                              {item.verified ? (
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                              ) : (
+                                <Clock className="h-5 w-5 text-gray-400" />
+                              )}
+                            </div>
                           </div>
                         </div>
                       ))}
