@@ -761,6 +761,27 @@ export default function BillingFinancialIntegration() {
                           </Button>
                         ))}
                       </div>
+                      
+                      {/* Currency Conversion Info */}
+                      {(() => {
+                        const paymentCurrency = getPaymentCurrency(selectedPaymentMethod);
+                        if (selectedCurrency !== paymentCurrency) {
+                          const convertedTotal = getDisplayAmountForPayment(calculateSaleTotal().total, selectedPaymentMethod);
+                          return (
+                            <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                              <div className="text-sm font-medium text-blue-800 mb-1">Currency Conversion</div>
+                              <div className="text-sm text-blue-700">
+                                <div>Sale Total: {formatCurrency(calculateSaleTotal().total, selectedCurrency)}</div>
+                                <div>Customer Pays: {formatCurrency(convertedTotal, paymentCurrency)}</div>
+                                <div className="text-xs text-blue-600 mt-1">
+                                  Exchange Rate: 1 {selectedCurrency} = {(settings.currencies[paymentCurrency as keyof typeof settings.currencies]?.rate / settings.currencies[selectedCurrency as keyof typeof settings.currencies]?.rate).toFixed(4)} {paymentCurrency}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
 
                     {/* Insurance Details */}
@@ -1180,16 +1201,42 @@ export default function BillingFinancialIntegration() {
                     <Input value={code} disabled />
                     <Input 
                       type="number"
+                      step="0.01"
+                      min="0"
                       value={info.rate}
                       onChange={(e) => {
-                        const newRate = parseFloat(e.target.value) || 1;
-                        setSettings(prev => ({
-                          ...prev,
-                          currencies: {
-                            ...prev.currencies,
-                            [code]: { ...info, rate: newRate }
+                        const value = e.target.value;
+                        if (value === '') {
+                          setSettings(prev => ({
+                            ...prev,
+                            currencies: {
+                              ...prev.currencies,
+                              [code]: { ...info, rate: 0 }
+                            }
+                          }));
+                        } else {
+                          const newRate = parseFloat(value);
+                          if (!isNaN(newRate)) {
+                            setSettings(prev => ({
+                              ...prev,
+                              currencies: {
+                                ...prev.currencies,
+                                [code]: { ...info, rate: newRate }
+                              }
+                            }));
                           }
-                        }));
+                        }
+                      }}
+                      onBlur={(e) => {
+                        if (e.target.value === '' || parseFloat(e.target.value) <= 0) {
+                          setSettings(prev => ({
+                            ...prev,
+                            currencies: {
+                              ...prev.currencies,
+                              [code]: { ...info, rate: 1 }
+                            }
+                          }));
+                        }
                       }}
                     />
                     <Input 
@@ -1231,6 +1278,22 @@ export default function BillingFinancialIntegration() {
                       <SelectItem value="large">Large (A4)</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div>
+                  <Label>Receipt Width (mm)</Label>
+                  <Input 
+                    type="number"
+                    min="40"
+                    max="210"
+                    value={settings.receipt.width}
+                    onChange={(e) => {
+                      const width = parseInt(e.target.value) || 80;
+                      setSettings(prev => ({
+                        ...prev,
+                        receipt: { ...prev.receipt, width: width }
+                      }));
+                    }}
+                  />
                 </div>
                 <div>
                   <Label>Pharmacy Name</Label>
