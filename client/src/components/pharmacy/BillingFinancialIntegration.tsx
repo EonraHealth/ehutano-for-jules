@@ -76,6 +76,151 @@ export default function BillingFinancialIntegration() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Print receipt function
+  const printReceiptData = (receiptData: any) => {
+    if (!receiptData) return;
+    
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+    
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Receipt - ${receiptData.receiptNumber}</title>
+          <style>
+            body { 
+              font-family: 'Courier New', monospace; 
+              max-width: 350px; 
+              margin: 0 auto; 
+              padding: 20px; 
+              font-size: 12px;
+              line-height: 1.4;
+            }
+            .header { 
+              text-align: center; 
+              border-bottom: 2px solid #000; 
+              padding-bottom: 10px; 
+              margin-bottom: 15px; 
+            }
+            .customer-info {
+              background: #f5f5f5;
+              padding: 8px;
+              margin: 10px 0;
+              border-radius: 4px;
+            }
+            .item { 
+              display: flex; 
+              justify-content: space-between; 
+              margin: 8px 0; 
+              padding: 4px 0;
+              border-bottom: 1px dotted #ccc;
+            }
+            .item-details {
+              font-size: 10px;
+              color: #666;
+              margin-left: 10px;
+            }
+            .totals { 
+              border-top: 2px solid #000; 
+              margin-top: 15px; 
+              padding-top: 10px; 
+            }
+            .total-line {
+              display: flex;
+              justify-content: space-between;
+              margin: 5px 0;
+            }
+            .final-total {
+              font-weight: bold;
+              font-size: 14px;
+              border-top: 1px solid #000;
+              padding-top: 5px;
+              margin-top: 8px;
+            }
+            .footer {
+              text-align: center;
+              margin-top: 20px;
+              border-top: 1px solid #ccc;
+              padding-top: 15px;
+              font-size: 11px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h2 style="margin: 0;">EHUTANO PHARMACY</h2>
+            <p style="margin: 5px 0;">Complete Healthcare Solutions</p>
+            <p style="margin: 5px 0;">Receipt #${receiptData.receiptNumber}</p>
+            <p style="margin: 5px 0; font-size: 10px;">${new Date(receiptData.timestamp).toLocaleString()}</p>
+          </div>
+          
+          ${(receiptData.customerName || receiptData.customerPhone) ? `
+            <div class="customer-info">
+              <strong>Customer Information:</strong><br>
+              ${receiptData.customerName ? `Name: ${receiptData.customerName}<br>` : ''}
+              ${receiptData.customerPhone ? `Phone: ${receiptData.customerPhone}` : ''}
+            </div>
+          ` : ''}
+          
+          <div style="margin: 15px 0;">
+            <strong>Items Purchased:</strong>
+          </div>
+          
+          ${receiptData.items?.map((item: any) => `
+            <div class="item">
+              <div style="flex: 1;">
+                <div>${item.medicineName}</div>
+                <div class="item-details">
+                  $${item.unitPrice.toFixed(2)} × ${item.quantity}
+                  ${item.batchNumber ? ` (Batch: ${item.batchNumber})` : ''}
+                </div>
+              </div>
+              <div style="font-weight: bold;">$${item.total.toFixed(2)}</div>
+            </div>
+          `).join('')}
+          
+          <div class="totals">
+            <div class="total-line">
+              <span>Subtotal:</span>
+              <span>$${receiptData.subtotal?.toFixed(2)}</span>
+            </div>
+            ${receiptData.discount > 0 ? `
+              <div class="total-line" style="color: red;">
+                <span>Discount:</span>
+                <span>-$${receiptData.discount?.toFixed(2)}</span>
+              </div>
+            ` : ''}
+            <div class="total-line">
+              <span>Tax (15% VAT):</span>
+              <span>$${receiptData.tax?.toFixed(2)}</span>
+            </div>
+            <div class="total-line final-total">
+              <span>TOTAL:</span>
+              <span>$${receiptData.total?.toFixed(2)}</span>
+            </div>
+          </div>
+          
+          <div class="footer">
+            <p><strong>Thank you for choosing Ehutano Pharmacy!</strong></p>
+            <p>Payment Method: ${receiptData.paymentMethod?.toUpperCase()}</p>
+            <p>Served by: ${receiptData.cashier}</p>
+            <p style="margin-top: 10px; font-size: 10px;">
+              For queries, please contact us with this receipt number
+            </p>
+          </div>
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    
+    // Auto-print after content loads
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
+
   // Fetch sales data
   const { data: sales, isLoading: salesLoading } = useQuery({
     queryKey: ["/api/v1/pharmacy/sales"],
@@ -110,9 +255,12 @@ export default function BillingFinancialIntegration() {
       
       // Set receipt data and show dialog
       setLastReceipt(response.sale);
+      setShowReceiptDialog(true);
+      
+      // Auto-print receipt after a short delay
       setTimeout(() => {
-        setShowReceiptDialog(true);
-      }, 100);
+        printReceiptData(response.sale);
+      }, 500);
       
       toast({
         title: "Sale Processed",
@@ -265,51 +413,7 @@ export default function BillingFinancialIntegration() {
 
   const printReceipt = () => {
     if (!lastReceipt) return;
-    
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Receipt - ${lastReceipt.receiptNumber}</title>
-          <style>
-            body { font-family: Arial, sans-serif; max-width: 300px; margin: 0 auto; padding: 20px; }
-            .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; }
-            .item { display: flex; justify-content: space-between; margin: 5px 0; }
-            .total { border-top: 1px solid #000; margin-top: 10px; padding-top: 10px; font-weight: bold; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h2>Ehutano Pharmacy</h2>
-            <p>Receipt #${lastReceipt.receiptNumber}</p>
-            <p>${new Date(lastReceipt.timestamp).toLocaleString()}</p>
-          </div>
-          ${lastReceipt.customerName ? `<p><strong>Customer:</strong> ${lastReceipt.customerName}</p>` : ''}
-          ${lastReceipt.customerPhone ? `<p><strong>Phone:</strong> ${lastReceipt.customerPhone}</p>` : ''}
-          <div class="items">
-            ${lastReceipt.items.map((item: any) => `
-              <div class="item">
-                <span>${item.medicineName} x${item.quantity}</span>
-                <span>$${item.total.toFixed(2)}</span>
-              </div>
-            `).join('')}
-          </div>
-          <div class="total">
-            <div class="item"><span>Subtotal:</span><span>$${lastReceipt.subtotal.toFixed(2)}</span></div>
-            <div class="item"><span>Tax (15%):</span><span>$${lastReceipt.tax.toFixed(2)}</span></div>
-            <div class="item"><span><strong>Total:</strong></span><span><strong>$${lastReceipt.total.toFixed(2)}</strong></span></div>
-          </div>
-          <p style="text-align: center; margin-top: 20px;">Thank you for your business!</p>
-        </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+    printReceiptData(lastReceipt);
   };
 
   if (salesLoading || categoriesLoading) {
