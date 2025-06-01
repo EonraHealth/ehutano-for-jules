@@ -104,15 +104,22 @@ export default function BillingFinancialIntegration() {
   const processSaleMutation = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/v1/pharmacy/sales/process", data),
     onSuccess: (response: any) => {
+      console.log("Sale processed successfully:", response);
       queryClient.invalidateQueries({ queryKey: ["/api/v1/pharmacy/sales"] });
       queryClient.invalidateQueries({ queryKey: ["/api/v1/pharmacy/financial-analytics"] });
+      
+      // Set receipt data and show dialog
       setLastReceipt(response.sale);
-      setShowReceiptDialog(true);
+      setTimeout(() => {
+        setShowReceiptDialog(true);
+      }, 100);
+      
       toast({
         title: "Sale Processed",
         description: `Receipt #${response.receiptNumber} generated successfully`,
       });
-      setIsNewSaleDialogOpen(false);
+      
+      // Reset form
       setCurrentSale({ 
         items: [], 
         subtotal: 0, 
@@ -123,7 +130,8 @@ export default function BillingFinancialIntegration() {
         customerPhone: ""
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Sale processing error:", error);
       toast({
         title: "Error",
         description: "Failed to process sale",
