@@ -598,13 +598,24 @@ const EfficientDispensingWorkflow = () => {
   const handleBarcodeVerification = async () => {
     if (!scannedBarcode || !currentPrescription) return;
     
-    // Find the next unverified item
-    const nextItem = currentPrescription.items.find(item => !item.verified);
-    if (!nextItem) {
+    // Use the selected medicine for scanning or find the next unverified item
+    const targetItem = scanningFor 
+      ? currentPrescription.items.find(item => item.id === scanningFor)
+      : currentPrescription.items.find(item => !item.verified);
+    
+    if (!targetItem) {
       toast({
-        title: 'All Items Verified',
-        description: 'All prescription items have been verified',
-        variant: 'default',
+        title: 'No Medicine Selected',
+        description: 'Please select a medicine to verify first',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (targetItem.verified) {
+      toast({
+        title: 'Already Verified',
+        description: 'This medicine has already been verified',
       });
       return;
     }
@@ -612,7 +623,7 @@ const EfficientDispensingWorkflow = () => {
     try {
       const result = await verifyBarcodeMutation.mutateAsync({
         barcode: scannedBarcode,
-        medicineId: nextItem.medicineId,
+        medicineId: targetItem.medicineId,
         prescriptionId: currentPrescription.id
       });
 
@@ -623,29 +634,38 @@ const EfficientDispensingWorkflow = () => {
           return {
             ...prev,
             items: prev.items.map(item => 
-              item.id === nextItem.id ? { ...item, verified: true } : item
+              item.id === targetItem.id ? { ...item, verified: true } : item
             )
           };
         });
         
         setScannedBarcode('');
+        setScanningFor(null);
         updateDispensingProgress();
         
         toast({
-          title: 'Item Verified',
-          description: `${result.medicineName || nextItem.medicineName} verified successfully`,
+          title: 'Medicine Verified',
+          description: `${result.medicineName || targetItem.medicineName} verified successfully`,
         });
+
+        // Auto-focus to the next unverified item
+        const nextUnverified = currentPrescription.items.find(item => 
+          !item.verified && item.id !== targetItem.id
+        );
+        if (nextUnverified) {
+          setScanningFor(nextUnverified.id);
+        }
       } else {
         toast({
           title: 'Verification Failed',
-          description: 'Barcode does not match expected medicine',
+          description: result.message || 'Barcode does not match expected medicine',
           variant: 'destructive',
         });
       }
     } catch (error) {
       toast({
         title: 'Verification Error',
-        description: 'Failed to verify barcode',
+        description: 'Failed to verify barcode. Please try again.',
         variant: 'destructive',
       });
     }

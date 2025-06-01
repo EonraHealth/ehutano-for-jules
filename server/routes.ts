@@ -1987,12 +1987,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let medicineName = "Verified Medicine";
       if (medicineId) {
         try {
-          const medicineResult = await db.execute(`
-            SELECT name FROM medicines WHERE id = $1 LIMIT 1
-          `, [medicineId]);
+          const medicineResult = await db.execute(
+            `SELECT name FROM medicines WHERE id = ${medicineId} LIMIT 1`
+          );
           
           if (medicineResult.rows.length > 0) {
-            medicineName = medicineResult.rows[0].name;
+            medicineName = medicineResult.rows[0].name as string;
           }
         } catch (dbError) {
           console.log("Could not fetch medicine details:", dbError);
