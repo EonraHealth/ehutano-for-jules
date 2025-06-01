@@ -41,6 +41,13 @@ export const DeliveryType = {
   SCHEDULED: "SCHEDULED"
 } as const;
 
+// Pending prescription types enum
+export const PendingPrescriptionType = {
+  WALK_IN: "WALK_IN",
+  ONLINE: "ONLINE",
+  TRANSFER: "TRANSFER"
+} as const;
+
 // Prescription status enum
 export const PrescriptionStatus = {
   PENDING_REVIEW: "PENDING_REVIEW",
@@ -48,7 +55,9 @@ export const PrescriptionStatus = {
   ACTIVE: "ACTIVE",
   FILLED: "FILLED",
   CANCELLED: "CANCELLED",
-  EXPIRED: "EXPIRED"
+  EXPIRED: "EXPIRED",
+  DISPENSED: "DISPENSED",
+  PENDING_POS: "PENDING_POS"
 } as const;
 
 // Medical aid status enum
@@ -130,6 +139,13 @@ export const pharmacyStaff = pgTable("pharmacy_staff", {
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
+// Medicine types enum
+export const MedicineType = {
+  OTC: "OTC", // Over-the-counter - available in POS
+  DISPENSARY: "DISPENSARY", // Prescription only - available in dispensing
+  BOTH: "BOTH" // Available in both POS and dispensing
+} as const;
+
 // Medicines table
 export const medicines = pgTable("medicines", {
   id: serial("id").primaryKey(),
@@ -140,6 +156,7 @@ export const medicines = pgTable("medicines", {
   manufacturer: text("manufacturer"),
   requiresPrescription: boolean("requires_prescription").default(false),
   isAntibiotic: boolean("is_antibiotic").default(false),
+  medicineType: text("medicine_type").notNull().default(MedicineType.DISPENSARY),
   defaultImageUrl: text("default_image_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
@@ -314,6 +331,27 @@ export const blogPosts = pgTable("blog_posts", {
   imageUrl: text("image_url"),
   category: text("category").notNull(),
   tags: text("tags").array(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+// Pending prescriptions table (dispensing to POS bridge)
+export const pendingPrescriptions = pgTable("pending_prescriptions", {
+  id: serial("id").primaryKey(),
+  prescriptionId: integer("prescription_id").references(() => prescriptions.id),
+  scriptNumber: text("script_number").notNull().unique(),
+  prescriptionType: text("prescription_type").notNull().default(PendingPrescriptionType.WALK_IN),
+  patientName: text("patient_name"),
+  patientPhone: text("patient_phone"),
+  doctorName: text("doctor_name"),
+  items: jsonb("items").notNull(), // Array of dispensed items
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  dispensedBy: text("dispensed_by").notNull(),
+  dispensedAt: timestamp("dispensed_at").defaultNow().notNull(),
+  isPosProcessed: boolean("is_pos_processed").default(false),
+  posProcessedAt: timestamp("pos_processed_at"),
+  posReceiptNumber: text("pos_receipt_number"),
+  notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
@@ -583,6 +621,10 @@ export type InsertMedicalAidClaim = z.infer<typeof insertMedicalAidClaimSchema>;
 
 export type DeliveryPartner = typeof deliveryPartners.$inferSelect;
 export type InsertDeliveryPartner = z.infer<typeof insertDeliveryPartnerSchema>;
+
+export type PendingPrescription = typeof pendingPrescriptions.$inferSelect;
+export const insertPendingPrescriptionSchema = createInsertSchema(pendingPrescriptions);
+export type InsertPendingPrescription = z.infer<typeof insertPendingPrescriptionSchema>;
 
 export type Delivery = typeof deliveries.$inferSelect;
 export type InsertDelivery = z.infer<typeof insertDeliverySchema>;
