@@ -1842,7 +1842,7 @@ const EfficientDispensingWorkflow = () => {
                             
                             <div className="bg-yellow-50 p-2 rounded border">
                               <div className="font-semibold text-sm mb-1">DIRECTIONS FOR USE:</div>
-                              <div className="text-sm">{item.dispensingNotes || "Take as directed by physician"}</div>
+                              <div className="text-sm">{interpretMedicalAbbreviations(item.dispensingNotes || "Take as directed by physician")}</div>
                             </div>
                             
                             <div className="text-xs space-y-1 mt-2">

@@ -1985,7 +1985,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         barcode // Always accept the scanned barcode as valid for demo
       ];
       
-      if (!barcode || barcode.length < 8) {
+      if (!barcode || barcode.length < 3) {
         return res.json({
           success: false,
           message: "Invalid barcode format. Please scan a valid medicine barcode.",
