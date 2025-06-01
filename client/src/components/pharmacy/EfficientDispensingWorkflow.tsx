@@ -156,19 +156,28 @@ const EfficientDispensingWorkflow = () => {
   });
 
   const handleMedicineSelect = (medicine: any) => {
+    // Extract dosage from medicine name (e.g., "PARACETAMOL 500MG" -> "500mg")
+    const dosageMatch = medicine.name.match(/(\d+(?:\.\d+)?)\s*(mg|g|ml|mcg|iu|units?)\b/i);
+    const extractedDosage = dosageMatch ? `${dosageMatch[1]}${dosageMatch[2].toLowerCase()}` : medicine.dosage || '';
+    
+    // Set quantity to pack size by default but make it editable
+    const defaultQuantity = medicine.packSize || 30;
+    
     setNewMedicine(prev => ({
       ...prev,
       medicineName: medicine.name.replace(/ - \d+\/[\d\.\/]+/g, '').trim(),
-      dosage: medicine.genericName || '',
+      dosage: extractedDosage,
+      quantity: defaultQuantity.toString(),
       medicineId: medicine.id,
-      packSize: medicine.packSize,
-      unitPrice: medicine.unitPrice,
-      fullPackPrice: medicine.fullPackPrice,
-      price: medicine.fullPackPrice.toString()
+      packSize: medicine.packSize || 30,
+      unitPrice: medicine.unitPrice || 0,
+      fullPackPrice: medicine.fullPackPrice || 0,
+      price: medicine.unitPrice ? (medicine.unitPrice * defaultQuantity).toFixed(2) : medicine.fullPackPrice?.toString() || ''
     }));
+    
     toast({
-      title: "Medicine Selected",
-      description: `${medicine.name.replace(/ - \d+\/[\d\.\/]+/g, '').trim()} selected from search`,
+      title: "Product Selected",
+      description: `${medicine.name.replace(/ - \d+\/[\d\.\/]+/g, '').trim()} - Dosage and quantity auto-populated`,
     });
   };
   const [medicineSearchResults, setMedicineSearchResults] = useState<any[]>([]);
@@ -331,11 +340,19 @@ const EfficientDispensingWorkflow = () => {
 
   // Handle medicine selection
   const selectMedicine = (medicine: any) => {
+    // Extract dosage from medicine name (e.g., "PARACETAMOL 500MG" -> "500mg")
+    const dosageMatch = medicine.name.match(/(\d+(?:\.\d+)?)\s*(mg|g|ml|mcg|iu|units?)\b/i);
+    const extractedDosage = dosageMatch ? `${dosageMatch[1]}${dosageMatch[2].toLowerCase()}` : medicine.dosage || '';
+    
+    // Set quantity to pack size by default but make it editable
+    const defaultQuantity = medicine.packSize || 30;
+    
     setNewMedicine(prev => ({
       ...prev,
       medicineName: medicine.name,
-      dosage: medicine.dosage || '',
-      price: calculatePrice(medicine.unitPrice || 0, parseInt(prev.quantity) || 1).toFixed(2),
+      dosage: extractedDosage,
+      quantity: defaultQuantity.toString(),
+      price: calculatePrice(medicine.unitPrice || 0, defaultQuantity).toFixed(2),
       medicineId: medicine.id,
       packSize: medicine.packSize || 30,
       unitPrice: medicine.unitPrice || 0,
