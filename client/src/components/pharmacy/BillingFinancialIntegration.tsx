@@ -446,7 +446,19 @@ export default function BillingFinancialIntegration() {
     }));
   };
 
-  const filteredMedicines = Array.isArray(medicines) ? medicines.filter((medicine: any) =>
+  // Fetch OTC medicines for POS and pending prescriptions
+  const { data: otcMedicines } = useQuery({
+    queryKey: ["/api/v1/medicines", "OTC"],
+    queryFn: () => apiRequest("GET", "/api/v1/medicines?type=OTC")
+  });
+
+  const { data: pendingPrescriptions } = useQuery({
+    queryKey: ["/api/v1/pharmacy/pending-prescriptions"],
+    queryFn: () => apiRequest("GET", "/api/v1/pharmacy/pending-prescriptions"),
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  const filteredMedicines = Array.isArray(otcMedicines) ? otcMedicines.filter((medicine: any) =>
     medicine.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     medicine.activeIngredient?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     medicine.category?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -596,13 +608,57 @@ export default function BillingFinancialIntegration() {
                       </div>
                     </div>
 
-                    {/* Medicine Search and Add - Using Zimbabwe Database */}
+                    {/* Pending Prescriptions (Hanging Scripts) */}
+                    {Array.isArray(pendingPrescriptions) && pendingPrescriptions.length > 0 && (
+                      <div>
+                        <Label>Pending Prescriptions (Hanging Scripts)</Label>
+                        <div className="border rounded-lg p-3 space-y-2 bg-blue-50">
+                          {pendingPrescriptions.map((script: any) => (
+                            <div 
+                              key={script.id}
+                              className="flex justify-between items-center p-2 bg-white rounded border cursor-pointer hover:bg-gray-50"
+                              onClick={() => {
+                                // Load prescription into current sale
+                                setCurrentSale({
+                                  items: script.items,
+                                  subtotal: script.totalAmount,
+                                  discount: 0,
+                                  tax: script.totalAmount * 0.15,
+                                  total: script.totalAmount * 1.15,
+                                  customerName: script.patientName || "",
+                                  customerPhone: script.patientPhone || ""
+                                });
+                                toast({
+                                  title: "Prescription Loaded",
+                                  description: `Script ${script.scriptNumber} loaded into POS`
+                                });
+                              }}
+                            >
+                              <div>
+                                <div className="font-medium text-sm">{script.scriptNumber}</div>
+                                <div className="text-xs text-gray-600">
+                                  {script.prescriptionType === 'WALK_IN' ? 'Walk-in' : 
+                                   script.prescriptionType === 'ONLINE' ? 'Online' : 'Transfer'} | 
+                                  {script.patientName || 'Walk-in Customer'}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-medium text-sm">${script.totalAmount?.toFixed(2)}</div>
+                                <div className="text-xs text-gray-500">{script.items?.length} items</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Medicine Search and Add - OTC Products Only */}
                     <div>
-                      <Label htmlFor="medicine-search">Add Medicine</Label>
+                      <Label htmlFor="medicine-search">Add OTC Medicine</Label>
                       <div className="space-y-3">
                         <div className="flex gap-2">
                           <Input
-                            placeholder="Search Zimbabwe medicines by name..."
+                            placeholder="Search OTC medicines by name..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="flex-1"

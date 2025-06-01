@@ -1,19 +1,31 @@
 import { db } from "./db";
 
-export async function searchMedicines(searchTerm: string) {
+export async function searchMedicines(searchTerm: string, medicineType?: string) {
   try {
     if (!searchTerm || searchTerm.length < 2) {
       return [];
     }
 
-    // Query the authentic Zimbabwe medicine database
-    const result = await db.execute(`
-      SELECT id, name, generic_name, manufacturer, category, description, requires_prescription 
+    // Build query with medicine type filter
+    let query = `
+      SELECT id, name, generic_name, manufacturer, category, description, requires_prescription, medicine_type 
       FROM medicines 
-      WHERE LOWER(name) LIKE LOWER($1) 
-         OR LOWER(generic_name) LIKE LOWER($1)
-      LIMIT 20
-    `, [`%${searchTerm}%`]);
+      WHERE (LOWER(name) LIKE LOWER($1) OR LOWER(generic_name) LIKE LOWER($1))
+    `;
+    
+    const params: string[] = [`%${searchTerm}%`];
+    
+    // Filter by medicine type for POS (OTC only) vs dispensing (all)
+    if (medicineType === 'OTC') {
+      query += ` AND (medicine_type = 'OTC' OR medicine_type = 'BOTH')`;
+    } else if (medicineType === 'DISPENSARY') {
+      query += ` AND (medicine_type = 'DISPENSARY' OR medicine_type = 'BOTH')`;
+    }
+    
+    query += ` LIMIT 20`;
+
+    // Query the authentic Zimbabwe medicine database
+    const result = await db.execute(query, params);
 
     // Format for frontend with pricing calculations
     const formattedMedicines = result.rows.map((medicine: any) => {
