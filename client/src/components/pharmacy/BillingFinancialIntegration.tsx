@@ -643,7 +643,7 @@ export default function BillingFinancialIntegration() {
                     <Button 
                       className="w-full" 
                       size="lg"
-                      onClick={() => processSaleMutation.mutate(currentSale)}
+                      onClick={handleProcessSale}
                       disabled={currentSale.items.length === 0 || processSaleMutation.isPending}
                     >
                       {processSaleMutation.isPending ? "Processing..." : "Process Sale"}
