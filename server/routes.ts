@@ -2878,5 +2878,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add custom medicine route
+  app.post("/api/v1/pharmacy/medicines/add", authenticateJWT, authorizeRoles([UserRole.PHARMACY_STAFF]), async (req: Request, res: Response) => {
+    try {
+      const {
+        genericName,
+        brandName,
+        dosageForm,
+        dose,
+        packSize,
+        smallUnits,
+        supplier,
+        costPrice,
+        markupPercentage,
+        sellingPrice,
+        distributionCategory,
+        medicineType
+      } = req.body;
+
+      if (!genericName || !brandName || !sellingPrice) {
+        return res.status(400).json({ message: "Generic name, brand name, and selling price are required" });
+      }
+
+      // Insert new medicine into database
+      const result = await db.execute(`
+        INSERT INTO medicines (
+          name, generic_name, brand_name, dosage_form, dose, pack_size, 
+          small_units, supplier, cost_price, markup_percentage, selling_price, 
+          distribution_category, medicine_type, requires_prescription, category
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        RETURNING id, name, generic_name, brand_name, selling_price
+      `, [
+        brandName, // Using brand name as display name
+        genericName,
+        brandName,
+        dosageForm || '',
+        dose || '',
+        packSize || 1,
+        smallUnits || '',
+        supplier || '',
+        costPrice || 0,
+        markupPercentage || 0,
+        sellingPrice,
+        distributionCategory || 'General',
+        medicineType || 'DISPENSARY',
+        distributionCategory === 'Prescription' || medicineType === 'DISPENSARY',
+        distributionCategory || 'General'
+      ]);
+
+      res.json({
+        success: true,
+        message: "Medicine added successfully",
+        medicine: result.rows[0]
+      });
+    } catch (error) {
+      console.error("Error adding medicine:", error);
+      res.status(500).json({ message: "Failed to add medicine" });
+    }
+  });
+
   return httpServer;
 }

@@ -29,8 +29,12 @@ import {
   CreditCard,
   ExternalLink,
   Languages,
-  HelpCircle
+  HelpCircle,
+  X,
+  Save
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
@@ -983,19 +987,30 @@ const EfficientDispensingWorkflow = () => {
                 <div className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 border rounded-lg mb-4">
                   <div className="space-y-2">
                     <Label>Medicine Name</Label>
-                    <Input 
-                      placeholder="Type medicine name and press Enter to search..."
-                      value={newMedicine.medicineName}
-                      onChange={(e) => setNewMedicine(prev => ({ ...prev, medicineName: e.target.value }))}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          setSearchTerm(newMedicine.medicineName);
-                          setIsSearchPopupOpen(true);
-                        }
-                      }}
-                      className="border-blue-200"
-                    />
-                    <div className="text-xs text-gray-500">Press Enter to open medicine search</div>
+                    <div className="flex gap-2">
+                      <Input 
+                        placeholder="Type medicine name and press Enter to search..."
+                        value={newMedicine.medicineName}
+                        onChange={(e) => setNewMedicine(prev => ({ ...prev, medicineName: e.target.value }))}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            setSearchTerm(newMedicine.medicineName);
+                            setIsSearchPopupOpen(true);
+                          }
+                        }}
+                        className="border-blue-200 flex-1"
+                      />
+                      <Button
+                        onClick={() => setShowAddMedicineForm(true)}
+                        variant="outline"
+                        size="sm"
+                        className="px-3"
+                      >
+                        <Pill className="h-4 w-4 mr-1" />
+                        Add Medicine
+                      </Button>
+                    </div>
+                    <div className="text-xs text-gray-500">Press Enter to search or click "Add Medicine" to register new medicine</div>
                   </div>
                   <div className="space-y-2">
                     <Label>Dosage</Label>
@@ -1794,6 +1809,225 @@ const EfficientDispensingWorkflow = () => {
         onSelectMedicine={handleMedicineSelect}
         initialSearchTerm={searchTerm}
       />
+
+      {/* Add Medicine Form Dialog */}
+      <Dialog open={showAddMedicineForm} onOpenChange={setShowAddMedicineForm}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pill className="h-5 w-5 text-blue-600" />
+              Add Custom Medicine to Database
+            </DialogTitle>
+            <DialogDescription>
+              Register a new medicine with complete details for dispensing and inventory management
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+            {/* Basic Information */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg border-b pb-2">Basic Information</h3>
+              
+              <div className="space-y-2">
+                <Label htmlFor="genericName">Generic Name *</Label>
+                <Input
+                  id="genericName"
+                  placeholder="e.g., Paracetamol"
+                  value={customMedicine.genericName}
+                  onChange={(e) => setCustomMedicine(prev => ({ ...prev, genericName: e.target.value }))}
+                  className="border-blue-200"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="brandName">Brand Name *</Label>
+                <Input
+                  id="brandName"
+                  placeholder="e.g., Panado"
+                  value={customMedicine.brandName}
+                  onChange={(e) => setCustomMedicine(prev => ({ ...prev, brandName: e.target.value }))}
+                  className="border-blue-200"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dosageForm">Dosage Form</Label>
+                <Select
+                  value={customMedicine.dosageForm}
+                  onValueChange={(value) => setCustomMedicine(prev => ({ ...prev, dosageForm: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select dosage form" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tablets">Tablets</SelectItem>
+                    <SelectItem value="capsules">Capsules</SelectItem>
+                    <SelectItem value="syrup">Syrup</SelectItem>
+                    <SelectItem value="suspension">Suspension</SelectItem>
+                    <SelectItem value="injection">Injection</SelectItem>
+                    <SelectItem value="cream">Cream</SelectItem>
+                    <SelectItem value="ointment">Ointment</SelectItem>
+                    <SelectItem value="drops">Drops</SelectItem>
+                    <SelectItem value="spray">Spray</SelectItem>
+                    <SelectItem value="patches">Patches</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="dose">Dose/Strength</Label>
+                <Input
+                  id="dose"
+                  placeholder="e.g., 500mg, 10ml, 25mcg"
+                  value={customMedicine.dose}
+                  onChange={(e) => setCustomMedicine(prev => ({ ...prev, dose: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="distributionCategory">Category of Distribution</Label>
+                <Select
+                  value={customMedicine.distributionCategory}
+                  onValueChange={(value) => setCustomMedicine(prev => ({ ...prev, distributionCategory: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="OTC">Over-the-Counter (OTC)</SelectItem>
+                    <SelectItem value="DISPENSARY">Prescription Only</SelectItem>
+                    <SelectItem value="BOTH">Both OTC & Prescription</SelectItem>
+                    <SelectItem value="CONTROLLED">Controlled Substance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="medicineType">Medicine Type</Label>
+                <Select
+                  value={customMedicine.medicineType}
+                  onValueChange={(value) => setCustomMedicine(prev => ({ ...prev, medicineType: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="OTC">OTC Only</SelectItem>
+                    <SelectItem value="DISPENSARY">Dispensary Only</SelectItem>
+                    <SelectItem value="BOTH">Available in Both</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Packaging & Financial */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg border-b pb-2">Packaging & Financial</h3>
+              
+              <div className="space-y-2">
+                <Label htmlFor="packSize">Pack Size</Label>
+                <Input
+                  id="packSize"
+                  type="number"
+                  placeholder="e.g., 30 (tablets per pack)"
+                  value={customMedicine.packSize}
+                  onChange={(e) => setCustomMedicine(prev => ({ ...prev, packSize: parseInt(e.target.value) || 1 }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="smallUnits">Small Units</Label>
+                <Input
+                  id="smallUnits"
+                  placeholder="e.g., tablets, ml, grams"
+                  value={customMedicine.smallUnits}
+                  onChange={(e) => setCustomMedicine(prev => ({ ...prev, smallUnits: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="supplier">Supplier</Label>
+                <Input
+                  id="supplier"
+                  placeholder="e.g., Varichem Pharmaceuticals"
+                  value={customMedicine.supplier}
+                  onChange={(e) => setCustomMedicine(prev => ({ ...prev, supplier: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="costPrice">Cost Price (USD)</Label>
+                <Input
+                  id="costPrice"
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g., 5.50"
+                  value={customMedicine.costPrice}
+                  onChange={(e) => setCustomMedicine(prev => ({ ...prev, costPrice: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="markupPercentage">Markup Percentage (%)</Label>
+                <Input
+                  id="markupPercentage"
+                  type="number"
+                  step="0.1"
+                  placeholder="e.g., 25.0"
+                  value={customMedicine.markupPercentage}
+                  onChange={(e) => {
+                    const markup = parseFloat(e.target.value) || 0;
+                    const cost = parseFloat(customMedicine.costPrice) || 0;
+                    const sellingPrice = cost * (1 + markup / 100);
+                    setCustomMedicine(prev => ({ 
+                      ...prev, 
+                      markupPercentage: e.target.value,
+                      sellingPrice: sellingPrice.toFixed(2)
+                    }));
+                  }}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sellingPrice">Selling Price (USD) *</Label>
+                <Input
+                  id="sellingPrice"
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g., 8.50"
+                  value={customMedicine.sellingPrice}
+                  onChange={(e) => setCustomMedicine(prev => ({ ...prev, sellingPrice: e.target.value }))}
+                  className="border-blue-200"
+                />
+                <div className="text-xs text-gray-500">
+                  {customMedicine.costPrice && customMedicine.sellingPrice && (
+                    `Markup: ${(((parseFloat(customMedicine.sellingPrice) - parseFloat(customMedicine.costPrice)) / parseFloat(customMedicine.costPrice)) * 100).toFixed(1)}%`
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={() => setShowAddMedicineForm(false)}
+              disabled={addCustomMedicineMutation.isPending}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAddCustomMedicine}
+              disabled={addCustomMedicineMutation.isPending || !customMedicine.genericName || !customMedicine.brandName || !customMedicine.sellingPrice}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {addCustomMedicineMutation.isPending ? 'Adding Medicine...' : 'Add Medicine'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Contextual Help System */}
       <WorkflowHelpSystem
