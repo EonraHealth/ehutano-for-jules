@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { CreditCard, Smartphone, DollarSign, Receipt, FileText, Users, Calendar, TrendingUp, Search, Plus, Minus, Trash2, Printer } from "lucide-react";
+import { CreditCard, Smartphone, DollarSign, Receipt, FileText, Users, Calendar, TrendingUp, Search, Plus, Minus, Trash2, Printer, Settings, Download, History } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -73,8 +73,50 @@ export default function BillingFinancialIntegration() {
   const [searchTerm, setSearchTerm] = useState("");
   const [lastReceipt, setLastReceipt] = useState<any>(null);
   const [showReceiptDialog, setShowReceiptDialog] = useState(false);
+  const [selectedCurrency, setSelectedCurrency] = useState("USD");
+  const [showSettings, setShowSettings] = useState(false);
+  const [showSalesReports, setShowSalesReports] = useState(false);
+  const [showReceiptHistory, setShowReceiptHistory] = useState(false);
+  
+  // Currency and receipt settings
+  const [settings, setSettings] = useState({
+    currencies: {
+      USD: { rate: 1, symbol: "$" },
+      ZWG: { rate: 25000, symbol: "ZWG" }
+    },
+    receipt: {
+      size: "standard", // standard, small, large
+      pharmacyName: "Ehutano Pharmacy",
+      address: "123 Health Street, Harare, Zimbabwe",
+      phone: "+263 4 123 4567",
+      email: "info@ehutano.com",
+      license: "PL-2024-001"
+    }
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Currency conversion helpers
+  const convertCurrency = (amount: number, fromCurrency: string, toCurrency: string) => {
+    if (fromCurrency === toCurrency) return amount;
+    const fromRate = settings.currencies[fromCurrency as keyof typeof settings.currencies]?.rate || 1;
+    const toRate = settings.currencies[toCurrency as keyof typeof settings.currencies]?.rate || 1;
+    return (amount / fromRate) * toRate;
+  };
+
+  const formatCurrency = (amount: number, currency: string) => {
+    const currencyInfo = settings.currencies[currency as keyof typeof settings.currencies];
+    const symbol = currencyInfo?.symbol || currency;
+    return `${symbol} ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  };
+
+  const getPaymentCurrency = (paymentMethod: string) => {
+    // Card payments and mobile money use USD conversion
+    if (paymentMethod === 'card' || paymentMethod === 'ecocash' || paymentMethod === 'onemoney') {
+      return 'USD';
+    }
+    return selectedCurrency;
+  };
 
   // Print receipt function
   const printReceiptData = (receiptData: any) => {
@@ -260,11 +302,6 @@ export default function BillingFinancialIntegration() {
       if (response && response.sale) {
         setLastReceipt(response.sale);
         setShowReceiptDialog(true);
-        
-        // Auto-print receipt after a short delay
-        setTimeout(() => {
-          printReceiptData(response.sale);
-        }, 500);
       } else {
         console.error("No sale data in response:", response);
         toast({
@@ -457,15 +494,54 @@ export default function BillingFinancialIntegration() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {/* Customer Information */}
+                    {/* Customer Information & Currency Selection */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="customer-name">Customer Name (Optional)</Label>
-                        <Input id="customer-name" placeholder="Enter customer name" />
+                        <Input 
+                          id="customer-name" 
+                          placeholder="Enter customer name"
+                          value={currentSale.customerName}
+                          onChange={(e) => setCurrentSale(prev => ({...prev, customerName: e.target.value}))}
+                        />
                       </div>
                       <div>
                         <Label htmlFor="customer-phone">Phone Number</Label>
-                        <Input id="customer-phone" placeholder="Enter phone number" />
+                        <Input 
+                          id="customer-phone" 
+                          placeholder="Enter phone number"
+                          value={currentSale.customerPhone}
+                          onChange={(e) => setCurrentSale(prev => ({...prev, customerPhone: e.target.value}))}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Currency Selection */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label>Sale Currency</Label>
+                        <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select currency" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(settings.currencies).map(([code, info]) => (
+                              <SelectItem key={code} value={code}>
+                                {code} ({info.symbol}) - Rate: {info.rate}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setShowSettings(true)}
+                        >
+                          <Settings className="w-4 h-4 mr-1" />
+                          Settings
+                        </Button>
                       </div>
                     </div>
 
@@ -939,9 +1015,7 @@ export default function BillingFinancialIntegration() {
 
               <div className="flex gap-3">
                 <Button 
-                  onClick={() => {
-                    window.print();
-                  }} 
+                  onClick={printReceipt} 
                   className="flex-1"
                 >
                   <Printer className="w-4 h-4 mr-2" />
